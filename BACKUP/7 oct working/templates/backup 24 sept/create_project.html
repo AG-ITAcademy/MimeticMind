@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <!-- Use the same dashboard styles, or add new page-specific styles if needed -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_project.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- Include the same sidebar used on the dashboard -->
+    {% include '_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Create New Project</h1>
+        </div>
+
+        <div class="content-sections">
+            <div class="section">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        {{ form.name.label }}<br>
+                        {{ form.name(size=32) }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.description.label }}<br>
+                        {{ form.description(rows=4) }}
+                    </div>
+
+                    <!-- Buttons: Create and Cancel -->
+                    <div class="button-section">
+                        {{ form.create(class="btn btn-primary") }}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

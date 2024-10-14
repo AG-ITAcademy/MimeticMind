@@ -1,0 +1,46 @@
+
+great. Now, the next step. I want to be able to create analytical reports based on the survey data. The user may customize a survey with different types of query templates (each using a certain answer schema). Each survey will include an arbitrary K number of questions. For each type of answer schema, the application will provide different analysis views according to this table:
+
+"answer_schema","analysis_method","description"
+"MultipleChoiceSchema","Cluster Analysis","Groups respondents into clusters based on similar responses or characteristics to identify segments within the data."
+"MultipleChoiceSchema","Frequency Distribution Analysis","Shows how often each response option was selected, helping identify the most common responses."
+"OpenEndedSchema","Sentiment Analysis","Analyzes textual data to determine the emotional tone (positive, negative, neutral) using natural language processing techniques."
+"OpenEndedSchema","Thematic Analysis","Identifies and analyzes patterns or themes within qualitative data by coding and categorizing responses."
+"OpenEndedSchema","Word Frequency Counts","Counts the frequency of words or phrases in textual data to identify commonly mentioned topics."
+"RankingSchema","Frequency Distribution Analysis","Shows how often each response option was selected, helping identify the most common responses."
+"RankingSchema","Mean Rank Calculation","Calculates the average rank assigned to each item in ranking questions to determine overall preferences."
+"ScaleSchema","Descriptive Statistics","Summarizes data using measures like mean, median, mode, and standard deviation to provide an overview of central tendency and dispersion."
+"ScaleSchema","Frequency Distribution Analysis","Shows how often each response option was selected, helping identify the most common responses."
+"YesNoSchema","Frequency Distribution Analysis","Shows how often each response option was selected, helping identify the most common responses."
+
+I have created a database view that returns the available project_survey_id's for a certain project_id:
+
+CREATE VIEW vw_completed_surveys AS
+SELECT ps.id as project_survey_id, survey_alias, survey_template_id, project_id, segment_id, created_at FROM public.project_survey ps
+inner join projects p on p.id = ps.project_id
+where completion_percentage = 100
+
+based on the project_survey_id, for each question in the completed survey, the app can then extract the survey answers from the views you have previously created. To know what question_template to look for, the app can use another view I have created:
+
+create view vw_completed_survey_questions as
+select distinct template_id as question_template_id, qt.schema as answer_schema, project_survey_id, user_id 
+    from interactions i
+    inner join query_templates qt on qt.id = i.template_id
+    order by 1
+
+First, let's write a simple python script that takes the project_id as an input and then:
+1. lists all completed surveys for that project (if any)
+2. for each completed survey, it displays all query_template_id's used in that survey and for each query template, it also lists the available analysis methods that can be used and the corresponding database view name that can be used to extract the data for analysis
+
+Let's see if it works. Let me know if you have any questions first
+
+
+
+
+
+AG
+Ok, now in a similar way to how the population explorer works (see attached population_explorer.html), I want to add a new page to my app called survey_analysis. This page should take the project_survey_id as an argument and for the selected project_survey_id display the following cards:
+1. top card should allow the user to navigate through the questions included in that survey.
+2. 2nd card: when the user selects a particular question from the first card, the second card should display a set of filters, an apply filter button and a graph section (just like the population explorer). The tabs in the graph section should be the actual analysis methods available for that question template, but for now, the graph should be just a placeholder. we'll add the graph part later.
+
+Instead of reusing projects.py for the back-end I would like to create an additional flask blueprint called survey_analysis. That's where the back-end code should be stored. If possible, advise if we could reuse some of the already existing code in projects.py. But if that requires changing that existing code, I would preffer writting new code in order to avoid breaking existing functionality. I have attached my main app.py as well as projects.py, forms.py and models.py. When formulating a solution, please consider these existing elements and try to reuse them as much as possible.

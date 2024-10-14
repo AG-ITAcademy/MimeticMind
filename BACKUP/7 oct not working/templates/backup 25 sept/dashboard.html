@@ -1,0 +1,43 @@
+<!-- templates/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block head %}
+<!-- Page-Specific Styles (Optional) -->
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="row">
+        <!-- Main Content Area -->
+        <main class="col ps-md-2 pt-2">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Welcome to your dashboard</h1>
+                <!-- Optional: Add buttons or actions here -->
+            </div>
+
+            <!-- Content Sections -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>This is your personalized dashboard where you can manage your projects.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Outstanding actions</h5>
+                            <p class="card-text">No outstanding actions at the moment</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

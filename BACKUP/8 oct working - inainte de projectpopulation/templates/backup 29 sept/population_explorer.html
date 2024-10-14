@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row g-3">
+        <!-- Population Name and Description Card -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ population_name }}</h2>
+                    <p>{{ population_description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter and Graph Card -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Filter Form -->
+                        <div class="col-md-3">
+                            <form id="filter-form" method="POST" action="{{ url_for('population_explorer_bp.apply_filters') }}">
+                                {{ form.hidden_tag() }}
+                                <input type="hidden" name="population" value="{{ population_name }}">
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.gender.id }}" class="col-sm-5 col-form-label-sm">{{ form.gender.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.gender(class="form-select form-select-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.age_min.id }}" class="col-sm-5 col-form-label-sm">{{ form.age_min.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.age_min(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.age_max.id }}" class="col-sm-5 col-form-label-sm">{{ form.age_max.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.age_max(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.location.id }}" class="col-sm-5 col-form-label-sm">{{ form.location.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.location(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.ethnicity.id }}" class="col-sm-5 col-form-label-sm">{{ form.ethnicity.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.ethnicity(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.occupation.id }}" class="col-sm-5 col-form-label-sm">{{ form.occupation.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.occupation(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.education_level.id }}" class="col-sm-5 col-form-label-sm">{{ form.education_level.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.education_level(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.religion.id }}" class="col-sm-5 col-form-label-sm">{{ form.religion.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.religion(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.health_status.id }}" class="col-sm-5 col-form-label-sm">{{ form.health_status.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.health_status(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.legal_status.id }}" class="col-sm-5 col-form-label-sm">{{ form.legal_status.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.legal_status(class="form-control form-control-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-2 row align-items-center">
+                                    <label for="{{ form.income_range.id }}" class="col-sm-5 col-form-label-sm">{{ form.income_range.label.text }}</label>
+                                    <div class="col-sm-7">
+                                        {{ form.income_range(class="form-select form-select-sm") }}
+                                    </div>
+                                </div>
+                                <div class="mb-3 mt-3">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Apply Filters</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Graph Display and Dropdown -->
+                        <div class="col-md-9">
+                            <div class="position-relative">
+                                <div class="dropdown position-absolute top-0 end-0 m-2 z-index-1">
+                                    <button class="btn btn-falcon-default btn-sm dropdown-toggle" id="graphDropdown" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Select visualization
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end py-0" aria-labelledby="graphDropdown">
+                                        <a class="dropdown-item" href="#" data-graph="graph1">Graph 1</a>
+                                        <a class="dropdown-item" href="#" data-graph="graph2">Graph 2</a>
+                                        <a class="dropdown-item" href="#" data-graph="graph3">Graph 3</a>
+                                        <a class="dropdown-item" href="#" data-graph="graph4">Graph 4</a>
+                                        <a class="dropdown-item" href="#" data-graph="graph5">Graph 5</a>
+                                    </div>
+                                </div>
+                                <div id="graph-display-area" class="w-100 h-100 bg-light d-flex justify-content-center align-items-center">
+                                    <p class="text-muted">Graph area</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table Card -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Profile Data</h3>
+                    <div id="tableExample2" data-list='{"valueNames":["profile_name","gender","occupation"],"page":5,"pagination":true}'>
+                        <div class="table-responsive scrollbar">
+                            <table class="table table-bordered table-striped fs-10 mb-0">
+                                <thead class="bg-200">
+                                    <tr>
+                                        <th class="sort" data-sort="profile_name">Profile Name</th>
+                                        <th class="sort" data-sort="gender">Gender</th>
+                                        <th class="sort" data-sort="occupation">Occupation</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="list">
+                                    {% for profile in profiles %}
+                                    <tr>
+                                        <td class="profile_name">{{ profile.profile_name }}</td>
+                                        <td class="gender">{{ profile.gender }}</td>
+                                        <td class="occupation">{{ profile.occupation }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn btn-sm btn-falcon-default me-1" type="button" title="Previous" data-list-pagination="prev">
+                                <span class="fas fa-chevron-left"></span>
+                            </button>
+                            <ul class="pagination mb-0"></ul>
+                            <button class="btn btn-sm btn-falcon-default ms-1" type="button" title="Next" data-list-pagination="next">
+                                <span class="fas fa-chevron-right"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Segment Card -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <button class="btn btn-primary btn-lg">Save Segment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    const tableElement = document.getElementById('tableExample2');
+    let listObj;
+
+    // Initialize List.js
+    function initializeList() {
+        listObj = new List('tableExample2', {
+            valueNames: ['profile_name', 'gender', 'occupation'],
+            page: 5,
+            pagination: true
+        });
+    }
+
+    initializeList();
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        fetch('{{ url_for('population_explorer_bp.apply_filters') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            listObj.clear();
+            listObj.add(data);
+            listObj.update();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while applying filters. Please try again.');
+        });
+    });
+
+    // Handle graph selection
+    const graphDropdown = document.getElementById('graphDropdown');
+    const graphItems = document.querySelectorAll('[data-graph]');
+    const graphDisplayArea = document.getElementById('graph-display-area');
+
+    graphItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const graphType = this.getAttribute('data-graph');
+            graphDropdown.textContent = this.textContent;
+            // Here you would call a function to update the graph based on the selected type
+            updateGraph(graphType);
+        });
+    });
+
+    function updateGraph(graphType) {
+        // Implement graph updating logic here
+        console.log(`Updating graph to ${graphType}`);
+        // For now, just update the text in the graph area
+        graphDisplayArea.textContent = `Selected graph: ${graphType}`;
+    }
+});
+</script>
+{% endblock %}

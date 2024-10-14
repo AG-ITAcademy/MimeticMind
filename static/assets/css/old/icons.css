@@ -1,0 +1,41 @@
+/* Icon Styles */
+.user-icon::before {
+    content: '\1F464'; 
+}
+
+.dropdown-arrow::before {
+    content: '\25BC'; 
+}
+
+.briefcase-icon::before {
+    content: '\1F4BC'; 
+}
+
+.plus-icon::before {
+    content: '\2795'; 
+}
+
+.bell-icon::before {
+    content: '\1F514'; 
+}
+
+.cog-icon::before {
+    content: '\2699'; 
+}
+
+.cart-icon::before {
+    content: '\1F6D2'; 
+}
+
+.settings-icon::before {
+    content: '\2699'; 
+}
+
+.trash-icon::before {
+    content: '\1F5D1'; 
+}
+
+.home-icon::before {
+    content: '\1F3E0'; /* Unicode character for a house (🏠) */
+    margin-right: 10px;
+}

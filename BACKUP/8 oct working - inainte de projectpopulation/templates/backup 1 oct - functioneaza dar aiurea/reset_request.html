@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <!-- Reset Request Page Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/reset_request.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="main" id="top">
+    <div class="container" data-layout="container">
+        <script>
+            var isFluid = JSON.parse(localStorage.getItem('isFluid'));
+            if (isFluid) {
+                var container = document.querySelector('[data-layout]');
+                container.classList.remove('container');
+                container.classList.add('container-fluid');
+            }
+        </script>
+        <div class="row flex-center min-vh-100 py-6">
+            <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+                <!-- Branding Section -->
+                <a class="d-flex flex-center mb-4" href="{{ url_for('home') }}">
+                    <img class="me-2" src="{{ url_for('static', filename='assets/img/favicons/favicon-32x32.png') }}" alt="Logo" width="58" />
+                    <span class="font-sans-serif text-primary fw-bolder fs-4 d-inline-block">MimeticMind</span>
+                </a>
+                <!-- Reset Request Card -->
+                <div class="card">
+                    <div class="card-body p-4 p-sm-5">
+                        <!-- Header Section -->
+                        <div class="row flex-between-center mb-4">
+                            <div class="col-auto">
+                                <h5>Request Password Reset</h5>
+                            </div>
+                            <div class="col-auto fs-10 text-600">
+                                <span>or</span> <span><a href="{{ url_for('login') }}">Log in</a></span>
+                            </div>
+                        </div>
+                        <!-- Reset Request Form -->
+                        <form method="POST" action="{{ url_for('reset_request') }}">
+                            {{ form.hidden_tag() }}
+                            <!-- Email Field -->
+                            <div class="mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control", placeholder="Enter your email") }}
+                            </div>
+                            <!-- Submit Button -->
+                            <div class="mb-3">
+                                <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Request Password Reset</button>
+                            </div>
+                        </form>
+                        <!-- Optional: Additional Information or Links -->
+                        <div class="mt-4 text-center">
+                            <p>Remembered your password? <a href="{{ url_for('login') }}">Log in here</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</main>
+{% endblock %}

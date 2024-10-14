@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Settings</h1>
+        </div>
+
+        <div class="content-sections">
+            <p>Adjust your account settings here.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+OK. My survey_templates table contains two types of surveys:
+
+the ones that do not have a user_id defined are default templates. They can be used as a starting point to create user-defined surveys. They cannot be deleted or modified (basicaly read-only)
+
+the ones that have user_id set are user-defined surveys. They are associated with that user_id and can be modified or deleted.
+
+In my current code, there are two pages under the survey builder menu section: Edit surveys (which leads to the /surveys route - displaying the list of surveys from survey_edit.html) and Create New Survey (which leads to the /survey/create route - displaying the survey_create.html page)
+
+I have attached all the mentioned files. Next step is to modify the survey_create.html page. If the user clicks on the second card (to start from a template), the page should display an additional card, below the existing one. That card should be titled: "Select the template you want to use". Below the title, there should be a table that lists all default survey templates (the ones that don't have a user_id set) displaying the template name, description and a 'SELECT' button. 

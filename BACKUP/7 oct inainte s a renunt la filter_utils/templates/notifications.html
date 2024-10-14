@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="row">
+        <!-- Main Content Area -->
+        <main class="col ps-md-2 pt-2">
+
+            <!-- Content Sections -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h1 class="h3 mb-0">Notifications</h1>
+                            <p>This is where you will see all your notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <p class="card-text">Nothing here yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

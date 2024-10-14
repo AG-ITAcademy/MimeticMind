@@ -1,0 +1,306 @@
+<div class="row g-4">
+    <!-- Top Row: Population and Segments -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="section quadrant" id="targeted-populations">
+                    <h2 class="card-title">TARGETED POPULATIONS</h2>
+
+                    <!-- Default content -->
+                    <div id="population-default-content">
+                        <p>Select all targeted populations from the list below.</p>
+                        {% if tags %}
+                            <p>Currently selected populations:</p>
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Population</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tag in tags %}
+                                        <tr>
+                                            <th scope="row">{{ loop.index }}</th>
+                                            <td>{{ tag[0] }}</td>
+                                            <td><button class="btn btn-outline-danger btn-sm">Remove</button></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted">No populations selected yet.</p>
+                        {% endif %}
+                        
+                        <p>Total individuals: {{ total_profiles }}</p>
+                        <button class="btn btn-outline-primary me-2" id="configure-button">Configure</button>
+                    </div>
+
+                    <!-- Form content (hidden by default) -->
+                    <div id="population-form-content" style="display:none; max-width: 800px; margin: 0 auto;">
+                        <form method="POST" action="{{ url_for('projects_bp.apply_population', project_id=project.id) }}" id="population-form" style="display: grid; grid-template-columns: 150px 1fr 150px 1fr; gap: 10px;">
+                            <label for="population_tag">Select Population:</label> 
+                            <select name="population_tag" id="population_tag" class="form-control">
+                                {% for tag in profile_tags %}
+                                    <option value="{{ tag[0] }}">{{ tag[0] }}</option>
+                                {% endfor %}
+                            </select>
+                            <div style="grid-column: 1 / 3; display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="submit" class="btn btn-outline-primary me-2">Apply</button>
+                            </div>
+                            <div style="grid-column: 3 / 5; display: flex; justify-content: flex-start; gap: 10px;">
+                                <button type="button" class="btn btn-outline-danger" id="cancel-button">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="section quadrant" id="targeted-segments">
+                    <!-- Default content -->
+                    <div id="segments-default-content">
+                        <h2 class="card-title">TARGETED SEGMENTS</h2>
+                        <p>Create population segments by applying filters.</p>
+                        <p>List of the current defined population segments:</p>
+                        {% if segments %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Segment</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for segment in segments %}
+                                        <tr>
+                                            <th scope="row">{{ loop.index }}</th>
+                                            <td>{{ segment.alias }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('projects_bp.remove_segment', project_id=project.id, segment_id=segment.id) }}" style="display:inline;">
+                                                    {{ form.hidden_tag() }}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to remove this segment?');">
+                                                        Remove
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted">No segments defined.</p>
+                        {% endif %}
+                        <p>{{ segments|length }} segment(s) defined.</p>
+                        <button class="btn btn-outline-primary me-2" id="define-segments-button">Define Segments</button>
+                    </div>
+
+                    <!-- Form content (hidden by default) -->
+                    <div id="segments-form-content" style="display:none; max-width: 800px; margin: 0 auto;">
+                       <form method="POST" action="{{ url_for('projects_bp.define_segments', project_id=project.id) }}" id="segments-form" style="display: grid; grid-template-columns: 150px 1fr 150px 1fr; gap: 10px;">
+                            {{ form.hidden_tag() }}
+                            
+                            <!-- Left Column Fields -->
+                            <label for="alias">Segment Alias:</label> {{ form.alias(class="form-control") }}
+                            <label for="gender">Gender:</label> {{ form.gender(class="form-control") }}
+                            <label for="age_min">Age Min:</label> {{ form.age_min(class="form-control") }}
+                            <label for="age_max">Age Max:</label> {{ form.age_max(class="form-control") }}
+                            <label for="location">Location:</label> {{ form.location(class="form-control") }}
+                            <label for="ethnicity">Ethnicity:</label> {{ form.ethnicity(class="form-control") }}
+                            
+                            <!-- Right Column Fields -->
+                            <label for="occupation">Occupation:</label> {{ form.occupation(class="form-control") }}
+                            <label for="education_level">Education Level:</label> {{ form.education_level(class="form-control") }}
+                            <label for="religion">Religion:</label> {{ form.religion(class="form-control") }}
+                            <label for="health_status">Health Status:</label> {{ form.health_status(class="form-control") }}
+                            <label for="legal_status">Legal Status:</label> {{ form.legal_status(class="form-control") }}
+                            <label for="marital_status">Marital Status:</label> {{ form.marital_status(class="form-control") }}
+
+                            <!-- Income Range Field -->
+                            <label for="income_range">Income Range:</label>
+                            <select name="income_range" id="income_range" class="form-control">
+                                <option value="">Select Income Range</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                            
+                            <!-- Buttons -->
+                            <div style="grid-column: 1 / 3; display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="submit" class="btn btn-outline-primary me-2">Create Segment</button>
+                            </div>
+                            <div style="grid-column: 3 / 5; display: flex; justify-content: flex-start; gap: 10px;">
+                                <button type="button" class="btn btn-outline-danger" id="cancel-segment-button">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Row: Surveys (Full Width) -->
+    <div class="col-12">
+        <div class="card overflow-hidden">
+            <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/icons/spot-illustrations/reports-bg.png') }});"></div>
+            <div class="card-body position-relative">
+                <div class="section quadrant">
+                    <h2 class="card-title">SURVEYS</h2>
+                        <p>Define surveys that will be run against the created population segments.</p>
+                        {% if project_surveys %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Survey</th>
+                                        <th scope="col">Actions</th>
+                                        <th scope="col">Progress</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for survey in project_surveys %}
+                                        <tr>
+                                            <th scope="row">{{ loop.index }}</th>
+                                            <td>{{ survey.survey_alias }}</td>
+                                            <td>
+                                                <form method="POST" action="{{ url_for('projects_bp.remove_survey', project_id=project.id, survey_id=survey.id) }}" style="display:inline;">
+                                                    {{ form.hidden_tag() }}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to remove this survey?')">Remove</button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('projects_bp.run_survey', project_id=project.id, survey_id=survey.id) }}" style="display:inline;">
+                                                    {{ form.hidden_tag() }}
+                                                    <button type="submit" class="btn btn-outline-success btn-sm">Execute</button>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                    <div id="progress-bar-{{ survey.id }}" class="progress-bar bg-info" style="width: 0%">
+                                                        0%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p class="text-muted">No surveys selected yet.</p>
+                        {% endif %}
+                        <button class="btn btn-outline-primary me-2" id="add-survey-button">Add Survey</button>
+                    </div>
+
+                    <!-- Form content (hidden by default) -->
+                    <div id="survey-form-content" style="display:none; max-width: 800px; margin: 0 auto;">
+                        <form method="POST" action="{{ url_for('projects_bp.create_survey', project_id=project.id) }}" id="survey-form" style="display: grid; grid-template-columns: 150px 1fr 150px 1fr; gap: 10px;">
+                            {{ form.hidden_tag() }}
+
+                            <label for="template_id">Template:</label>
+                            <select name="template_id" id="template-select" class="form-control" required>
+                                <option value="">Select a Template</option>
+                                {% for template in survey_templates %}
+                                    <option value="{{ template.id }}">{{ template.name }}</option>
+                                {% endfor %}
+                            </select>
+
+       
+                            <label for="survey_alias">Survey Alias:</label> 
+                            <input type="text" name="survey_alias" class="form-control" required>
+
+                            <label for="segment_id">Select Segment:</label>
+                            <select name="segment_id" id="segment-select" class="form-control" required>
+                                <option value="">Select a Segment</option>
+                                {% for segment in segments %}
+                                    <option value="{{ segment.id }}">{{ segment.alias }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <div style="grid-column: 1 / 3; display: flex; justify-content: flex-end; gap: 10px;">
+                                <button type="submit" class="btn btn-outline-primary me-2">Create</button>
+                            </div>
+                            <div style="grid-column: 3 / 5; display: flex; justify-content: flex-start; gap: 10px;">
+                                <button type="button" class="btn btn-outline-danger" id="cancel-survey-button">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Bottom Row: Reports -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="section quadrant">
+                    <h2 class="card-title">ANALYSIS REPORTS</h2>
+                    <p>No data for analysis available yet. Run surveys to generate data first.</p>
+                    <p>Data available for ? completed surveys.</p>
+                    <div class="button-section">
+                        <button class="btn btn-outline-primary me-2">DOWNLOAD RAW DATA</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // JavaScript to toggle between default content and the form in the quadrant
+    document.getElementById('configure-button').addEventListener('click', function() {
+        document.getElementById('population-default-content').style.display = 'none';
+        document.getElementById('population-form-content').style.display = 'block';
+    });
+
+    document.getElementById('cancel-button').addEventListener('click', function() {
+        document.getElementById('population-default-content').style.display = 'block';
+        document.getElementById('population-form-content').style.display = 'none';
+    });
+    
+    // JavaScript to toggle between default content and the form in the segments quadrant
+    document.getElementById('define-segments-button').addEventListener('click', function() {
+        document.getElementById('segments-default-content').style.display = 'none';
+        document.getElementById('segments-form-content').style.display = 'block';
+    });
+
+    document.getElementById('cancel-segment-button').addEventListener('click', function() {
+        document.getElementById('segments-default-content').style.display = 'block';
+        document.getElementById('segments-form-content').style.display = 'none';
+    });
+    
+    document.getElementById('add-survey-button').addEventListener('click', function() {
+        document.getElementById('survey-default-content').style.display = 'none';
+        document.getElementById('survey-form-content').style.display = 'block';
+    });
+
+    document.getElementById('cancel-survey-button').addEventListener('click', function() {
+        document.getElementById('survey-default-content').style.display = 'block';
+        document.getElementById('survey-form-content').style.display = 'none';
+    });
+    
+    const templateSelect = document.getElementById('template-select');
+    const descriptionField = document.getElementById('template-description');
+
+    const templates = {
+        {% for template in survey_templates %}
+            "{{ template.id }}": "{{ template.description }}",
+        {% endfor %}
+    };
+
+    templateSelect.addEventListener('change', function() {
+        const selectedTemplateId = this.value;
+        if (templates[selectedTemplateId]) {
+            descriptionField.textContent = templates[selectedTemplateId];
+        } else {
+            descriptionField.textContent = '';
+        }
+    });
+    
+
+</script>

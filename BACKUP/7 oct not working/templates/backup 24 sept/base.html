@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your App</title>
+
+    <!-- General Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+    
+    <!-- Icon Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/icons.css') }}">
+    
+    <!-- Flash Messages (If Needed Globally) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/flashes.css') }}">
+    
+    <!-- Sidebar -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+
+    <!-- For Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway&display=swap">
+
+    <!-- Block for Page-Specific Styles -->
+    {% block head %}{% endblock %}
+
+    <!-- Global Font Styling -->
+    <style>
+        body {
+            font-family: 'Raleway', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+    <!-- Flash Messages Section -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+</body>
+<script>
+    // Automatically remove flash messages after 10 seconds
+    setTimeout(function() {
+        var flashes = document.querySelectorAll('.flashes li');
+        flashes.forEach(function(flash) {
+            flash.style.animation = "fadeOut 1s ease-out forwards";
+        });
+    }, 10000); // 10 seconds
+</script>
+
+</html>

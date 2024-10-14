@@ -1,0 +1,22 @@
+- redis nu cred ca e multi user, eventuial facute instante cu id-ul userului in coada
+- de vazut cum e implementat CSRF protect in form-uri (pare-se ca doar la survey_create si edit l-am facut calumea)
+- de adaugat optiune de : contextual survey (care practic introduce si intrebarile si raspunsurile anterioare in contextul intrebarii curente). E util pentru surveyuri de genul : dati o nota de la 1 la 5 si apoi explicati de ce ati dat nota
+- blog cu 2-3 articole ca sa atraga si trafic
+- implementat log pentru toate actiunile
+- privacy policy + gdpr
+- autentificare
+- integrare sistem de plati
+- cookies
+- implementat notificarile
+
+- lansare cu Florin Pop, hey my folowers help me help another foloower... producthunt, etc.
+
+
+MESAJ 1
+N-am mai scris cod de cand eram in liceu. Dar pasiunea dispare greu :)
+Asa ca, vreau sa incerc un experiment. Trei luni de munca, investite intr-un proiect despre care eu cred ca ar putea avea un viitor interesant. Daca vreti sa vedeti ce poate face un programator nascut in anii '80 cu mult AI si un pic de inspiratie, aruncati o privire pe www.MimeticMind.com Sunt tare curios daca nu cumva vi se pare si voua ca e o idee idee faina ;)
+
+
+MESAJ 2:
+O rugaminte adresata celor care au avut curiozitatea sa arunce o privire pe www.mimeticmind.com (si le-a plact :D). Am nevoie de sustinerea voastra. Saptamana viitoare va avea lansarea pe producthunt.com, si imi doresc mult, mult de tot, sa fie una epica! Daca aveti 2 minute libere, tot ce trebuie sa faceti este sa ....
+
