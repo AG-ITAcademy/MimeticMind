@@ -1,1 +1,7 @@
+__pycache__/
+BACKUP/
+temp/
+migrations/
+static/
 config.py
+zz_start_celery.bat

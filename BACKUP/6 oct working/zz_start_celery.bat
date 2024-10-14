@@ -1,1 +1,0 @@
-celery -A celery_app worker --without-gossip --without-mingle --without-heartbeat -Ofair -E --loglevel=debug --pool=solo

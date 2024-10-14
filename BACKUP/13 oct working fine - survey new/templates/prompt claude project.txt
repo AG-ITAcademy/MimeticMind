@@ -1,5 +1,0 @@
-I'm building a population explorer feature for my online survey application. Currently, the population explorer page displays the Population name and description (just a placeholder at the moment) and allows the user to apply various filters in order to target a specific population segment. When a filter is applied, the page automatically displays various graphs about the selected population. There is also a 'SAVE SEGMENT' button that will be used to store the selected filters in the database (feature not implemented yet). 
-
-I have uploaded the relevant code, the front-end html together with the main flask backend blueprint. You can also find attached the models.py (SQLAlchemy models) and the forms.py (where the forms are defined). 
-
-First, please have a look at the code to get a better understanding and then we'll work together to improve its current form and correct some bugs.  
