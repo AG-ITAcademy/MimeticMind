@@ -1,0 +1,7 @@
+- redis nu cred ca e multi user, eventuial facute instante cu id-ul userului in coada. Ba da merge
+
+- de vazut cum e implementat CSRF protect in form-uri (pare-se ca doar la survey_create si edit l-am facut calumea)
+
+- de adaugat optiune de : contextual survey (care practic introduce si intrebarile si raspunsurile anterioare in contextul intrebarii curente). E util pentru surveyuri de genul : dati o nota de la 1 la 5 si apoi explicati de ce ati dat nota
+
+- blog cu 2-3 articole ca sa atraga si trafic
