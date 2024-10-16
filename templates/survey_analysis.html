@@ -1,12 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
 
 <div class="container-fluid">
     <div class="row g-3">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h2 class="card-title">Survey Analysis: {{ project_survey.survey_alias }}</h2>
+                    <h2 class="card-title">Survey Analysis: </h2>
+                    <p>Welcome to the analysis dashboard for the <span class="text-warning-emphasis">{{ project_survey.survey_alias }} </span>survey.</p>
+                    <p>Survey description: <span class="text-warning-emphasis">{{ description }}</span></p>
+                    <ul>
+                        <li><strong>Respondents:</strong> <span class="text-warning-emphasis">{{ respondents }}</span> participants from <span class="text-warning-emphasis">{{ population }}</span> of various age groups and geographic locations</li>
+                        <!--<li><strong>Focus Areas:</strong> Product quality, customer service, website usability, and overall brand perception</li>-->
+                        <li><strong>Key Insights:</strong> This dashboard presents visualizations on response distributions, sentiment analysis, and demographic breakdowns</li>
+                    </ul>
+                    <p>Use the filters and interactive charts below to explore the survey results in detail.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                
                     <div class="mb-3">
                         <select id="question-select" class="form-select">
                             <option value="" disabled selected>Select a question to begin analysis</option>
@@ -15,13 +32,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
+                    
                     <div class="row">
                         <div class="col-sm-4">
                             <form id="filter-form" method="POST" action="{{ url_for('population_explorer_bp.population_explorer', project_survey_id=project_survey_id) }}">
@@ -49,6 +60,10 @@
                             <div class="tab-content" id="analysis-content">
                                 <!-- THIS IS WHERE THE GRAPHS SHOULD APPEAR -->
                             </div>
+                            
+                            <div id="chart-controls-container" class="mt-3">
+                                <!-- Chart controls will be dynamically inserted here -->
+                            </div>
                         </div>
                         
                     </div>
@@ -59,6 +74,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <h2 class="card-title">Raw Survey Data</h2>
                     <table id="profile-table" class="table table-striped table-bordered table-md" style="width:100%">
                     </table>
                 </div>
@@ -76,6 +92,10 @@ $(document).ready(function() {
     const analysisContent = document.getElementById('analysis-content');
     const analysisPlaceholder = document.getElementById('analysis-placeholder');
     const questionSelect = $('#question-select');
+    const chartControlsContainer = document.getElementById('chart-controls-container');
+    
+    let chartInstance;
+    let chartOptions;
      
     // Initialize DataTable
     const profileTable = $('#profile-table').DataTable({
@@ -87,7 +107,17 @@ $(document).ready(function() {
             { data: 'income_range', title: 'Income Range' },
             { data: 'education_level', title: 'Education Level' },
             { data: 'item', title: 'Item' },
-            { data: 'response', title: 'Response' }
+            { 
+                data: 'response', 
+                title: 'Response',
+                render: function(data, type, row) {
+                    if (type === 'display' && data != null && data.length > 50) {
+                        return '<span title="' + data.replace(/"/g, '&quot;') + '">' + 
+                               data.substr(0, 50) + '...</span>';
+                    }
+                    return data;
+                }
+            }
         ],
         data: {{ data | tojson | safe }}
     });
@@ -136,46 +166,161 @@ $(document).ready(function() {
         });
     }
 
-    function updateAnalysisContent(methods, questionId) {
-        analysisContent.innerHTML = '';
-        let tabsHtml = '<ul class="nav nav-tabs" role="tablist">';
-        let contentHtml = '<div class="tab-content">';
+function updateAnalysisContent(methods, questionId) {
+    analysisContent.innerHTML = '';
+    chartControlsContainer.innerHTML = '';
+    let tabsHtml = '<ul class="nav nav-tabs" role="tablist">';
+    let contentHtml = '<div class="tab-content">';
+    let activeChartMethod = null;
 
-        methods.forEach((method, index) => {
-            const tabId = `tab-${method.name.toLowerCase().replace(/\s+/g, '-')}`;
-            const isActive = index === 0 ? 'active' : '';
+    methods.forEach((method, index) => {
+        const tabId = `tab-${method.name.toLowerCase().replace(/\s+/g, '-')}`;
+        const isActive = index === 0 ? 'active' : '';
+        const chartId = `chart-${method.name.toLowerCase().replace(/\s+/g, '-')}-${questionId}`;
+
+        tabsHtml += `
+            <li class="nav-item" role="presentation">
+                <a class="nav-link ${isActive}" id="${tabId}" data-bs-toggle="tab" href="#${tabId}-content" role="tab" aria-controls="${tabId}-content" aria-selected="${isActive === 'active'}">${method.name}</a>
+            </li>
+        `;
+
+        contentHtml += `
+            <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="${tabId}-content" role="tabpanel" aria-labelledby="${tabId}">
+                <div id="${chartId}" style="width: 700px; height: 400px;"></div>
+            </div>
+        `;
+
+        if (isActive && (method.name === 'Frequency Distribution' || method.name === 'Mean Rank Calculation')) {
+            activeChartMethod = method;
+        }
+    });
+
+    tabsHtml += '</ul>';
+    contentHtml += '</div>';
+
+    analysisContent.innerHTML = tabsHtml + contentHtml;
+
+    methods.forEach((method, index) => {
+        const chartId = `chart-${method.name.toLowerCase().replace(/\s+/g, '-')}-${questionId}`;
+        const chart = echarts.init(document.getElementById(chartId));
+        
+        if (method.name === 'Frequency Distribution' || method.name === 'Mean Rank Calculation') {
+            const chartOptions = JSON.parse(JSON.stringify(method.chart_option));
+            const totalSeries = chartOptions.series.find(s => s.name === 'Total') || chartOptions.series[0];
+            chart.setOption({
+                ...chartOptions,
+                series: [totalSeries]
+            });
+
+            if (method === activeChartMethod) {
+                chartInstance = chart;
+                createChartControls(method.name, chartOptions);
+            }
+        } else {
+            chart.setOption(method.chart_option);
+        }
+    });
+
+    // Add event listener for tab changes
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const methodName = e.target.textContent;
+        const method = methods.find(m => m.name === methodName);
+        if (method && (method.name === 'Frequency Distribution' || method.name === 'Mean Rank Calculation')) {
             const chartId = `chart-${method.name.toLowerCase().replace(/\s+/g, '-')}-${questionId}`;
+            chartInstance = echarts.getInstanceByDom(document.getElementById(chartId));
+            chartControlsContainer.innerHTML = '';
+            createChartControls(method.name, method.chart_option);
+        } else {
+            chartControlsContainer.innerHTML = '';
+        }
+    });
 
-            tabsHtml += `
-                <li class="nav-item" role="presentation">
-                    <a class="nav-link ${isActive}" id="${tabId}" data-bs-toggle="tab" href="#${tabId}-content" role="tab">${method.name}</a>
-                </li>
-            `;
+    analysisPlaceholder.style.display = 'none';
+    analysisContent.style.display = 'block';
+}
 
-            contentHtml += `
-                <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="${tabId}-content" role="tabpanel">
-                    <p>${method.description}</p>
-                    <div id="${chartId}" style="width: 600px; height: 400px;"></div>
-                </div>
-            `;
-        });
+function createChartControls(methodName, chartOptions) {
+    const controls = document.createElement('div');
+    controls.id = 'chart-controls-' + methodName.replace(/\s+/g, '-').toLowerCase();
+    controls.className = 'mt-3';
+    
+    const buttons = [
+        {text: 'Total', view: 'total'},
+        {text: 'By Gender', view: 'gender'},
+        {text: 'By Marital Status', view: 'marital'},
+        {text: 'By Health Status', view: 'health'},
+        {text: 'By Income', view: 'income'},
+        {text: 'By Education', view: 'education'}
+    ];
+    
+    buttons.forEach(function(button) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm btn-outline-primary mr-2 mb-2';
+        btn.textContent = button.text;
+        btn.onclick = function() { 
+            updateChartView(chartOptions, button.view);
+            // Highlight the active button
+            controls.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+        controls.appendChild(btn);
+    });
+    
+    // Set 'Total' button as active by default and trigger its click event
+    const totalButton = controls.querySelector('button');
+    totalButton.classList.add('active');
+    totalButton.click();
+    
+    chartControlsContainer.appendChild(controls);
+}
 
-        tabsHtml += '</ul>';
-        contentHtml += '</div>';
+function updateChartView(chartOptions, view) {
+    if (!chartInstance || !chartOptions) return;
+    
+    const originalOptions = JSON.parse(JSON.stringify(chartOptions));
+    
+    const colorPalette = [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ];
 
-        analysisContent.innerHTML = tabsHtml + contentHtml;
-
-        methods.forEach((method, index) => {
-            const chartId = `chart-${method.name.toLowerCase().replace(/\s+/g, '-')}-${questionId}`;
-            const chart = echarts.init(document.getElementById(chartId));
-            const option = method.chart_option;
-            console.log('Option: '+option)
-            chart.setOption(option);
-        });
-
-        analysisPlaceholder.style.display = 'none';
-        analysisContent.style.display = 'block';
+    const newSeries = originalOptions.series.filter(function(s) {
+        const name = s.name;
+        switch(view) {
+            case 'total':
+                return name === 'Total';
+            case 'gender':
+                return name.startsWith('Gender:');
+            case 'marital':
+                return name.startsWith('Marital:');
+            case 'health':
+                return name.startsWith('Health:');
+            case 'income':
+                return name.startsWith('Income:');
+            case 'education':
+                return name.startsWith('Education:');
+            default:
+                return true;
+        }
+    });
+    
+    newSeries.forEach((series, index) => {
+        series.itemStyle = {
+            ...series.itemStyle,
+            color: colorPalette[index % colorPalette.length]
+        };
+    });
+    
+    if (newSeries.length > 0) {
+        chartInstance.setOption({
+            ...originalOptions,
+            series: newSeries,
+            color: colorPalette
+        }, true);
+    } else {
+        console.warn(`No data found for the selected view: ${view}`);
     }
+}
 });
 </script>
 

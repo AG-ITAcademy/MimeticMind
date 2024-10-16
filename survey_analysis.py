@@ -4,6 +4,7 @@ from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_
 from answer_schema import get_data_from_schema
 from flask_login import login_required
 from sqlalchemy import text
+from analysis_utils import perform_sentiment_analysis, calculate_word_frequency
 
 survey_analysis_bp = Blueprint('survey_analysis_bp', __name__)
 
@@ -19,6 +20,8 @@ def survey_analysis(project_survey_id):
     questions = survey_template.query_templates
     form = FilterForm(request.form)
     populate_filter_form_choices(form, population_tag)
+    print('population_tag: '+str(population_tag))
+    print(form.gender.choices)
    
     if request.method == 'POST' and form.validate():
         profiles = get_filtered_profiles(population_tag, form.data).all()
@@ -47,7 +50,7 @@ def survey_analysis(project_survey_id):
                 'response': getattr(row, 'response', None) or getattr(row, 'choice', None) or getattr(row, 'rating', None) or getattr(row, 'rank', None)
             }
             response_data.append(raw_data)
-            
+       
         # prepare question specific data (for charts)
         for method in question_data['methods']:
             chart_data = []
@@ -71,6 +74,8 @@ def survey_analysis(project_survey_id):
                            population=population_tag,
                            project_survey=project_survey,
                            questions=questions,
+                           respondents= len(profiles),
+                           description=survey_template.description,
                            data=response_data,
                            question_data=question_data)
 
@@ -80,21 +85,97 @@ def build_options(question_data):
         chart_data = method['chart_data']
         print(chart_data)
         if method['name'] == 'Frequency Distribution':
-            labels = [str(item['response']) for item in chart_data]
-            values = [item['frequency'] for item in chart_data]
+            responses = [item['response'] for item in chart_data]
+            categories = [
+                'Total',
+                'Gender: Male', 'Gender: Female', 
+                'Marital: Single', 'Marital: Married', 'Marital: Divorced', 'Marital: Widowed', 'Marital: Separated',
+                'Health: Excellent', 'Health: Very Good', 'Health: Good', 'Health: Fair', 'Health: Poor',
+                'Income: Low', 'Income: Medium', 'Income: High',
+                'Education: < High School', 'Education: HS Graduate', 'Education: Associate', 'Education: Bachelor', 'Education: Master/PhD'
+            ]
+            series = [{
+                'name': category,
+                'type': 'bar',
+                'stack': 'total',
+                'data': [item[key] for item in chart_data],
+                'label': {
+                    'show': True,
+                    'position': 'inside',
+                    'formatter': '{c}',
+                    'fontSize': 12,
+                    'fontWeight': 'bold',
+                    'color': '#fff'
+                },
+                'emphasis': {
+                    'label': {
+                        'show': True,
+                        'fontSize': 14,
+                        'fontWeight': 'bold',
+                        'color': '#fff'
+                    }
+                }
+            } for category, key in zip(categories, [
+                'total',
+                'male', 'female', 
+                'single', 'married', 'divorced', 'widowed', 'separated',
+                'health_excellent', 'health_very_good', 'health_good', 'health_fair', 'health_poor',
+                'income_low', 'income_medium', 'income_high',
+                'edu_less_than_hs', 'edu_hs_graduate', 'edu_associate', 'edu_bachelor', 'edu_master_phd'
+            ])]
             method['chart_option'] = {
-                "title": {"text": method['name']},
-                "tooltip": {},
-                "xAxis": {"type": "category", "data": labels},
-                "yAxis": {"type": "value"},
-                "series": [{"data": values, "type": 'bar'}]
+                "tooltip": {
+                    "trigger": "axis",
+                    "axisPointer": {"type": "shadow"}
+                },
+                "legend": {
+                    "data": categories,
+                    "type": 'scroll',
+                    "orient": 'horizontal',
+                    "top": 0,
+                    "left": 'center',
+                    "width": '80%',
+                    "pageButtonPosition": 'end',
+                    "textStyle": {
+                        "color": '#B2BEB5'
+                    },
+                    "height": 25,  
+                    "padding": [5, 10]
+                },
+                "grid": {
+                    "left": '3%',
+                    "right": '10%',  
+                    "bottom": '3%',
+                    "top": '10%',  
+                    "containLabel": True
+                },
+                "toolbox": {
+                    "show": True,
+                    "orient": 'vertical',
+                    "left": 'right',
+                    "top": 'center',
+                    "feature": {
+                        "dataView": { "show": True, "readOnly": True },
+                        "magicType": { "show": True, "type": ['bar', 'stack'] },
+                        "restore": { "show": True },
+                        "saveAsImage": { "show": True }
+                    }
+                },
+                "xAxis": {
+                    "type": "value"
+                },
+                "yAxis": {
+                    "type": "category",
+                    "data": responses,
+                    "inverse": True
+                },
+                "series": series
             }
-        
+            
         elif method['name'] == 'Descriptive Statistics':
             if chart_data:
                 stats = chart_data[0]
                 method['chart_option'] = {
-                    "title": {"text": method['name']},
                     "tooltip": {"trigger": "axis"},
                     "xAxis": {"type": "category", "data": ['Min', 'Max', 'Average']},
                     "yAxis": {"type": "value"},
@@ -105,60 +186,292 @@ def build_options(question_data):
                 }
         
         elif method['name'] == 'Sentiment Analysis':
-            sentiments = {'Positive': 0, 'Neutral': 0, 'Negative': 0}
-            for item in chart_data:
-                sentiments[item['sentiment']] = item['count']
+            responses = [item['response'] for item in chart_data]
+            sentiment_data = perform_sentiment_analysis(responses)
             method['chart_option'] = {
-                "title": {"text": method['name']},
-                "tooltip": {"trigger": "item"},
-                "legend": {"orient": "vertical", "left": "left"},
+                "tooltip": {
+                    "trigger": "item",
+                    "formatter": "{a} <br/>{b}: {c} ({d}%)"
+                },
+                "legend": {
+                    "data": [item['sentiment'] for item in sentiment_data],
+                    "type": 'scroll',
+                    "orient": 'horizontal',
+                    "top": 0,
+                    "left": 'center',
+                    "width": '80%',
+                    "pageButtonPosition": 'end',
+                    "textStyle": {
+                        "color": '#B2BEB5'
+                    },
+                    "height": 25,  
+                    "padding": [5, 10]
+                },
+                "grid": {
+                    "left": '3%',
+                    "right": '10%',  
+                    "bottom": '3%',
+                    "top": '10%',  
+                    "containLabel": True
+                },
+                "toolbox": {
+                    "show": True,
+                    "orient": 'vertical',
+                    "left": 'right',
+                    "top": 'center',
+                    "feature": {
+                        "dataView": { "show": True, "readOnly": True },
+                        "restore": { "show": True },
+                        "saveAsImage": { "show": True }
+                    }
+                },
                 "series": [{
+                    "name": 'Sentiment',
                     "type": 'pie',
-                    "radius": "50%",
-                    "data": [{"value": v, "name": k} for k, v in sentiments.items()],
+                    "radius": ['40%', '70%'],
+                    "center": ['50%', '60%'],
+                    "avoidLabelOverlap": False,
+                    "itemStyle": {
+                        "borderRadius": 10,
+                        "borderColor": '#fff',
+                        "borderWidth": 0
+                    },
+                    "label": {
+                        "show": True,
+                        "formatter": '{b}: {c} ({d}%)',
+                        "textStyle": {"color": '#B2BEB5'},
+                        "textBorderColor": 'transparent',  
+                        "textShadowColor": 'transparent'  
+                    },
+                    "emphasis": {
+                        "label": {
+                            "show": True,
+                            "fontSize": '14',
+                            "fontWeight": 'bold'
+                        }
+                    },
+                    "labelLine": {
+                        "show": True
+                    },
+                    "data": [{"value": item['count'], "name": item['sentiment']} for item in sentiment_data]
+                }]
+            }
+        
+        elif method['name'] == 'Word Frequency':
+            responses = [item['response'] for item in chart_data]
+            word_freq_data = calculate_word_frequency(responses)
+            method['chart_option'] = {
+                "tooltip": {},
+                "series": [{
+                    "type": 'wordCloud',
+                    "sizeRange": [20, 80],
+                    "rotationRange": [0, 0],
+                    "shape": 'circle',
+                    "width": '130%',
+                    "height": '130%',
+                    "textStyle": {
+                        "color": '#B2BEB5'  # Apply color universally to the word cloud
+                    },
+                    "data": [{"name": item['word'], "value": item['frequency']} for item in word_freq_data]
+                }]
+            }
+        
+        elif method['name'] == 'Cluster Analysis':
+            data = [[item['age'], item['choice']] for item in chart_data]
+            unique_choices = list(set(item['choice'] for item in chart_data))
+            
+            method['chart_option'] = {
+                "tooltip": {
+                    "trigger": 'item'
+                },
+                "legend": {
+                    "data": unique_choices,
+                    "type": 'scroll',
+                    "orient": 'horizontal',
+                    "top": 30,
+                    "left": 'center',
+                    "width": '80%',
+                    "pageButtonPosition": 'end',
+                    "textStyle": {
+                        "color": '#B2BEB5'
+                    }
+                },
+                "grid": {
+                    "left": '3%',
+                    "right": '10%',
+                    "bottom": '3%',
+                    "top": '15%',
+                    "containLabel": True
+                },
+                "toolbox": {
+                    "show": True,
+                    "orient": 'vertical',
+                    "left": 'right',
+                    "top": 'center',
+                    "feature": {
+                        "dataZoom": {},
+                        "dataView": { "show": True, "readOnly": True },
+                        "restore": { "show": True },
+                        "saveAsImage": { "show": True }
+                    }
+                },
+                "xAxis": {
+                    "type": 'value',
+                    "name": 'Age',
+                    "nameLocation": 'middle',
+                    "nameGap": 30,
+                    "nameTextStyle": {
+                        "color": '#B2BEB5'
+                    },
+                    "axisLabel": {
+                        "color": '#B2BEB5'
+                    }
+                },
+                "yAxis": {
+                    "type": 'category',
+                    "name": 'Choice',
+                    "nameLocation": 'middle',
+                    "nameGap": 40,
+                    "nameTextStyle": {
+                        "color": '#B2BEB5'
+                    },
+                    "axisLabel": {
+                        "color": '#B2BEB5'
+                    },
+                    "data": unique_choices
+                },
+                "series": [{
+                    "name": 'Clusters',
+                    "type": 'scatter',
+                    "symbolSize": 10,
+                    "data": data,
+                    "itemStyle": {
+                        "opacity": 0.8
+                    },
                     "emphasis": {
                         "itemStyle": {
                             "shadowBlur": 10,
                             "shadowOffsetX": 0,
-                            "shadowColor": "rgba(0, 0, 0, 0.5)"
+                            "shadowColor": 'rgba(0, 0, 0, 0.5)'
                         }
                     }
                 }]
             }
         
-        elif method['name'] == 'Word Frequency':
-            words = [item['word'] for item in chart_data]
-            frequencies = [item['frequency'] for item in chart_data]
-            method['chart_option'] = {
-                "title": {"text": method['name']},
-                "tooltip": {},
-                "xAxis": {"type": "category", "data": words},
-                "yAxis": {"type": "value"},
-                "series": [{"data": frequencies, "type": 'bar'}]
-            }
-        
-        elif method['name'] == 'Cluster Analysis':
-            data = [[item['age'], item['choice']] for item in chart_data]
-            method['chart_option'] = {
-                "title": {"text": method['name']},
-                "xAxis": {},
-                "yAxis": {},
-                "series": [{
-                    "symbolSize": 20,
-                    "data": data,
-                    "type": 'scatter'
-                }]
-            }
-        
         elif method['name'] == 'Mean Rank Calculation':
             items = [item['item'] for item in chart_data]
-            mean_ranks = [item['mean_rank'] for item in chart_data]
+            categories = [
+                'Total', 'Gender: Male', 'Gender: Female', 
+                'Marital: Single', 'Marital: Married', 'Marital: Divorced', 'Marital: Widowed', 'Marital: Separated',
+                'Health: Excellent', 'Health: Very Good', 'Health: Good', 'Health: Fair', 'Health: Poor',
+                'Income: Low', 'Income: Medium', 'Income: High',
+                'Education: < High School', 'Education: HS Graduate', 'Education: Associate', 'Education: Bachelor', 'Education: Master/PhD'
+            ]
+            series = [{
+                'name': category,
+                'type': 'bar',
+                'data': [item[key] for item in chart_data],
+                "itemStyle": {
+                    "borderRadius": [5, 5, 0, 0]
+                },
+                "emphasis": {
+                    "itemStyle": {
+                        "brightness": 0.2
+                    }
+                },
+                "label": {
+                    "show": True,
+                    "position": 'top',
+                    "color": '#B2BEB5',
+                }
+            } for category, key in zip(categories, [
+                'total', 'male', 'female', 
+                'single', 'married', 'divorced', 'widowed', 'separated',
+                'health_excellent', 'health_very_good', 'health_good', 'health_fair', 'health_poor',
+                'income_low', 'income_medium', 'income_high',
+                'edu_less_than_hs', 'edu_hs_graduate', 'edu_associate', 'edu_bachelor', 'edu_master_phd'
+            ])]
+            
             method['chart_option'] = {
-                "title": {"text": method['name']},
-                "tooltip": {},
-                "xAxis": {"type": "category", "data": items},
-                "yAxis": {"type": "value"},
-                "series": [{"data": mean_ranks, "type": 'bar'}]
+                "title": {
+                    "text": "Mean Rank Calculation",
+                    "left": 'center',
+                    "top": 0,
+                    "textStyle": {
+                        "color": '#B2BEB5'
+                    }
+                },
+                "tooltip": {
+                    "trigger": 'axis',
+                    "axisPointer": {
+                        "type": 'shadow'
+                    },
+                },
+                "legend": {
+                    "data": categories,
+                    "type": 'scroll',
+                    "orient": 'horizontal',
+                    "top": 30,
+                    "left": 'center',
+                    "width": '80%',
+                    "pageButtonPosition": 'end',
+                    "textStyle": {
+                        "color": '#B2BEB5'
+                    }
+                },
+                "grid": {
+                    "left": '3%',
+                    "right": '10%',
+                    "bottom": '3%',
+                    "top": '15%',
+                    "containLabel": True
+                },
+                "toolbox": {
+                    "show": True,
+                    "orient": 'vertical',
+                    "left": 'right',
+                    "top": 'center',
+                    "feature": {
+                        "dataZoom": {},
+                        "dataView": { "show": True, "readOnly": True },
+                        "magicType": { "type": ['line', 'bar'] },
+                        "restore": { "show": True },
+                        "saveAsImage": { "show": True }
+                    }
+                },
+                "xAxis": {
+                    "type": 'category',
+                    "data": items,
+                    "axisLabel": {
+                        "color": '#B2BEB5',
+                        "rotate": 45,
+                        "interval": 0
+                    },
+                    "axisLine": {
+                        "lineStyle": {
+                            "color": '#B2BEB5'
+                        }
+                    }
+                },
+                "yAxis": {
+                    "type": 'value',
+                    "name": 'Mean Rank',
+                    "nameLocation": 'middle',
+                    "nameGap": 40,
+                    "nameTextStyle": {
+                        "color": '#B2BEB5'
+                    },
+                    "axisLabel": {
+                        "color": '#B2BEB5'
+                    },
+                    "axisLine": {
+                        "lineStyle": {
+                            "color": '#B2BEB5'
+                        }
+                    }
+                },
+                "series": series
             }
-    
+            
+            
     return question_data

@@ -24,8 +24,6 @@ def populate_filter_form_choices(form, population_tag=None):
     form.health_status.choices = get_distinct_values(ProfileModel.health_status)
     form.legal_status.choices = get_distinct_values(ProfileModel.legal_status)
     form.marital_status.choices = get_distinct_values(ProfileModel.marital_status)
-    
-    # Income range is typically predefined
     form.income_range.choices = [('Any', 'Any'), ('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')]
 
 def apply_filters_to_query(query, form_data):

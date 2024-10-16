@@ -5,3 +5,9 @@
 - de adaugat optiune de : contextual survey (care practic introduce si intrebarile si raspunsurile anterioare in contextul intrebarii curente). E util pentru surveyuri de genul : dati o nota de la 1 la 5 si apoi explicati de ce ati dat nota
 
 - blog cu 2-3 articole ca sa atraga si trafic
+
+- AI Assistant pentru crearea de survey-uri
+- AI Assistant pentru smart filtering (e.g. I want all profiles that eat cereals for breakfast) - vector search si embedding pe life story
+- AI Assistant pt. rapoarte
+
+* BUG - nu merge filtrul pe income la populations
