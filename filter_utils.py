@@ -62,23 +62,6 @@ def get_filtered_profiles(population_tag, form_data):
 
 # TREBUIE MUTATE ASTEA DOUA IN FORMS SI EVENTUAL ADUS AICI FILTER CLASS DIN Filter.py
 
-class SegmentCreationForm(FlaskForm):
-    """
-    Form for creating segments. Includes all filter fields plus an alias.
-    """
-    alias = StringField('Segment Alias', validators=[DataRequired()])
-    gender = SelectField('Gender', validators=[Optional()])
-    age_min = IntegerField('Age Min', validators=[Optional()])
-    age_max = IntegerField('Age Max', validators=[Optional()])
-    location = SelectField('Location', validators=[Optional()])
-    ethnicity = SelectField('Ethnicity', validators=[Optional()])
-    occupation = SelectField('Occupation', validators=[Optional()])
-    education_level = SelectField('Education Level', validators=[Optional()])
-    religion = SelectField('Religion', validators=[Optional()])
-    health_status = SelectField('Health Status', validators=[Optional()])
-    legal_status = SelectField('Legal Status', validators=[Optional()])
-    marital_status = SelectField('Marital Status', validators=[Optional()])
-    income_range = SelectField('Income Range', validators=[Optional()])
 
 class FilterForm(FlaskForm):
     """

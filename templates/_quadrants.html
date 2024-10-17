@@ -167,6 +167,7 @@
                         <thead class="table-active">
                             <tr>
                                 <th>Survey:</th>
+                                <th>Segment:</th>
                                 <th>Actions</th>
                                 <th>Progress</th>
                             </tr>
@@ -175,6 +176,7 @@
                             {% for survey in project_surveys %}
                             <tr>
                                 <td>{{ survey.survey_alias }}</td>
+                                <td>{{ survey.segment_alias }}</td>
                                 <td>
                                     <form action="{{ url_for('projects_bp.remove_survey', project_id=project.id, survey_id=survey.id) }}" method="POST" style="display: inline;">
                                         {{ form.hidden_tag() }}
@@ -244,9 +246,10 @@
             <div id="available-results-section">
                 <div class="card h-100 d-flex flex-column ">
                     <div class="card-body position-relative flex-grow-1 d-flex flex-column card border border-warning">
-                        <h2 class="card-title">Available data</h2>
+                        <h2 class="card-title">Survey results</h2> 
                             <div class="alert alert-warning" role="alert">No data available!</div>
                             <p>Generate data by executing a survey</p>      
+                            <h5 class="card-title placeholder-glow"><span class="placeholder col-6"></span></h5>
                     </div>
                 </div>
             </div>
@@ -257,161 +260,159 @@
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-      // Population section
-    const configureButton = document.getElementById('configure-button');
-    const cancelButton = document.getElementById('cancel-button');
-    const populationDefaultContent = document.getElementById('population-default-content');
-    const populationFormContent = document.getElementById('population-form-content');
-    const populationSelect = document.getElementById('population_tag');
-    const populationDescription = document.getElementById('population-description');
+    document.addEventListener('DOMContentLoaded', function() {
+          // Population section
+        const configureButton = document.getElementById('configure-button');
+        const cancelButton = document.getElementById('cancel-button');
+        const populationDefaultContent = document.getElementById('population-default-content');
+        const populationFormContent = document.getElementById('population-form-content');
+        const populationSelect = document.getElementById('population_tag');
+        const populationDescription = document.getElementById('population-description');
 
-    if (configureButton && cancelButton && populationDefaultContent && populationFormContent) {
-        configureButton.addEventListener('click', function() {
-            populationDefaultContent.style.display = 'none';
-            populationFormContent.style.display = 'block';
-        });
-
-        cancelButton.addEventListener('click', function() {
-            populationDefaultContent.style.display = 'block';
-            populationFormContent.style.display = 'none';
-        });
-    } else {
-        console.error('One or more population elements not found');
-    }
-
-    if (populationSelect && populationDescription) {
-        const populations = {
-            {% for population in populations %}
-                "{{ population.tag }}": {{ population.description|tojson }},
-            {% endfor %}
-        };
-
-        populationSelect.addEventListener('change', function() {
-            const selectedPopulationTag = this.value;
-            if (populations[selectedPopulationTag]) {
-                populationDescription.innerHTML = populations[selectedPopulationTag];
-            } else {
-                populationDescription.innerHTML = '';
-            }
-        });
-
-        // Trigger the change event to display the description for the pre-selected population
-        populationSelect.dispatchEvent(new Event('change'));
-    } else {
-        console.error('Population select or description element not found');
-    }
-
-    // Segments section
-    const defineSegmentsButton = document.getElementById('define-segments-button');
-    const cancelSegmentButton = document.getElementById('cancel-segment-button');
-    const segmentsDefaultContent = document.getElementById('segments-default-content');
-    const segmentsFormContent = document.getElementById('segments-form-content');
-
-    if (defineSegmentsButton && cancelSegmentButton && segmentsDefaultContent && segmentsFormContent) {
-        defineSegmentsButton.addEventListener('click', function() {
-            segmentsDefaultContent.style.display = 'none';
-            segmentsFormContent.style.display = 'block';
-        });
-
-        cancelSegmentButton.addEventListener('click', function() {
-            segmentsDefaultContent.style.display = 'block';
-            segmentsFormContent.style.display = 'none';
-        });
-    } else {
-        console.error('One or more segment elements not found');
-    }
-
-    // Surveys section
-    const addSurveyBtn = document.getElementById('add-survey-btn');
-    const cancelSurveyBtn = document.getElementById('cancel-survey-btn');
-    const surveyFormContent = document.getElementById('survey-form-content');
-
-    if (addSurveyBtn && cancelSurveyBtn && surveyFormContent) {
-        addSurveyBtn.addEventListener('click', function() {
-            surveyFormContent.style.display = 'block';
-            addSurveyBtn.style.display = 'none';
-        });
-
-        cancelSurveyBtn.addEventListener('click', function() {
-            surveyFormContent.style.display = 'none';
-            addSurveyBtn.style.display = 'block';
-        });
-    } else {
-        console.error('One or more survey elements not found');
-    }
-
-    // Template description update
-    const templateSelect = document.getElementById('template_id');
-    const descriptionField = document.getElementById('template-description');
-
-    if (templateSelect && descriptionField) {
-        const templates = {
-            {% for template in survey_templates %}
-                "{{ template.id }}": {{ template.description|tojson }},
-            {% endfor %}
-        };
-
-        templateSelect.addEventListener('change', function() {
-            const selectedTemplateId = this.value;
-            if (templates[selectedTemplateId]) {
-                descriptionField.textContent = templates[selectedTemplateId];
-            } else {
-                descriptionField.textContent = '';
-            }
-        });
-    } else {
-        console.error('Template select or description field not found');
-    }
-    
-});
-
-// Function to update progress for a single survey
-function updateSurveyProgress(surveyId) {
-  fetch(`/survey_progress/${surveyId}`)
-    .then(response => response.json())
-    .then(data => {
-      const progressBar = document.querySelector(`#progress-bar-${surveyId}`);
-      const executeButton = document.querySelector(`#execute-survey-${surveyId}`);
-      
-      if (progressBar) {
-        progressBar.style.width = `${data.progress}%`;
-        progressBar.textContent = `${data.progress}%`;
-
-        if (data.progress < 100 && data.progress > 0) {
-          executeButton.disabled = true;
-          executeButton.classList.add('disabled');
-          executeButton.textContent = 'Running...';
-          progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-        } else {
-          executeButton.disabled = false;
-          executeButton.classList.remove('disabled');
-          executeButton.textContent = 'Execute';
-          progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
-        }
-
-        if (data.progress === 100) {
-          // Survey completed, update the Available Results section
-          const projectId = document.querySelector('meta[name="project-id"]').getAttribute('content');
-          fetch(`/project/${projectId}/available_results`)
-            .then(response => response.text())
-            .then(html => {
-              const availableResultsSection = document.getElementById('available-results-section');
-              availableResultsSection.innerHTML = html;
+        if (configureButton && cancelButton && populationDefaultContent && populationFormContent) {
+            configureButton.addEventListener('click', function() {
+                populationDefaultContent.style.display = 'none';
+                populationFormContent.style.display = 'block';
             });
-        }
-      }
-    });
-}
 
-function updateAllSurveyProgress() {
-  document.querySelectorAll('.progress-bar[data-survey-id]').forEach(progressBar => {
-    const surveyId = progressBar.getAttribute('data-survey-id');
-    updateSurveyProgress(surveyId);
-  });
-}
-setInterval(updateAllSurveyProgress, 1000);
-updateAllSurveyProgress();
+            cancelButton.addEventListener('click', function() {
+                populationDefaultContent.style.display = 'block';
+                populationFormContent.style.display = 'none';
+            });
+        } else {
+            console.error('One or more population elements not found');
+        }
+
+        if (populationSelect && populationDescription) {
+            const populations = {
+                {% for population in populations %}
+                    "{{ population.tag }}": {{ population.description|tojson }},
+                {% endfor %}
+            };
+
+            populationSelect.addEventListener('change', function() {
+                const selectedPopulationTag = this.value;
+                if (populations[selectedPopulationTag]) {
+                    populationDescription.innerHTML = populations[selectedPopulationTag];
+                } else {
+                    populationDescription.innerHTML = '';
+                }
+            });
+
+            // Trigger the change event to display the description for the pre-selected population
+            populationSelect.dispatchEvent(new Event('change'));
+        } else {
+            console.error('Population select or description element not found');
+        }
+
+        // Segments section
+        const defineSegmentsButton = document.getElementById('define-segments-button');
+        const cancelSegmentButton = document.getElementById('cancel-segment-button');
+        const segmentsDefaultContent = document.getElementById('segments-default-content');
+        const segmentsFormContent = document.getElementById('segments-form-content');
+
+        if (defineSegmentsButton && cancelSegmentButton && segmentsDefaultContent && segmentsFormContent) {
+            defineSegmentsButton.addEventListener('click', function() {
+                segmentsDefaultContent.style.display = 'none';
+                segmentsFormContent.style.display = 'block';
+            });
+
+            cancelSegmentButton.addEventListener('click', function() {
+                segmentsDefaultContent.style.display = 'block';
+                segmentsFormContent.style.display = 'none';
+            });
+        } else {
+            console.error('One or more segment elements not found');
+        }
+
+        // Surveys section
+        const addSurveyBtn = document.getElementById('add-survey-btn');
+        const cancelSurveyBtn = document.getElementById('cancel-survey-btn');
+        const surveyFormContent = document.getElementById('survey-form-content');
+
+        if (addSurveyBtn && cancelSurveyBtn && surveyFormContent) {
+            addSurveyBtn.addEventListener('click', function() {
+                surveyFormContent.style.display = 'block';
+                addSurveyBtn.style.display = 'none';
+            });
+
+            cancelSurveyBtn.addEventListener('click', function() {
+                surveyFormContent.style.display = 'none';
+                addSurveyBtn.style.display = 'block';
+            });
+        } else {
+            console.error('One or more survey elements not found');
+        }
+
+        // Template description update
+        const templateSelect = document.getElementById('template_id');
+        const descriptionField = document.getElementById('template-description');
+
+        if (templateSelect && descriptionField) {
+            const templates = {
+                {% for template in survey_templates %}
+                    "{{ template.id }}": {{ template.description|tojson }},
+                {% endfor %}
+            };
+
+            templateSelect.addEventListener('change', function() {
+                const selectedTemplateId = this.value;
+                if (templates[selectedTemplateId]) {
+                    descriptionField.textContent = templates[selectedTemplateId];
+                } else {
+                    descriptionField.textContent = '';
+                }
+            });
+        } 
+        
+    });
+
+    // Function to update progress for a single survey
+    function updateSurveyProgress(surveyId) {
+      fetch(`/survey_progress/${surveyId}`)
+        .then(response => response.json())
+        .then(data => {
+          const progressBar = document.querySelector(`#progress-bar-${surveyId}`);
+          const executeButton = document.querySelector(`#execute-survey-${surveyId}`);
+          
+          if (progressBar) {
+            progressBar.style.width = `${data.progress}%`;
+            progressBar.textContent = `${data.progress}%`;
+
+            if (data.progress < 100 && data.progress > 0) {
+              executeButton.disabled = true;
+              executeButton.classList.add('disabled');
+              executeButton.textContent = 'Running...';
+              progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+            } else {
+              executeButton.disabled = false;
+              executeButton.classList.remove('disabled');
+              executeButton.textContent = 'Execute';
+              progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+            }
+
+            if (data.progress === 100) {
+              // Survey completed, update the Available Results section
+              const projectId = document.querySelector('meta[name="project-id"]').getAttribute('content');
+              fetch(`/project/${projectId}/available_results`)
+                .then(response => response.text())
+                .then(html => {
+                  const availableResultsSection = document.getElementById('available-results-section');
+                  availableResultsSection.innerHTML = html;
+                });
+            }
+          }
+        });
+    }
+
+    function updateAllSurveyProgress() {
+      document.querySelectorAll('.progress-bar[data-survey-id]').forEach(progressBar => {
+        const surveyId = progressBar.getAttribute('data-survey-id');
+        updateSurveyProgress(surveyId);
+      });
+    }
+    setInterval(updateAllSurveyProgress, 1000);
+    updateAllSurveyProgress();
 
 
 

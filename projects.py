@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from models import db, Project,  ProfileModel, FilterModel, SurveyTemplate, ProjectSurvey, Population
-from filter_utils import SegmentCreationForm, populate_filter_form_choices, apply_filters_to_query, create_segment_from_form
+from filter_utils import populate_filter_form_choices, apply_filters_to_query, create_segment_from_form
 from filter import Filter
-from forms import ProjectForm
+from forms import ProjectForm, SegmentCreationForm
 from flask_wtf.csrf import CSRFProtect
 from config import Config
 import redis
+from sqlalchemy.orm import aliased
 from survey import Survey, get_survey_progress
 
 # Create a Blueprint for project-related routes
@@ -34,9 +35,21 @@ def project_dashboard(project_id):
 
     segments = FilterModel.query.filter_by(project_id=project.id).all()
     form = SegmentCreationForm()
-    survey_templates = SurveyTemplate.query.all()
+    #survey_templates = SurveyTemplate.query.all()
+    survey_templates = SurveyTemplate.query.filter_by(user_id=current_user.id).all()
     
-    project_surveys = ProjectSurvey.query.filter_by(project_id=project_id).order_by(ProjectSurvey.survey_alias.asc()).all()
+    FilterAlias = aliased(FilterModel)
+   
+    project_surveys = db.session.query(ProjectSurvey)\
+        .outerjoin(FilterAlias, ProjectSurvey.segment_id == FilterAlias.id)\
+        .filter(ProjectSurvey.project_id == project_id)\
+        .order_by(ProjectSurvey.survey_alias.asc())\
+        .all()
+        
+    for survey in project_surveys:
+        segment = db.session.query(FilterModel).filter_by(id=survey.segment_id).first()
+        survey.segment_alias = segment.alias if segment else None
+  
     completed_surveys = db.session.query(ProjectSurvey).filter(
         ProjectSurvey.project_id == project_id,
         ProjectSurvey.completion_percentage == 100
@@ -286,3 +299,17 @@ def available_results(project_id):
                            completed_surveys=completed_surveys, 
                            project_id=project_id,
                            project_population=project_population)
+                           
+@projects_bp.route('/projects/<int:project_id>/rename', methods=['POST'])
+@login_required
+def rename_project(project_id):
+    project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
+    
+    new_name = request.json.get('new_name')
+    if not new_name:
+        return jsonify({'success': False, 'message': 'New name is required'}), 400
+    
+    project.name = new_name
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Project renamed successfully'})

@@ -1,82 +1,124 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
+<script src="../static/vendors/lottie/lottie.min.js"></script>
 
 <div class="container-fluid">
     <div class="row g-3">
+        <!-- Survey Summary Card -->
         <div class="col-12">
             <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Survey Analysis: </h2>
-                    <p>Welcome to the analysis dashboard for the <span class="text-warning-emphasis">{{ project_survey.survey_alias }} </span>survey.</p>
-                    <p>Survey description: <span class="text-warning-emphasis">{{ description }}</span></p>
-                    <ul>
-                        <li><strong>Respondents:</strong> <span class="text-warning-emphasis">{{ respondents }}</span> participants from <span class="text-warning-emphasis">{{ population }}</span> of various age groups and geographic locations</li>
-                        <!--<li><strong>Focus Areas:</strong> Product quality, customer service, website usability, and overall brand perception</li>-->
-                        <li><strong>Key Insights:</strong> This dashboard presents visualizations on response distributions, sentiment analysis, and demographic breakdowns</li>
-                    </ul>
-                    <p>Use the filters and interactive charts below to explore the survey results in detail.</p>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Survey Summary: <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span></h2>
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSummary" aria-expanded="false" aria-controls="collapseSummary">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <div id="collapseSummary" class="collapse" aria-labelledby="headingSummary">
+                    <div class="card-body">
+                        <p>Welcome to the analysis dashboard for the <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span> survey, consisting of <span class="text-warning-emphasis">{{ questions|length }}</span> questions.</p>
+                        <p>Survey description: <span class="text-warning-emphasis">{{ description }}</span></p>
+                        <ul>
+                            <li><strong>Respondents:</strong> <span class="text-warning-emphasis">{{ respondents }}</span> participants from <span class="text-warning-emphasis">{{ population }}</span> of various age groups and geographic locations</li>
+                            <li>
+                                <strong>Key Insights:</strong> This dashboard presents visualizations using the following analysis methods:
+                                <ul>
+                                    {% for method in all_analysis_methods %}
+                                        <li>{{ method }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>Use the filters and interactive charts below to explore the survey results in detail.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Question Analysis Card -->
         <div class="col-12">
             <div class="card">
-                <div class="card-body">
-                
-                    <div class="mb-3">
-                        <select id="question-select" class="form-select">
-                            <option value="" disabled selected>Select a question to begin analysis</option>
-                            {% for question in questions %}
-                                <option value="{{ question.id }}">{{ question.query_text }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <form id="filter-form" method="POST" action="{{ url_for('population_explorer_bp.population_explorer', project_survey_id=project_survey_id) }}">
-                                {{ form.hidden_tag() }}
-                                {% for field in form if field.name != 'csrf_token' %}
-                                <div class="mb-0 row align-items-center">
-                                    <label for="{{ field.id }}" class="col-sm-6 col-form-label">{{ field.label.text }}</label>
-                                    <div class="col-sm-6">
-                                        {{ field(class="form-select form-select-sm" if field.type == "SelectField" else "form-control form-control-sm", disabled=True) }}
-                                    </div>
-                                </div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Question Analysis</h5>
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnalysis" aria-expanded="true" aria-controls="collapseAnalysis">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <div id="collapseAnalysis" class="collapse show" aria-labelledby="headingAnalysis">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <select id="question-select" class="form-select">
+                                <option value="" disabled selected>Select a question to begin analysis</option>
+                                {% for question in questions %}
+                                    <option value="{{ question.id }}">{{ question.query_text }}</option>
                                 {% endfor %}
-                                <div class="mt-0">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100" disabled>Apply Filters</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Analysis Methods Section -->
-                        <div class="col-sm-8">
-                            <div id="analysis-placeholder" class="text-center py-5">
-                                <h4>Select a question to view analysis methods</h4>
-                            </div>
-                            <ul class="nav nav-tabs" id="analysis-tabs" role="tablist"></ul>
-                            <div class="tab-content" id="analysis-content">
-                                <!-- THIS IS WHERE THE GRAPHS SHOULD APPEAR -->
-                            </div>
-                            
-                            <div id="chart-controls-container" class="mt-3">
-                                <!-- Chart controls will be dynamically inserted here -->
-                            </div>
+                            </select>
                         </div>
                         
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <form id="filter-form" method="POST" action="{{ url_for('population_explorer_bp.population_explorer', project_survey_id=project_survey_id) }}">
+                                    {{ form.hidden_tag() }}
+                                    {% for field in form if field.name != 'csrf_token' %}
+                                    <div class="mb-0 row align-items-center">
+                                        <label for="{{ field.id }}" class="col-sm-6 col-form-label">{{ field.label.text }}</label>
+                                        <div class="col-sm-6">
+                                            {{ field(class="form-select form-select-sm" if field.type == "SelectField" else "form-control form-control-sm", disabled=True) }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    <div class="mt-0">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100" disabled>Apply Filters</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="col-sm-8">
+                                <div id="analysis-placeholder" class="text-center py-5 w-100">
+                                    <div class="card overflow-hidden mx-auto ms-3" style="width: 40rem;" aria-hidden="true">
+                                        <div class="card-body">
+                                            <h4>Select a question to view analysis methods</h4>
+                                            <h5 class="card-title placeholder-glow"><span class="placeholder col-6"></span></h5>
+                                            <p class="card-text placeholder-glow"><span class="placeholder col-7"></span><span class="placeholder col-4"></span><span class="placeholder col-4"></span><span class="placeholder col-6"></span><span class="placeholder col-8"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Loading Spinner -->
+                                <div id="loading-spinner" class="text-center d-none">
+                                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2">Loading analysis...</p>
+                                </div>
+                                <ul class="nav nav-tabs" id="analysis-tabs" role="tablist"></ul>
+                                <div class="tab-content" id="analysis-content">
+                                    <!-- THIS IS WHERE THE GRAPHS SHOULD APPEAR -->
+                                </div>
+                                
+                                <div id="chart-controls-container" class="mt-3">
+                                    <!-- Chart controls will be dynamically inserted here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- Raw Survey Data Card -->
         <div class="col-12">
             <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Raw Survey Data</h2>
-                    <table id="profile-table" class="table table-striped table-bordered table-md" style="width:100%">
-                    </table>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Raw Survey Data</h2>
+                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRawData" aria-expanded="true" aria-controls="collapseRawData">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+                <div id="collapseRawData" class="collapse show" aria-labelledby="headingRawData">
+                    <div class="card-body">
+                        <table id="profile-table" class="table table-striped table-bordered table-md" style="width:100%">
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,6 +131,7 @@ $(document).ready(function() {
     const formFields = $('#filter-form input, #filter-form select');
     const submitButton = $('#filter-form button[type="submit"]');
     const analysisTabs = document.getElementById('analysis-tabs');
+    const loadingSpinner = document.getElementById('loading-spinner');
     const analysisContent = document.getElementById('analysis-content');
     const analysisPlaceholder = document.getElementById('analysis-placeholder');
     const questionSelect = $('#question-select');
@@ -144,6 +187,8 @@ $(document).ready(function() {
         const pathParts = window.location.pathname.split('/');
         const project_survey_id = pathParts[pathParts.length - 1];
         const selectedQuestionId = $('#question-select').val();
+        loadingSpinner.classList.remove('d-none');
+        analysisPlaceholder.style.display = 'none';
         formData.append('selected_question_id', selectedQuestionId);
         $.ajax({
             url: `/survey_analysis/${project_survey_id}`,
@@ -157,10 +202,12 @@ $(document).ready(function() {
             success: function(data) {
                 console.log("Received table data:", data.data);
                 console.log("Received question data:", data.question_data);
+                loadingSpinner.classList.add('d-none');
                 profileTable.clear().rows.add(data.data).draw();
                 updateAnalysisContent(data.question_data.methods, selectedQuestionId);
             },
             error: function(error) {
+                loadingSpinner.classList.add('d-none');
                 console.log('Error fetching data:', error);
             }
         });
@@ -277,13 +324,9 @@ function createChartControls(methodName, chartOptions) {
 function updateChartView(chartOptions, view) {
     if (!chartInstance || !chartOptions) return;
     
+    // Clone the original chart options to avoid modifying the original data
     const originalOptions = JSON.parse(JSON.stringify(chartOptions));
     
-    const colorPalette = [
-        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
-        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
-    ];
-
     const newSeries = originalOptions.series.filter(function(s) {
         const name = s.name;
         switch(view) {
@@ -304,19 +347,8 @@ function updateChartView(chartOptions, view) {
         }
     });
     
-    newSeries.forEach((series, index) => {
-        series.itemStyle = {
-            ...series.itemStyle,
-            color: colorPalette[index % colorPalette.length]
-        };
-    });
-    
     if (newSeries.length > 0) {
-        chartInstance.setOption({
-            ...originalOptions,
-            series: newSeries,
-            color: colorPalette
-        }, true);
+        chartInstance.setOption({...originalOptions, series: newSeries}, true);
     } else {
         console.warn(`No data found for the selected view: ${view}`);
     }

@@ -69,6 +69,15 @@ def survey_analysis(project_survey_id):
             "question_data": question_data  # Analysis method data, including chart data
         })
     
+    # Collect all unique analysis methods
+    all_analysis_methods = set()
+    for question in questions:
+        question_data = get_data_from_schema(question.schema)
+        all_analysis_methods.update(method['name'] for method in question_data.get('methods', []))
+
+    # Convert the set to a sorted list
+    all_analysis_methods = sorted(list(all_analysis_methods))
+    
     return render_template('survey_analysis.html', 
                            form=form, 
                            population=population_tag,
@@ -77,7 +86,8 @@ def survey_analysis(project_survey_id):
                            respondents= len(profiles),
                            description=survey_template.description,
                            data=response_data,
-                           question_data=question_data)
+                           question_data=question_data,
+                           all_analysis_methods=all_analysis_methods)
 
 
 def build_options(question_data):

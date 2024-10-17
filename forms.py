@@ -29,6 +29,24 @@ class FilterForm(FlaskForm):
     
     submit = SubmitField('CREATE SEGMENT')
     cancel = SubmitField('CANCEL')
+    
+class SegmentCreationForm(FlaskForm):
+    """
+    Form for creating segments. Includes all filter fields plus an alias.
+    """
+    alias = StringField('Segment Alias', validators=[DataRequired()])
+    gender = SelectField('Gender', validators=[Optional()])
+    age_min = IntegerField('Age Min', validators=[Optional()])
+    age_max = IntegerField('Age Max', validators=[Optional()])
+    location = SelectField('Location', validators=[Optional()])
+    ethnicity = SelectField('Ethnicity', validators=[Optional()])
+    occupation = SelectField('Occupation', validators=[Optional()])
+    education_level = SelectField('Education Level', validators=[Optional()])
+    religion = SelectField('Religion', validators=[Optional()])
+    health_status = SelectField('Health Status', validators=[Optional()])
+    legal_status = SelectField('Legal Status', validators=[Optional()])
+    marital_status = SelectField('Marital Status', validators=[Optional()])
+    income_range = SelectField('Income Range', validators=[Optional()])
 
 class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=150)])

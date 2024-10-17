@@ -4,10 +4,29 @@
 
 - de adaugat optiune de : contextual survey (care practic introduce si intrebarile si raspunsurile anterioare in contextul intrebarii curente). E util pentru surveyuri de genul : dati o nota de la 1 la 5 si apoi explicati de ce ati dat nota
 
-- blog cu 2-3 articole ca sa atraga si trafic
+- de facut base_landing similar cu base.html pentru paginile fara meniu lateral
+
+- la pricing:
+	- de facut modale pentru detalii pe fiecare plan
+	- de rescris FAQ
+	- integrare cu Stripe
+
+- de adaugat subscription si limite in DB
+- de facut modale in loc de popup-urile alea simple
+- implementata logica pentru search
+- rezolvat fluxul de login/register/reset si integrare cu Google si FB
 
 - AI Assistant pentru crearea de survey-uri
-- AI Assistant pentru smart filtering (e.g. I want all profiles that eat cereals for breakfast) - vector search si embedding pe life story
+
+- AI Assistant pentru smart filtering (e.g. I want all profiles that eat cereals for breakfast) - vector search si embedding pe life story cu posibilitate de salvat segment custom din selectia facuta
+
 - AI Assistant pt. rapoarte
 
 * BUG - nu merge filtrul pe income la populations
+* BUG - filterForm e duplicat - apare si in forms si in survey_utils
+
+- La dashboard:
+	* BUG - nu merg butoanele din Dashboard
+	- facut butonul de create new project sa arate ca alea de la new survey (albastru)
+
+- blog cu 2-3 articole ca sa atraga si trafic
