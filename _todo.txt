@@ -4,12 +4,12 @@
 
 - de adaugat optiune de : contextual survey (care practic introduce si intrebarile si raspunsurile anterioare in contextul intrebarii curente). E util pentru surveyuri de genul : dati o nota de la 1 la 5 si apoi explicati de ce ati dat nota
 
-- de facut base_landing similar cu base.html pentru paginile fara meniu lateral
-
 - la pricing:
 	- de facut modale pentru detalii pe fiecare plan
 	- de rescris FAQ
 	- integrare cu Stripe
+
++ sectiunea de settings
 
 - de adaugat subscription si limite in DB
 - de facut modale in loc de popup-urile alea simple

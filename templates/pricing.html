@@ -1,151 +1,6 @@
-<!DOCTYPE html>
-<html data-bs-theme="dark" lang="en-US" dir="ltr">
-
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-
-    <!-- ===============================================-->
-    <!--    Document Title-->
-    <!-- ===============================================-->
-    <title>{% block title %}MimeticMind{% endblock %}</title>
-
-    <!-- ===============================================-->
-    <!--    Favicons-->
-    <!-- ===============================================-->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/img/favicons/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/img/favicons/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='assets/img/favicons/favicon-16x16.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='assets/img/favicons/favicon.ico') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='assets/img/favicons/manifest.json') }}">
-    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='assets/img/favicons/mstile-150x150.png') }}">
-    <meta name="theme-color" content="#ffffff">
-
-    <!-- Theme Configuration -->
-    <script src="{{ url_for('static', filename='assets/js/config.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/simplebar/simplebar.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/echarts/echarts.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/typed.js/typed.umd.js') }}"></script>
-
-    <!-- ===============================================-->
-    <!--    Stylesheets-->
-    <!-- ===============================================-->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,600,700|Poppins:300,400,500,600,700,800,900&amp;display=swap" rel="stylesheet">
-
-    <!-- Vendor CSS -->
-    <link href="{{ url_for('static', filename='vendors/simplebar/simplebar.min.css') }}" rel="stylesheet">
-
-    <!-- Theme CSS -->
-    <link href="{{ url_for('static', filename='assets/css/theme.css') }}" rel="stylesheet" id="style-default">
-    <link href="{{ url_for('static', filename='assets/css/user.css') }}" rel="stylesheet" id="user-style-default">
-  </head>
-
-
-  <body>
-
-    <!-- ===============================================-->
-    <!--    Main Content-->
-    <!-- ===============================================-->
-    <main class="main" id="top">
-      <nav class="navbar navbar-standard navbar-expand-lg fixed-top navbar-dark" data-navbar-darken-on-scroll="data-navbar-darken-on-scroll">
-        <div class="container"><a class="navbar-brand" href="../dashboard"><span class="text-white dark__text-white">MimeticMind</span></a>
-          <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarStandard" aria-controls="navbarStandard" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-          <div class="collapse navbar-collapse scrollbar" id="navbarStandard">
-            <ul class="navbar-nav" data-top-nav-dropdowns="data-top-nav-dropdowns">
-              <li class="nav-item"><a class="nav-link" href="../dashboard" role="button">Dashboard</a>
-              </li>
-              
-              <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="apps">App</a>
-                <div class="dropdown-menu dropdown-caret dropdown-menu-card border-0 mt-0" aria-labelledby="apps">
-                  <div class="bg-white dark__bg-1000 rounded-3 py-2">
-                        <div class="col-6 col-md-4">
-
-                            <a class="nav-link py-1 link-600 fw-medium" href="#">Features</a>
-                            <a class="nav-link py-1 link-600 fw-medium" href="../pricing">Pricing</a>
-                            <a class="nav-link py-1 link-600 fw-medium" href="#">Testimonials</a>
-                          
-                        </div>
-                  </div>
-                </div>
-              </li>
-
-              <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="documentations">Documentation</a>
-                <div class="dropdown-menu dropdown-caret dropdown-menu-card border-0 mt-0" aria-labelledby="documentations">
-                  <div class="bg-white dark__bg-1000 rounded-3 py-2">
-                      <a class="dropdown-item link-600 fw-medium" href="#">Getting started</a>
-                      <a class="dropdown-item link-600 fw-medium" href="#">Configuration</a>
-                      <a class="dropdown-item link-600 fw-medium" href="#">FAQ</a>
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <ul class="navbar-nav ms-auto">
-              <li class="nav-item d-flex align-items-center me-2">
-                <div class="dropdown theme-control-dropdown landing-drop"><a class="nav-link d-flex align-items-center dropdown-toggle fa-icon-wait pe-1" href="#" role="button" id="themeSwitchDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="d-none d-lg-block"><span class="fas fa-sun" data-theme-dropdown-toggle-icon="light"></span><span class="fas fa-moon" data-theme-dropdown-toggle-icon="dark"></span><span class="fas fa-adjust" data-theme-dropdown-toggle-icon="auto"></span></span><span class="d-lg-none">Switch theme</span></a>
-                  <div class="dropdown-menu dropdown-menu-end dropdown-caret border py-0 mt-1" aria-labelledby="themeSwitchDropdown">
-                    <div class="bg-white dark__bg-1000 rounded-2 py-2">
-                      <button class="dropdown-item link-600 d-flex align-items-center gap-2" type="button" value="light" data-theme-control="theme"><span class="fas fa-sun"></span>Light<span class="fas fa-check dropdown-check-icon ms-auto text-600"></span></button>
-                      <button class="dropdown-item link-600 d-flex align-items-center gap-2" type="button" value="dark" data-theme-control="theme"><span class="fas fa-moon" data-fa-transform=""></span>Dark<span class="fas fa-check dropdown-check-icon ms-auto text-600"></span></button>
-                      <button class="dropdown-item link-600 d-flex align-items-center gap-2" type="button" value="auto" data-theme-control="theme"><span class="fas fa-adjust" data-fa-transform=""></span>Auto<span class="fas fa-check dropdown-check-icon ms-auto text-600"></span></button>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="navbarDropdownLogin" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Login</a>
-                <div class="dropdown-menu dropdown-caret dropdown-menu-end dropdown-menu-card" aria-labelledby="navbarDropdownLogin">
-                  <div class="card shadow-none navbar-card-login">
-                    <div class="card-body fs-10 p-4 fw-normal">
-                      <div class="row text-start justify-content-between align-items-center mb-2">
-                        <div class="col-auto">
-                          <h5 class="mb-0">Log in</h5>
-                        </div>
-                        <div class="col-auto">
-                          <p class="fs-10 text-600 mb-0">or <a href="../register">Create an account</a></p>
-                        </div>
-                      </div>
-                      <form>
-                        <div class="mb-3">
-                          <input class="form-control" type="email" placeholder="Email address" />
-                        </div>
-                        <div class="mb-3">
-                          <input class="form-control" type="password" placeholder="Password" />
-                        </div>
-                        <div class="row flex-between-center">
-                          <div class="col-auto">
-                            <div class="form-check mb-0">
-                              <input class="form-check-input" type="checkbox" id="modal-checkbox" />
-                              <label class="form-check-label mb-0" for="modal-checkbox">Remember me</label>
-                            </div>
-                          </div>
-                          <div class="col-auto"><a class="fs-10" href="../pages/authentication/simple/forgot-password.html">Forgot Password?</a></div>
-                        </div>
-                        <div class="mb-3">
-                          <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Log in</button>
-                        </div>
-                      </form>
-                      <div class="position-relative mt-4">
-                        <hr />
-                        <div class="divider-content-center">or log in with</div>
-                      </div>
-                      <div class="row g-2 mt-2">
-                        <div class="col-sm-6"><a class="btn btn-outline-google-plus btn-sm d-block w-100" href="#"><span class="fab fa-google-plus-g me-2" data-fa-transform="grow-8"></span> google</a></div>
-                        <div class="col-sm-6"><a class="btn btn-outline-facebook btn-sm d-block w-100" href="#"><span class="fab fa-facebook-square me-2" data-fa-transform="grow-8"></span> facebook</a></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="nav-item"><a class="nav-link" href="#!" data-bs-toggle="modal" data-bs-target="#exampleModal">Register</a></li>
-            </ul>
-          </div>
-        </div>
-      </nav>
-      
-      
-    
+{% extends 'base_landing.html' %}
+{% block content %}
+   
 
      <!-- ============================================-->
       <!-- <section> begin ============================-->
@@ -228,8 +83,8 @@
             <div class="row justify-content-center mt-4">
               <div class="col-auto">
                 <div class="d-flex align-items-center">
-                  <h5 class="text-white me-3 mb-0">Billed Annually</h5>
-                  <span class="badge bg-success">Save 25%</span>
+                  <h5 class="text-white me-3 mb-0" id="billingText">Billed Annually</h5>
+                  <span class="badge bg-success" id="saveLabel">Save 25%</span>
                 </div>
               </div>
               <div class="col-auto">
@@ -259,24 +114,21 @@
             <div class="card-body bg-body-tertiary pb-0">
               <div class="row">
                 <div class="col-lg-6">
-                  <h5 class="fs-9">How does Falcon's pricing work?</h5>
-                  <p class="fs-10">The free version of Falcon is available for teams of up to 15 people. Our Falcon Premium plans of 15 or fewer qualify for a small team discount. As your team grows to 20 users or more and gets more value out of Falcon, you'll get closer to our standard monthly price per seat. The price of a paid Falcon plan is tiered, starting in groups of 5 and 10 users, based on the number of people you have in your Team or Organization.</p>
+                  <h5 class="fs-9">How does MimeticMind's pricing work?</h5>
+                  <p class="fs-10">The free version of MimeticMind is designed for individuals and small organizations that require ocasional and limited-scale research. Our premium plans provide more advanced analytical tools and higher usage rates to provide more flexibility and accomodate for a wider scope research. </p>
                   <h5 class="fs-9">What forms of payment do you accept?</h5>
-                  <p class="fs-10">You can purchase Falcon with any major credit card. For annual subscriptions, we can issue an invoice payable by bank transfer or check. Please contact us to arrange an invoice purchase. Monthly purchases must be paid for by credit card.</p>
-                  <h5 class="fs-9">We need to add more people to our team. How will that be billed?</h5>
-                  <p class="fs-10">You can add as many new teammates as you need before changing your subscription. We will subsequently ask you to correct your subscription to cover current usage.</p>
-                  <h5 class="fs-9">How secure is Falcon?</h5>
-                  <p class="fs-10">Protecting the data you trust to Falcon is our first priority. Falcon uses physical, procedural, and technical safeguards to preserve the integrity and security of your information. We regularly back up your data to prevent data loss and aid in recovery. Additionally, we host data in secure SSAE 16 / SOC1 certified data centers, implement firewalls and access restrictions on our servers to better protect your information, and work with third party security researchers to ensure our practices are secure.</p>
+                  <p class="fs-10">You can purchase a premium plan with any major credit card. For annual subscriptions, we can issue an invoice payable by bank transfer or check. Please contact us to arrange an invoice purchase. Monthly purchases must be paid for by credit card.</p>
+
+                  <h5 class="fs-9">How secure is MimeticMind?</h5>
+                  <p class="fs-10">Protecting the data you trust to MimeticMind is our top priority. MimeticMind uses physical, procedural, and technical safeguards to preserve the integrity and security of your information. We regularly back up your data to prevent data loss and aid in recovery. Additionally, we  implement firewalls and access restrictions on our servers to better protect your information, and work with third party security researchers to ensure our practices are secure.</p>
                 </div>
                 <div class="col-lg-6">
-                  <h5 class="fs-9">Will I be charged sales tax?</h5>
-                  <p class="fs-10">As of May 2016, state and local sales tax will be applied to fees charged to customers with a billing address in the State of New York.</p>
                   <h5 class="fs-9">Do you offer discounts?</h5>
-                  <p class="fs-10">We've built in discounts at each tier for teams smaller than 15 members. We also offer two months for free in exchange for an annual subscription.</p>
+                  <p class="fs-10">We reserve the right to offer promotional discounts at our discretion on a periodic basis. We also offer two months for free in exchange for an annual subscription.</p>
                   <h5 class="fs-9">Do you offer academic pricing?</h5>
-                  <p class="fs-10">We're happy to work with student groups using Falcon. Contact Us</p>
-                  <h5 class="fs-9">Is there an on-premise version of Falcon?</h5>
-                  <p class="fs-10">We are passionate about the web. We don't plan to offer an internally hosted version of Falcon. We hope you trust us to provide a robust and secure service so you can do the work only your team can do.</p>
+                  <p class="fs-10">We're happy to work with the academic comunity using MimeticMind. Contact Us</p>
+                  <h5 class="fs-9">Is there an on-premise version of MimeticMind?</h5>
+                  <p class="fs-10">Our focus is on delivering an exceptional web-based experience. Currently, we have no plans to offer an on-premise version of our platform. We are committed to providing a secure and reliable service, allowing your team to focus on what you do best.</p>
                   <h5 class="fs-9">What is your refund policy?</h5>
                   <p class="fs-10">We do not offer refunds apart from exceptions listed below. If you cancel your plan before the next renewal cycle, you will retain access to paid features until the end of your subscription period. When your subscription expires, you will lose access to paid features and all data associated with those features. Exceptions to our refund policy: canceling within 48 hours of initial charge will result in a full refund. If you cancel within this timeframe, you will lose access to paid features and associated data immediately upon canceling.</p>
                 </div>
@@ -284,170 +136,14 @@
             </div>
           </div>
             
-          <!--<div class="position-absolute btn-back-to-top bg-dark"><a class="text-600" href="#banner" data-bs-offset-top="0"><span class="fas fa-chevron-up" data-fa-transform="rotate-45"></span></a></div>-->
-          <div class="row">
-            <div class="col-lg-4">
-              <h5 class="text-uppercase text-white opacity-85 mb-3">WHAT WE DO</h5>
-              <p class="text-600">We empower businesses, marketers, and decision-makers by providing AI-generated virtual populations that are statistically modeled to represent real-world demographics. Our platform allows users to define and execute surveys, gaining valuable insights from these rich, personality-driven profiles. Whether you're a marketing specialist, startup owner, product manager, or public policy maker, our data offers a reliable source for understanding customer needs, analyzing market trends, or predicting public responses. With built-in survey templates and flexible data export options, we make advanced market research and predictive analysis accessible to everyone, delivering actionable insights for informed decision-making.</p>
-              <div class="icon-group mt-4"><a class="icon-item bg-white text-twitter" href="#!"><span class="fab fa-twitter"></span></a><a class="icon-item bg-white text-linkedin" href="#!"><span class="fab fa-linkedin-in"></span></a><a class="icon-item bg-white" href="#!"><span class="fab fa-medium-m"></span></a></div>
-            </div>
-            <div class="col ps-lg-6 ps-xl-8">
-              <div class="row mt-5 mt-lg-0">
-                <div class="col-6 col-md-3">
-                  <h5 class="text-uppercase text-white opacity-85 mb-3">Company</h5>
-                  <ul class="list-unstyled">
-                    <li class="mb-1"><a class="link-600" href="#!">About</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Contact</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Careers</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Blog</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Terms</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Privacy</a></li>
-                  </ul>
-                </div>
-                <div class="col-6 col-md-3">
-                  <h5 class="text-uppercase text-white opacity-85 mb-3">Product</h5>
-                  <ul class="list-unstyled">
-                    <li class="mb-1"><a class="link-600" href="#!">Features</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Roadmap</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Changelog</a></li>
-                    <li class="mb-1"><a class="link-600" href="../pricing">Pricing</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Docs</a></li>
-                  </ul>
-                </div>
-                <div class="col mt-5 mt-md-0">
-                  <h5 class="text-uppercase text-white opacity-85 mb-3">From the Blog</h5>
-                  <ul class="list-unstyled">
-                    <li>
-                      <h5 class="fs-9 mb-0"><a class="link-600" href="#!"> First Article</a></h5>
-                      <p class="text-600 opacity-50">Jan 15 &bull; 8min read </p>
-                    </li>
-                    <li>
-                      <h5 class="fs-9 mb-0"><a class="link-600" href="#!"> Second Article</a></h5>
-                      <p class="text-600 opacity-50">Jan 5 &bull; 3min read &starf;</p>
-                    </li>
-                    <li>
-                      <h5 class="fs-9 mb-0"><a class="link-600" href="#!"> Third Article</a></h5>
-                      <p class="text-600 opacity-50">Dec 25 &bull; 2min read</p>
-                    </li>
-                    <li>
-                      <h5 class="fs-9 mb-0"><a class="link-600" href="#!"> Fourth Article</a></h5>
-                      <p class="text-600 opacity-50">Dec 23 &bull; 10min read </p>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end of .container-->
-
-      </section>
-      <!-- <section> close ============================-->
-      <!-- ============================================-->
-
-
-      <!-- ============================================-->
-      <!-- <section> begin ============================-->
-      <section class="py-0 bg-dark" data-bs-theme="light">
-
-        <div>
-          <hr class="my-0 text-600 opacity-25" />
-          <div class="container py-3">
-            <div class="row justify-content-between fs-10">
-              <div class="col-12 col-sm-auto text-center">
-                <p class="mb-0 text-600 opacity-85">Your valuable partner <span class="d-none d-sm-inline-block">| </span><br class="d-sm-none" /> 2024 &copy; <a class="text-white opacity-85" href="../landing">MimeticMind</a></p>
-              </div>
-              <div class="col-12 col-sm-auto text-center">
-                <p class="mb-0 text-600 opacity-85">v0.1</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- end of .container-->
-
-      </section>
-      <!-- <section> close ============================-->
-      <!-- ============================================-->
-
-
-      <div class="modal fade" id="authentication-modal" tabindex="-1" role="dialog" aria-labelledby="authentication-modal-label" aria-hidden="true">
-        <div class="modal-dialog mt-6" role="document">
-          <div class="modal-content border-0">
-            <div class="modal-header px-5 position-relative modal-shape-header bg-shape">
-              <div class="position-relative z-1">
-                <h4 class="mb-0 text-white" id="authentication-modal-label">Register</h4>
-                <p class="fs-10 mb-0 text-white">Please create your free Mimetic account</p>
-              </div>
-              <div data-bs-theme="dark">
-                <button class="btn-close position-absolute top-0 end-0 mt-2 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-            </div>
-            <div class="modal-body py-4 px-5">
-              <form>
-                <div class="mb-3">
-                  <label class="form-label" for="modal-auth-name">Name</label>
-                  <input class="form-control" type="text" autocomplete="on" id="modal-auth-name" />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label" for="modal-auth-email">Email address</label>
-                  <input class="form-control" type="email" autocomplete="on" id="modal-auth-email" />
-                </div>
-                <div class="row gx-2">
-                  <div class="mb-3 col-sm-6">
-                    <label class="form-label" for="modal-auth-password">Password</label>
-                    <input class="form-control" type="password" autocomplete="on" id="modal-auth-password" />
-                  </div>
-                  <div class="mb-3 col-sm-6">
-                    <label class="form-label" for="modal-auth-confirm-password">Confirm Password</label>
-                    <input class="form-control" type="password" autocomplete="on" id="modal-auth-confirm-password" />
-                  </div>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="modal-auth-register-checkbox" />
-                  <label class="form-label" for="modal-auth-register-checkbox">I accept the <a href="#!">terms </a>and <a class="white-space-nowrap" href="#!">privacy policy</a></label>
-                </div>
-                <div class="mb-3">
-                  <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Register</button>
-                </div>
-              </form>
-              <div class="position-relative mt-5">
-                <hr />
-                <div class="divider-content-center">or register with</div>
-              </div>
-              <div class="row g-2 mt-2">
-                <div class="col-sm-6"><a class="btn btn-outline-google-plus btn-sm d-block w-100" href="#"><span class="fab fa-google-plus-g me-2" data-fa-transform="grow-8"></span> google</a></div>
-                <div class="col-sm-6"><a class="btn btn-outline-facebook btn-sm d-block w-100" href="#"><span class="fab fa-facebook-square me-2" data-fa-transform="grow-8"></span> facebook</a></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-    <!-- ===============================================-->
-    <!--    End of Main Content-->
-    <!-- ===============================================-->
-
-
-    <!-- ===============================================-->
-    <!--    JavaScripts-->
-    <!-- ===============================================-->
-    <script src="{{ url_for('static', filename='vendors/popper/popper.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/bootstrap/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/anchorjs/anchor.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/is/is.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/fontawesome/all.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/lodash/lodash.min.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='assets/js/theme.js') }}"></script>
-    <script src="{{ url_for('static', filename='vendors/list.js/list.min.js') }}"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
           const billingToggle = document.getElementById('billingToggle');
           const advancedPrice = document.getElementById('advancedPrice');
           const enterprisePrice = document.getElementById('enterprisePrice');
           const billingPeriods = document.querySelectorAll('.billing-period');
-          const saveLabel = document.querySelector('.badge.bg-success');
+          const saveLabel = document.getElementById('saveLabel');
+          const billingText = document.getElementById('billingText');
 
           billingToggle.addEventListener('change', function() {
             const isMonthly = this.checked;
@@ -466,10 +162,11 @@
             // Update save label
             saveLabel.textContent = isMonthly ? 'Monthly price' : 'Save 25%';
             saveLabel.style.display = isMonthly ? 'none' : 'inline-block';
+
+            // Update billing text
+            billingText.textContent = isMonthly ? 'Billed Monthly' : 'Billed Annually';
           });
         });
-        </script>
-
-  </body>
-
-</html>
+    </script>
+    
+{% endblock %}
