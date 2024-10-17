@@ -5,14 +5,17 @@
       document.querySelector('.navbar-vertical').classList.add(`navbar-${navbarStyle}`);
     }
   </script>
+  
   <div class="d-flex align-items-center">
-    <div class="toggle-icon-wrapper">
+    <div class="toggle-icon-wrapper me-0">
       <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" aria-label="Toggle Navigation" data-bs-original-title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
     </div>
-    <a class="navbar-brand" href="../landing">
-      <div class="d-flex align-items-center py-3"><span class="font-sans-serif text-light fs-7">MimeticMind</span></div>
+    <a class="navbar-brand d-flex align-items-center mb-3 mt-3" href="../landing">
+      <img class="me-0" src="{{ url_for('static', filename='images/logo.png') }}" alt="Mimetic logo" width="40">
+      <span class="font-sans-serif text-light fs-7">MimeticMind</span>
     </a>
   </div>
+  
   <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
     <div class="navbar-vertical-content scrollbar d-flex flex-column" style="height: calc(100vh - 80px);">
       <ul class="navbar-nav flex-column mb-3" id="navbarVerticalNav">
@@ -152,7 +155,7 @@
               </div>
               <div class="text-center"><img src="{{ url_for('static', filename='assets/img/illustrations/navbar-vertical.png') }}" alt="" width="80">
                 <p class="fs-11 mt-2">15 Credits remaining...</p>
-                <div class="d-grid"><a class="btn btn-sm btn-primary" href="dashboard" target="_blank"> Upgrade Plan</a></div>
+                <div class="d-grid"><a class="btn btn-sm btn-primary" href="../pricing"> Upgrade Plan</a></div>
               </div>
             </div>
           </div>

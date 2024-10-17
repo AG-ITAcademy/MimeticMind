@@ -32,7 +32,7 @@
                         <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/icons/spot-illustrations/corner-2.png') }});"></div>
                         <div class="card-body d-flex flex-column position-relative">
                           <h5 class="card-title">
-                            <span class="fi fi-{{ project.population.flag }} me-2 fs-4"></span>
+                            <span class="fi fi-{{ project.population.flag }} me-2 fs-6"></span>
                             {{ project.name }}
                           </h5>
                           <p>Population: {{ project.population.name }}</p>
@@ -51,15 +51,14 @@
                 
                 
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 overflow-hidden clickable-card" onclick="window.location='{{ url_for('projects_bp.create_project') }}'">
-                        <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/icons/spot-illustrations/corner-3.png') }});"></div>
-                        <div class="card-body d-flex align-items-center justify-content-center position-relative">
-                            <span class="btn btn-outline-primary btn-lg">
-                                <i class="fas fa-plus"></i> Create New Project
-                            </span>
-                        </div>
+                  <a href="{{ url_for('projects_bp.create_project') }}" class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6">
+                    <i class="fas fa-project-diagram fa-5x mb-3"></i>
+                    <div>
+                      <h5 class="mb-0">Create New Project</h5>
                     </div>
+                  </a>
                 </div>
+                
             </div>
         </div>
     </div>

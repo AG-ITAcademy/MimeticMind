@@ -5,14 +5,14 @@
 <div class="container-fluid dashboard-container">
     <div class="row">
         <div class="col-12">
-            <div class="card mb-4 border border-light">
+            <div class="card mb-3 border border-light">
                 <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/icons/spot-illustrations/corner-2.png') }});"></div>
                 <div class="card-body position-relative">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h1 class="card-title mb-0 fs-6 d-flex align-items-center" id="project-name">
-                              {% if project_population and project_population.population.flag %}
-                                <span class="fi fi-{{ project_population.population.flag }} me-2 fs-4"></span>
-                              {% endif %}
+                            {% if project_population and project_population.population.flag %}
+                                <span class="fi fi-{{ project_population.population.flag }} me-2 fs-6"></span>
+                            {% endif %}
                             {{ project.name }}
                         </h1>
                         <div class="header-buttons">
@@ -20,6 +20,7 @@
                             <button class="btn btn-danger btn-sm" id="delete-project-btn">Delete Project</button>
                         </div>
                     </div>
+                    <p class="mt-2">{{ project.description }}</p>
                 </div>
             </div>
         </div>

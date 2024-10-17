@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, g
+from flask import Flask, render_template, redirect, url_for, flash, request, g,  jsonify, request, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager, login_user, logout_user,
@@ -6,12 +6,12 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegistrationForm, LoginForm, ProjectForm, RequestResetForm, ResetPasswordForm
-from models import db, User, Project, ProfileModel,  Population
+from models import db, User, Project, ProfileModel,  Population, SurveyTemplate
 import os
 from flask_migrate import Migrate
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
-from flask import render_template_string
+from sqlalchemy import or_
 from projects import projects_bp
 from dashboard import dashboard_bp
 from survey_builder import survey_builder_bp
@@ -251,6 +251,54 @@ def landing():
 @app.route('/pricing')
 def pricing():
     return render_template('pricing.html')
+
+@app.route('/api/search', methods=['GET'])
+@login_required
+def search():
+    query = request.args.get('q', '')
+    
+    if not query:
+        return jsonify({
+            'populations': [],
+            'projects': [],
+            'survey_templates': []
+        })
+
+    # Search in populations
+    populations = Population.query.filter(
+        or_(
+            Population.name.ilike(f'%{query}%'),
+            Population.description.ilike(f'%{query}%')
+        )
+    ).all()
+
+    # Search in projects
+    projects = Project.query.filter(
+        Project.user_id == current_user.id,
+        or_(
+            Project.name.ilike(f'%{query}%'),
+            Project.description.ilike(f'%{query}%')
+        )
+    ).all()
+
+    # Search in survey templates
+    survey_templates = SurveyTemplate.query.filter(
+        or_(
+            SurveyTemplate.user_id == current_user.id,
+            SurveyTemplate.user_id == None
+        ),
+        or_(
+            SurveyTemplate.name.ilike(f'%{query}%'),
+            SurveyTemplate.description.ilike(f'%{query}%')
+        )
+    ).all()
+
+    return jsonify({
+        'populations': [{'tag': p.tag, 'name': p.name} for p in populations],
+        'projects': [{'id': p.id, 'name': p.name} for p in projects],
+        'survey_templates': [{'id': s.id, 'name': s.name} for s in survey_templates]
+    })
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -13,7 +13,6 @@
 
 - de adaugat subscription si limite in DB
 - de facut modale in loc de popup-urile alea simple
-- implementata logica pentru search
 - rezolvat fluxul de login/register/reset si integrare cu Google si FB
 
 - AI Assistant pentru crearea de survey-uri
@@ -27,6 +26,9 @@
 
 - La dashboard:
 	* BUG - nu merg butoanele din Dashboard
-	- facut butonul de create new project sa arate ca alea de la new survey (albastru)
+
+- pregatite template-uri de survey gata facute
+
+- implementat sistemul de notificatii
 
 - blog cu 2-3 articole ca sa atraga si trafic
