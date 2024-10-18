@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField
 from wtforms.validators import Optional, DataRequired
 from models import ProfileModel, db
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from datetime import datetime, timedelta
 
 def populate_filter_form_choices(form, population_tag=None):
@@ -26,6 +26,8 @@ def populate_filter_form_choices(form, population_tag=None):
     form.marital_status.choices = get_distinct_values(ProfileModel.marital_status)
     form.income_range.choices = [('Any', 'Any'), ('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')]
 
+
+
 def apply_filters_to_query(query, form_data):
     """
     Apply filters to the given query based on form data.
@@ -46,9 +48,15 @@ def apply_filters_to_query(query, form_data):
             filters.append(getattr(ProfileModel, field).ilike(f"%{form_data[field]}%"))
     
     if form_data.get('income_range') and form_data['income_range'] != 'Any':
-        filters.append(ProfileModel.income_range == form_data['income_range'])
+        income_filter = or_(
+            ProfileModel.income_range.ilike(f"%{form_data['income_range']}%"),
+            ProfileModel.income_range == form_data['income_range']
+        )
+        filters.append(income_filter)
 
     return query.filter(and_(*filters))
+
+
 
 def get_filtered_profiles(population_tag, form_data):
     """
@@ -60,7 +68,7 @@ def get_filtered_profiles(population_tag, form_data):
     return apply_filters_to_query(query, form_data)
 
 
-# TREBUIE MUTATE ASTEA DOUA IN FORMS SI EVENTUAL ADUS AICI FILTER CLASS DIN Filter.py
+# FilterForm e duplicat aproape cu cel din forms.py care e folosit la segmente
 
 
 class FilterForm(FlaskForm):
@@ -78,7 +86,9 @@ class FilterForm(FlaskForm):
     health_status = SelectField('Health Status', validators=[Optional()])
     legal_status = SelectField('Legal Status', validators=[Optional()])
     marital_status = SelectField('Marital Status', validators=[Optional()])
-    income_range = SelectField('Income Range', validators=[Optional()])
+    income_range = SelectField('Income Range', validators=[Optional()], choices=[('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')])
+
+
 
 def create_segment_from_form(project_id, form_data):
     """

@@ -143,6 +143,16 @@ def get_hobbies(profiles):
     
     hobby_counts = Counter(all_hobbies)
     
+    if not hobby_counts:
+        # Return empty data if there are no hobbies
+        return {
+            "indicator": [],
+            "data": [{
+                "value": [],
+                "name": "Interest Percentage"
+            }]
+        }
+    
     # Select top 6 hobbies by frequency
     top_hobbies = hobby_counts.most_common(6)
     

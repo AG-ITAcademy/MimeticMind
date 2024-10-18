@@ -149,22 +149,13 @@
           billingToggle.addEventListener('change', function() {
             const isMonthly = this.checked;
             
-            // Update Advanced price
             advancedPrice.textContent = isMonthly ? advancedPrice.dataset.monthly : advancedPrice.dataset.yearly;
-            
-            // Update Enterprise price
             enterprisePrice.textContent = isMonthly ? enterprisePrice.dataset.monthly : enterprisePrice.dataset.yearly;
-            
-            // Update billing period text
             billingPeriods.forEach(period => {
               period.textContent = isMonthly ? 'month' : 'year';
             });
-            
-            // Update save label
             saveLabel.textContent = isMonthly ? 'Monthly price' : 'Save 25%';
             saveLabel.style.display = isMonthly ? 'none' : 'inline-block';
-
-            // Update billing text
             billingText.textContent = isMonthly ? 'Billed Monthly' : 'Billed Annually';
           });
         });
