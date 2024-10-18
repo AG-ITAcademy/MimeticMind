@@ -10,9 +10,9 @@
         <div class="row flex-center min-vh-100 py-6">
             <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
                 <!-- Branding Section -->
-                <a class="d-flex flex-center mb-4" href="{{ url_for('home') }}">
+                <a class="d-flex flex-center mb-4" href="{{ url_for('landing') }}">
                     <img class="me-2" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" width="80" />
-                    <span class="font-sans-serif text-primary fw-bolder fs-4 d-inline-block">MimeticMind</span>
+                    <span class="font-sans-serif text-light fw-bolder fs-4 d-inline-block">MimeticMind</span>
                 </a>
                 <!-- Login Card -->
                 <div class="card">
@@ -23,11 +23,11 @@
                                 <h5>Log in</h5>
                             </div>
                             <div class="col-auto fs-10 text-600">
-                                <span>or</span> <span><a href="{{ url_for('register') }}">Create an account</a></span>
+                                <span>or</span> <span><a href="{{ url_for('access_control.register') }}">Create an account</a></span>
                             </div>
                         </div>
                         <!-- Login Form -->
-                        <form method="POST" action="{{ url_for('login') }}">
+                        <form method="POST" action="{{ url_for('access_control.login') }}">
                             {{ form.hidden_tag() }}
                             <!-- Email Field -->
                             <div class="mb-3">
@@ -48,7 +48,7 @@
                                     </div>
                                 </div>
                                 <div class="col-auto">
-                                    <a class="fs-10" href="{{ url_for('reset_request') }}">Forgot Password?</a>
+                                    <a class="fs-10" href="{{ url_for('access_control.reset_request') }}">Forgot Password?</a>
                                 </div>
                             </div>
                             <!-- Submit Button -->
@@ -57,23 +57,27 @@
                             </div>
                         </form>
                         <!-- Divider -->
-                        <div class="position-relative mt-4">
-                            <hr />
-                            <div class="divider-content-center">or log in with</div>
-                        </div>
-                        <!-- Social Login Buttons -->
-                        <div class="row g-2 mt-2">
+                        <!--
+                            <div class="position-relative mt-4">
+                                <hr />
+                                <div class="divider-content-center">or log in with</div>
+                            </div>
+                   
+                            <div class="row g-2 mt-2">
                             <div class="col-sm-6">
                                 <a class="btn btn-outline-google-plus btn-sm d-block w-100" href="#">
                                     <span class="fab fa-google-plus-g me-2" data-fa-transform="grow-8"></span> Google
                                 </a>
                             </div>
+                            
                             <div class="col-sm-6">
                                 <a class="btn btn-outline-facebook btn-sm d-block w-100" href="#">
                                     <span class="fab fa-facebook-square me-2" data-fa-transform="grow-8"></span> Facebook
                                 </a>
                             </div>
+                            
                         </div>
+                        -->
                     </div>
                 </div>
             </div>

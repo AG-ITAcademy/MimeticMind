@@ -1,12 +1,23 @@
-{% extends 'base.html' %}
-
+{% extends 'base_landing.html' %}
 {% block content %}
-<div class="unconfirmed-container">
-    <h1>Email Confirmation Required</h1>
-    <p>Your account is not confirmed. Please check your email for the confirmation link.</p>
-    <p>If you did not receive the email, click the button below to resend it.</p>
-    <form action="{{ url_for('resend_confirmation') }}" method="post">
-        <button type="submit" class="btn">Resend Confirmation Email</button>
-    </form>
-</div>
+
+  <!-- ============================================-->
+      <!-- <section> begin ============================-->
+    <section class="py-11 overflow-hidden  d-flex align-items-center position-relative" id="banner" data-bs-theme="dark">
+      <div class="bg-holder overlay h-100 w-100 position-absolute" style="background-image:url(../static/assets/img/landing_bg_small.jpg);background-position: center bottom;"></div>
+      <!--/.bg-holder-->
+      <div class="container position-relative z-index-1 bg-dark bg-opacity-75 rounded-3">
+        <div class="row align-items-center mt-5">
+          <div class="col-md-11 col-lg-8 col-xl-8 mx-auto text-center mb-4">
+            <h2 class="text-white fs-4 fs-md-5 fs-lg-6">Email Confirmation Required</h2>
+            <p class="text-white-100">Your account is not confirmed. Please check your email for the confirmation link.</p>
+            <p class="text-white-100">If you did not receive the email, click the button below to resend it.</p>
+            <a href="{{ url_for('access_control.resend_confirmation') }}" class="btn btn-primary">Resend Confirmation Email</a>
+          </div>
+        </div>
+        
+      </div>
+    </section>
+            
+    
 {% endblock %}

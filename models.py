@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, DateTime, String
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from datetime import datetime
 import uuid
 from sqlalchemy.orm import Session , relationship
@@ -46,7 +47,6 @@ class User(db.Model, UserMixin):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    google_id = db.Column(db.String(255), unique=True, nullable=False) 
     email = db.Column(db.String(255), nullable=False, unique=True)
     full_name = db.Column(db.String(255), nullable=True)
     profile_picture = db.Column(db.String(255), nullable=True)
@@ -58,6 +58,13 @@ class User(db.Model, UserMixin):
     
     def __repr__(self):
         return f'<User {self.email}>'
+        
+class OAuth(OAuthConsumerMixin, db.Model):
+    __tablename__ = 'oauth'
+    
+    provider_user_id = db.Column(db.String(256), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    user = db.relationship(User)
 
 class ProfileModel(db.Model):
     __tablename__ = 'profiles'
