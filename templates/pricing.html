@@ -1,164 +1,225 @@
-{% extends 'base_landing.html' %}
+{% extends 'base_landing.html' %} 
 {% block content %}
-   
 
-     <!-- ============================================-->
-      <!-- <section> begin ============================-->
-    <section class="py-7 overflow-hidden  d-flex align-items-center position-relative" id="banner" data-bs-theme="dark">
-      <div class="bg-holder overlay h-100 w-100 position-absolute" style="background-image:url(../static/assets/img/landing_bg_small.jpg);background-position: center bottom;"></div>
-      <!--/.bg-holder-->
-      <div class="container position-relative z-index-1">
-        <div class="row align-items-center mt-5">
-          <div class="col-md-11 col-lg-8 col-xl-8 mx-auto text-center mb-4">
-            <h2 class="text-white fs-4 fs-md-5 fs-lg-6">Everything you need for a best-in-class experience</h2>
-            <p class="text-white-50">Pick the perfect plan for your needs.</p>
-          </div>
-        </div>
-        <div class="card border-0 bg-dark bg-opacity-75 rounded-3 mt-1">
-          <div class="card-body p-3 p-xl-4">
-            <div class="row g-0">
-              <!-- Single Plan -->
-              <div class="col-lg-4 border-bottom border-end-lg border-dark-subtle">
-                <div class="h-100 text-center p-4">
-                  <h3 class="fw-normal text-white">Starter</h3>
-                  <p class="mt-3 text-white-50">Small scale surveys with all the basic features and zero costs</p>
-                  <h2 class="fw-medium my-4 text-white"> <sup class="fw-normal fs-7 me-1">$</sup>0<small class="fs-10 text-white-50">/life</small></h2>
-                  <a class="btn btn-outline-light" href="#">Start free trial</a>
-                  <hr class="border-dark-subtle my-4" />
-                  <h5 class="fw-medium fs-9 text-white-50 mb-3">Enjoy free:</h5>
-                  <ul class="list-unstyled mt-3 text-start">
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Access to all populations</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Advanced segments</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Custom surveys </li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted survey generation <span class="badge bg-primary rounded-pill">Coming soon</span></li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Analysis engine</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 100 respondents/survey</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 1 project</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 500 interactions/month</li>
-                  </ul>
-                  <!--<a class="btn btn-link text-white" href="#">More about the Starter plan</a>-->
-                </div>
-              </div>
-              <!-- Business Plan -->
-              <div class="col-lg-4 border-bottom border-start-lg border-end-lg border-dark-subtle" style="background-color: rgba(255, 255, 255, 0.10);">
-                <div class="h-100 text-center p-4">
-                  <h3 class="fw-normal text-white">Advanced</h3>
-                  <p class="mt-3 text-white-50">Go beyond the basics: more tools and advanced analytics for better results</p>
-                  <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="advancedPrice" data-yearly="99" data-monthly="9">99</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
-                  <a class="btn btn-primary" href="#">Get Advanced</a>
-                  <hr class="border-dark-subtle my-4" />
-                  <h5 class="fw-medium fs-9 text-white-50 mb-3">Everything in Starter, plus:</h5>
-                  <ul class="list-unstyled mt-3 text-start">
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted segmentation</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited projects</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Configurable inference backend</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 500 respondents/survey</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 10.000 interactions/month</li>
-                  </ul>
-                  <!--<a class="btn btn-link text-white" href="#">More about the Advanced plan</a>-->
-                </div>
-              </div>
-              <!-- Extended Plan -->
-              <div class="col-lg-4 border-start-lg border-dark-subtle">
-                <div class="h-100 text-center p-4">
-                  <h3 class="fw-normal text-white">Enterprise</h3>
-                  <p class="mt-3 text-white-50">Maximize impact with enterprise-level market intelligence</p>
-                  <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="299" data-monthly="29">299</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
-                  <a class="btn btn-outline-light disabled" href="#">Coming Soon</a>
-                  <hr class="border-dark-subtle my-4" />
-                  <h5 class="fw-medium fs-9 text-white-50 mb-3">Everything in Business, plus:</h5>
-                  <ul class="list-unstyled mt-3 text-start">
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited respondents/survey</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited interactions</li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted analysis <span class="badge bg-primary rounded-pill">Coming soon</span></li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted insights <span class="badge bg-primary rounded-pill">Coming soon</span></li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> API Access <span class="badge bg-primary rounded-pill">Coming soon</span></li>
-                    <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Dedicated customer support</li>
-                  </ul>
-                  <!--<a class="btn btn-link text-white" href="#">More about the Enterprise plan</a>-->
-                </div>
-              </div>
-            </div>
-            
-            <!-- Billing Toggle -->
-            <div class="row justify-content-center mt-4">
-              <div class="col-auto">
-                <div class="d-flex align-items-center">
-                  <h5 class="text-white me-3 mb-0" id="billingText">Billed Annually</h5>
-                  <span class="badge bg-success" id="saveLabel">Save 25%</span>
-                </div>
-              </div>
-              <div class="col-auto">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" id="billingToggle" type="checkbox" role="switch">
-                  <label class="form-check-label text-white" for="billingToggle">Monthly billing</label>
-                </div>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-        
+<section id="banner" class="section py-7 overflow-hidden d-flex align-items-center position-relative" bs-theme="dark">
+  <div class="bg-holder overlay h-100 w-100 position-absolute" style="background-image:url(../static/assets/img/landing_bg_small.jpg);background-position: center bottom;">
+  </div>
+
+  <div class="container position-relative z-index-1">
+    <div class="row align-items-center mt-5">
+      <div class="col-md-11 col-lg-8 col-xl-8 mx-auto text-center mb-4">
+        <h2 class="text-white fs-4 fs-md-5 fs-lg-6">Everything you need for a best-in-class experience</h2>
+        <p class="text-white-50">Pick the perfect plan for your needs.</p>
       </div>
-    </section>
+    </div>
 
-
-      <!-- ============================================-->
-      <!-- <section> begin ============================-->
-      <section class="bg-dark pt-6 pb-4" data-bs-theme="dark">
-        <div class="container">
-            
-        <div class="card mb-6">
-            <div class="card-header">
-              <h5 class="mb-0">Frequently asked questions</h5>
-            </div>
-            <div class="card-body bg-body-tertiary pb-0">
-              <div class="row">
-                <div class="col-lg-6">
-                  <h5 class="fs-9">How does MimeticMind's pricing work?</h5>
-                  <p class="fs-10">The free version of MimeticMind is designed for individuals and small organizations that require ocasional and limited-scale research. Our premium plans provide more advanced analytical tools and higher usage rates to provide more flexibility and accomodate for a wider scope research. </p>
-                  <h5 class="fs-9">What forms of payment do you accept?</h5>
-                  <p class="fs-10">You can purchase a premium plan with any major credit card. For annual subscriptions, we can issue an invoice payable by bank transfer or check. Please contact us to arrange an invoice purchase. Monthly purchases must be paid for by credit card.</p>
-
-                  <h5 class="fs-9">How secure is MimeticMind?</h5>
-                  <p class="fs-10">Protecting the data you trust to MimeticMind is our top priority. MimeticMind uses physical, procedural, and technical safeguards to preserve the integrity and security of your information. We regularly back up your data to prevent data loss and aid in recovery. Additionally, we  implement firewalls and access restrictions on our servers to better protect your information, and work with third party security researchers to ensure our practices are secure.</p>
-                </div>
-                <div class="col-lg-6">
-                  <h5 class="fs-9">Do you offer discounts?</h5>
-                  <p class="fs-10">We reserve the right to offer promotional discounts at our discretion on a periodic basis. We also offer two months for free in exchange for an annual subscription.</p>
-                  <h5 class="fs-9">Do you offer academic pricing?</h5>
-                  <p class="fs-10">We're happy to work with the academic comunity using MimeticMind. Contact Us</p>
-                  <h5 class="fs-9">Is there an on-premise version of MimeticMind?</h5>
-                  <p class="fs-10">Our focus is on delivering an exceptional web-based experience. Currently, we have no plans to offer an on-premise version of our platform. We are committed to providing a secure and reliable service, allowing your team to focus on what you do best.</p>
-                  <h5 class="fs-9">What is your refund policy?</h5>
-                  <p class="fs-10">We do not offer refunds apart from exceptions listed below. If you cancel your plan before the next renewal cycle, you will retain access to paid features until the end of your subscription period. When your subscription expires, you will lose access to paid features and all data associated with those features. Exceptions to our refund policy: canceling within 48 hours of initial charge will result in a full refund. If you cancel within this timeframe, you will lose access to paid features and associated data immediately upon canceling.</p>
-                </div>
-              </div>
+    <div class="card border-0 bg-dark bg-opacity-75 rounded-3 mt-1">
+      <div class="card-body p-3 p-xl-4">
+        <div class="row g-0">
+        
+          <!-- Starter Plan -->
+          <div class="col-lg-4 border-bottom border-end-lg border-dark-subtle">
+            <div class="h-100 text-center p-4">
+              <h3 class="fw-normal text-white">Starter</h3>
+              <p class="mt-3 text-white-50">Small scale surveys with all the basic features and zero costs</p>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup>0<small class="fs-10 text-white-50">/life</small></h2>
+               <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
+                  <input type="hidden" name="tier" value="STARTER">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" name="tier" value="STARTER" class="btn btn-outline-light">
+                    {% if not current_user.is_authenticated %}
+                      Sign Up for Free
+                    {% elif current_user.subscription and current_user.subscription.tier == 'STARTER' %}
+                      Subscribed
+                    {% else %}
+                      {% if current_user.subscription %}Switch to{% else %}Get{% endif %} Starter
+                    {% endif %}
+                  </button>
+                </form>
+              <hr class="border-dark-subtle my-4" />
+              <h5 class="fw-medium fs-9 text-white-50 mb-3">Enjoy free:</h5>
+              <ul class="list-unstyled mt-3 text-start">
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Access to all populations</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Advanced segments</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Custom surveys</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted survey generation <span class="badge bg-primary rounded-pill">Coming soon</span></li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Analysis engine</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 100 respondents/survey</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 1 project</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 500 interactions/month</li>
+              </ul>
             </div>
           </div>
-            
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-          const billingToggle = document.getElementById('billingToggle');
-          const advancedPrice = document.getElementById('advancedPrice');
-          const enterprisePrice = document.getElementById('enterprisePrice');
-          const billingPeriods = document.querySelectorAll('.billing-period');
-          const saveLabel = document.getElementById('saveLabel');
-          const billingText = document.getElementById('billingText');
 
-          billingToggle.addEventListener('change', function() {
-            const isMonthly = this.checked;
+          <!-- Advanced Plan -->
+          <div class="col-lg-4 border-bottom border-start-lg border-end-lg border-dark-subtle" style="background-color: rgba(255, 255, 255, 0.10);">
+            <div class="h-100 text-center p-4">
+              <h3 class="fw-normal text-white">Advanced</h3>
+              <p class="mt-3 text-white-50">Go beyond the basics: more tools and advanced analytics for better results</p>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="advancedPrice" data-yearly="99" data-monthly="9">99</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
+                <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
+                  <input type="hidden" name="tier" value="ADVANCED">
+                  <input type="hidden" name="billing_cycle" value="yearly" class="billing-cycle-input">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" name="tier" value="ADVANCED" class="btn btn-primary">
+                    {% if not current_user.is_authenticated %}
+                      Sign Up
+                    {% elif current_user.subscription and current_user.subscription.tier == 'ADVANCED' %}
+                      Subscribed
+                    {% else %}
+                      {% if current_user.subscription %}Switch to{% else %}Get{% endif %} Advanced
+                    {% endif %}
+                  </button>
+                </form>
+              <hr class="border-dark-subtle my-4" />
+              <h5 class="fw-medium fs-9 text-white-50 mb-3">Everything in Starter, plus:</h5>
+              <ul class="list-unstyled mt-3 text-start">
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted segmentation</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited projects</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Configurable inference backend</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 500 respondents/survey</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Max. 10.000 interactions/month</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Enterprise Plan -->
+          <div class="col-lg-4 border-start-lg border-dark-subtle">
+            <div class="h-100 text-center p-4">
+              <h3 class="fw-normal text-white">Enterprise</h3>
+              <p class="mt-3 text-white-50">Maximize impact with enterprise-level market intelligence</p>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="299" data-monthly="29">299</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
+                <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
+                  <input type="hidden" name="tier" value="ENTERPRISE">
+                  <input type="hidden" name="billing_cycle" value="yearly" class="billing-cycle-input">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" name="tier" value="ENTERPRISE" class="btn btn-outline-light">
+                    {% if not current_user.is_authenticated %}
+                      Sign Up
+                    {% elif current_user.subscription and current_user.subscription.tier == 'ENTERPRISE' %}
+                      Subscribed
+                    {% else %}
+                      {% if current_user.subscription %}Switch to{% else %}Get{% endif %} Enterprise
+                    {% endif %}
+                  </button>
+                </form>
+              <hr class="border-dark-subtle my-4" />
+              <h5 class="fw-medium fs-9 text-white-50 mb-3">Everything in Business, plus:</h5>
+              <ul class="list-unstyled mt-3 text-start">
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited respondents/survey</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Unlimited interactions</li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted analysis <span class="badge bg-primary rounded-pill">Coming soon</span></li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> AI assisted insights <span class="badge bg-primary rounded-pill">Coming soon</span></li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> API Access <span class="badge bg-primary rounded-pill">Coming soon</span></li>
+                <li class="py-1 text-white-50"><span class="me-2 fas fa-check text-success"></span> Dedicated customer support</li>
+              </ul>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="row justify-content-center mt-4">
+      <div class="col-auto">
+        <div class="d-flex align-items-center">
+          <h5 id="billingText" class="text-white me-3 mb-0">Billed Annually</h5>
+          <span id="saveLabel" class="badge bg-success">Save 25%</span>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+          <label class="form-check-label text-white" for="flexSwitchCheckDefault">Switch to Monthly Billing</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-dark pt-6 pb-4" bs-theme="dark">
+  <div class="container">
+    <div class="card mb-6">
+      <div class="card-header">
+        <h5 class="mb-0">Frequently asked questions</h5>
+      </div>
+      <div class="card-body bg-body-tertiary pb-0">
+        <div class="row">
+          <div class="col-lg-6">
+            <h5 class="fs-9">How does MimeticMind's pricing work?</h5>
+            <p>The free version of MimeticMind is designed for individuals and small organizations that require occasional and limited-scale research. Our premium plans provide more advanced analytical tools and higher usage rates to provide more flexibility and accommodate for a wider scope research.</p>
+
+            <h5 class="fs-9">What forms of payment do you accept?</h5>
+            <p>You can purchase a premium plan with any major credit card. For annual subscriptions, we can issue an invoice payable by bank transfer or check. Please contact us to arrange an invoice purchase. Monthly purchases must be paid for by credit card.</p>
+
+            <h5 class="fs-9">How secure is MimeticMind?</h5>
+            <p>Protecting the data you trust to MimeticMind is our top priority. MimeticMind uses physical, procedural, and technical safeguards to preserve the integrity and security of your information. We regularly back up your data to prevent data loss and aid in recovery. Additionally, we implement firewalls and access restrictions on our servers to better protect your information, and work with third party security researchers to ensure our practices are secure.</p>
+          </div>
+          <div class="col-lg-6">
+            <h5 class="fs-9">Do you offer discounts?</h5>
+            <p>We reserve the right to offer promotional discounts at our discretion on a periodic basis. We also offer two months for free in exchange for an annual subscription.</p>
+
+            <h5 class="fs-9">Do you offer academic pricing?</h5>
+            <p>We're happy to work with the academic community using MimeticMind. Contact Us</p>
+
+            <h5 class="fs-9">Is there an on-premise version of MimeticMind?</h5>
+            <p>Our focus is on delivering an exceptional web-based experience. Currently, we have no plans to offer an on-premise version of our platform. We are committed to providing a secure and reliable service, allowing your team to focus on what you do best.</p>
+
+            <h5 class="fs-9">What is your refund policy?</h5>
+            <p>We do not offer refunds apart from exceptions listed below. If you cancel your plan before the next renewal cycle, you will retain access to paid features until the end of your subscription period. When your subscription expires, you will lose access to paid features and all data associated with those features. Exceptions to our refund policy: canceling within 48 hours of initial charge will result in a full refund. If you cancel within this timeframe, you will lose access to paid features and associated data immediately upon canceling.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
             
-            advancedPrice.textContent = isMonthly ? advancedPrice.dataset.monthly : advancedPrice.dataset.yearly;
-            enterprisePrice.textContent = isMonthly ? enterprisePrice.dataset.monthly : enterprisePrice.dataset.yearly;
-            billingPeriods.forEach(period => {
-              period.textContent = isMonthly ? 'month' : 'year';
-            });
-            saveLabel.textContent = isMonthly ? 'Monthly price' : 'Save 25%';
-            saveLabel.style.display = isMonthly ? 'none' : 'inline-block';
-            billingText.textContent = isMonthly ? 'Billed Monthly' : 'Billed Annually';
-          });
+<script>
+function initializePricing() {
+    const billingSwitch = document.querySelector('.form-check-input');
+    const billingCycleInputs = document.querySelectorAll('.billing-cycle-input');
+    const advancedPriceElement = document.getElementById('advancedPrice');
+    const enterprisePriceElement = document.getElementById('enterprisePrice');
+    const billingTextElement = document.getElementById('billingText');
+    const saveLabelElement = document.getElementById('saveLabel');
+    const billingLabelElement = document.querySelector('.form-check-label[for="flexSwitchCheckDefault"]');
+    const currentTier = '{{ current_user.subscription.tier if current_user.is_authenticated and current_user.subscription else "NONE" }}';
+
+    const updatePricing = (isYearly) => {
+        billingCycleInputs.forEach(input => input.value = isYearly ? 'yearly' : 'monthly');
+        if (advancedPriceElement) advancedPriceElement.textContent = isYearly ? advancedPriceElement.dataset.yearly : advancedPriceElement.dataset.monthly;
+        if (enterprisePriceElement) enterprisePriceElement.textContent = isYearly ? enterprisePriceElement.dataset.yearly : enterprisePriceElement.dataset.monthly;
+        document.querySelectorAll('.billing-period').forEach(el => el.textContent = isYearly ? 'year' : 'month');
+        if (billingTextElement) billingTextElement.textContent = isYearly ? 'Billed Annually' : 'Billed Monthly';
+        if (saveLabelElement) saveLabelElement.style.display = isYearly ? 'inline' : 'none';
+        billingSwitch.checked = !isYearly;
+        if (billingLabelElement) billingLabelElement.textContent = isYearly ? 'Switch to monthly billing' : 'Switch to yearly billing';
+    };
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.form-check-input')) {
+            const newState = !billingSwitch.checked;
+            updatePricing(!newState);
+        }
+    });
+
+    updatePricing(!billingSwitch.checked);
+
+    const updateButtons = () => {
+        document.querySelectorAll('button[name="tier"]').forEach(button => {
+            const buttonTier = button.value;
+            button.textContent = buttonTier === currentTier ? 'Subscribed' : `${currentTier !== 'NONE' ? 'Switch to' : 'Get'} ${buttonTier.charAt(0) + buttonTier.slice(1).toLowerCase()}`;
+            button.disabled = buttonTier === currentTier;
         });
-    </script>
+    };
+
+    if (currentTier !== 'NONE') updateButtons();
+}
+
+document.addEventListener('DOMContentLoaded', initializePricing);
+
+
+</script>
     
 {% endblock %}

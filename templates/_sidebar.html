@@ -1,11 +1,5 @@
 <nav class="navbar navbar-light navbar-vertical navbar-expand-xl navbar-card">
-  <script>
-    var navbarStyle = localStorage.getItem("navbarStyle");
-    if (navbarStyle && navbarStyle !== 'transparent') {
-      document.querySelector('.navbar-vertical').classList.add(`navbar-${navbarStyle}`);
-    }
-  </script>
-  
+ 
   <div class="d-flex align-items-center">
     <div class="toggle-icon-wrapper me-0">
       <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" aria-label="Toggle Navigation" data-bs-original-title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
@@ -29,18 +23,7 @@
             </div>
           </a>
         </li>
-        
-        <!-- Notifications Section 
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('notifications') }}">
-            <div class="d-flex align-items-center">
-              <span class="nav-link-icon"><i class="fas fa-bell"></i></span>
-              <span class="nav-link-text ps-1">Notifications</span>
-            </div>
-          </a>
-        </li>
-        -->
-        
+               
         <!-- Settings Section -->
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('settings') }}">
@@ -147,19 +130,35 @@
       </ul>
       
       <div class="mt-auto">
+      
+      <!-- Subscription info -->
         <div class="settings my-3">
           <div class="card shadow-none">
             <div class="card-body alert mb-0" role="alert">
-              <div class="btn-close-falcon-container">
-                <button class="btn btn-link btn-close-falcon p-0" aria-label="Close" data-bs-dismiss="alert"></button>
-              </div>
-              <div class="text-center"><img src="{{ url_for('static', filename='assets/img/illustrations/navbar-vertical.png') }}" alt="" width="80">
-                <p class="fs-11 mt-2">15 Credits remaining...</p>
-                <div class="d-grid"><a class="btn btn-sm btn-primary" href="../pricing"> Upgrade Plan</a></div>
+              <div class="btn-close-falcon-container"></div>
+              <div class="text-center">                    
+                {% if current_user.is_authenticated and subscription_info %}
+                  {% if subscription_info.tier in ['STARTER', 'ADVANCED'] %}
+                    <img src="{{ url_for('static', filename='assets/img/illustrations/navbar-vertical.png') }}" class="mb-1" width="80" alt="Subscription">
+                    <p class="fs-10 text-light">{{ subscription_info.tier.capitalize() }} Plan</p>
+                    <p class="fs-10 text-warning">{{ subscription_info.remaining_interactions }} Credits remaining</p>
+                  {% else %}
+                    <img src="{{ url_for('static', filename='assets/img/illustrations/creating.png') }}" class="mb-1" width="80" alt="Subscription">
+                  {% endif %}
+                  {% if subscription_info.tier != 'ENTERPRISE' %}
+                    <div class="d-grid">
+                      <a href="{{ url_for('pricing') }}" class="btn btn-sm btn-primary">Upgrade Plan</a>
+                    </div>
+                  {% else %}
+                    <p class="fs-9 text-primary">{{ subscription_info.tier.capitalize() }} Plan</p>
+                  {% endif %}
+                {% endif %}
               </div>
             </div>
           </div>
         </div>
+
+            
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, g, jsonify, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user, login_required
-from models import db, User, Project, ProfileModel, Population, SurveyTemplate
+from models import db, User, Project, ProfileModel, Population, SurveyTemplate, SubscriptionTier, Subscription
 import os
 from flask_migrate import Migrate
 from flask_mail import Mail
@@ -13,10 +13,10 @@ from survey_builder import survey_builder_bp
 from population_explorer import population_explorer_bp
 from survey_analysis import survey_analysis_bp
 from access_control import access_control_bp
+from subscription_routes import subscription_bp
 from config import Config
 from flask_wtf.csrf import CSRFProtect
 import celery_app
-from oauth import create_google_blueprint
 import logging
 
 app = Flask(__name__)
@@ -41,9 +41,13 @@ def load_user(user_id):
     
 @app.context_processor
 def inject_global_vars():
+    subscription_info = None
+    if current_user.is_authenticated:
+        subscription_info = current_user.subscription
     return dict(
         projects=g.projects if hasattr(g, 'projects') else [],
-        populations=Population.query.all()
+        populations=Population.query.all(),
+        subscription_info=subscription_info
     )
 
 # register additional blueprints
@@ -53,8 +57,8 @@ app.register_blueprint(survey_analysis_bp)
 app.register_blueprint(population_explorer_bp)
 app.register_blueprint(survey_builder_bp)
 app.register_blueprint(access_control_bp)
-google_bp = create_google_blueprint(db)
-app.register_blueprint(google_bp, url_prefix="/login")
+app.register_blueprint(subscription_bp)
+
 
 @app.before_request
 def before_request():
@@ -85,7 +89,7 @@ def landing():
     
 @app.route('/pricing')
 def pricing():
-    return render_template('pricing.html')
+    return render_template('pricing.html', SubscriptionTier=SubscriptionTier)
 
 @app.route('/api/search', methods=['GET'])
 @login_required

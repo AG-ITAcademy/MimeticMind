@@ -2,11 +2,14 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegistrationForm, LoginForm, RequestResetForm, ResetPasswordForm
-from models import db, User
+from models import db, User, SubscriptionTier
 from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from config import Config 
+from subscription_routes import set_subscription 
+from subscription_routes import create_or_update_subscription
+
 
 access_control_bp = Blueprint('access_control', __name__)
 
@@ -76,38 +79,40 @@ def login():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard_bp.dashboard'))
-
     form = RegistrationForm()
     if form.validate_on_submit():
         existing_user = User.query.filter_by(email=form.email.data.lower()).first()
-
+        if existing_user and existing_user.is_confirmed:
+            flash('Email address is already registered and confirmed. Please use a different email or try logging in.', 'danger')
+            return redirect(url_for('access_control.register'))
         try:
             if existing_user:
-                if existing_user.is_confirmed:
-                    flash('Email address is already registered and confirmed. Please use a different email or try logging in.', 'danger')
-                    return render_template('register.html', form=form)
-                else:
-                    existing_user.password = generate_password_hash(form.password.data)
-                    new_user = existing_user
+                existing_user.password = generate_password_hash(form.password.data)
+                new_user = existing_user
             else:
                 new_user = User(email=form.email.data.lower(), password=generate_password_hash(form.password.data))
                 db.session.add(new_user)
-
+            
             db.session.commit()
-
+            
+            # Use the new create_or_update_subscription function
+            success, message = create_or_update_subscription(new_user.id, SubscriptionTier.STARTER.value)
+            if not success:
+                raise Exception(message)
+            
             token = generate_confirmation_token(new_user.email)
             confirm_url = url_for('access_control.confirm_email', token=token, _external=True)
             html = render_template('activate.html', confirm_url=confirm_url)
             subject = "Please confirm your email"
             send_email(new_user.email, subject, html)
-
+            
             flash('Please check your inbox and confirm your account before logging in.', 'success')
             return redirect(url_for('access_control.login'))
         except Exception as e:
             db.session.rollback()
             current_app.logger.error(f"Error in registration: {str(e)}")
             flash('An unexpected error occurred. Please try again later.', 'danger')
-    
+            return redirect(url_for('access_control.register'))
     return render_template('register.html', form=form)
     
 @access_control_bp.route('/confirm/<token>')

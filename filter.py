@@ -128,3 +128,4 @@ class Filter:
             legal_status=model.legal_status,
             marital_status=model.marital_status
         )
+        

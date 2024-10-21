@@ -6,9 +6,45 @@ from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from datetime import datetime
 import uuid
 from sqlalchemy.orm import Session , relationship
+from enum import Enum
 
 db = SQLAlchemy()
 
+class SubscriptionTier(Enum):
+    STARTER = 'STARTER'
+    ADVANCED = 'ADVANCED'
+    ENTERPRISE = 'ENTERPRISE'
+
+class Subscription(db.Model):
+    __tablename__ = 'subscriptions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    tier = db.Column(db.String(255), nullable=False)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    max_projects = db.Column(db.Integer)
+    max_respondents_per_survey = db.Column(db.Integer)
+    max_interactions_per_month = db.Column(db.Integer)
+    remaining_interactions = db.Column(db.Integer)
+
+    user = db.relationship('User', back_populates='subscription')
+
+class Invitation(db.Model):
+    __tablename__ = 'invitations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    invite_code = db.Column(db.String(100), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, default=False)
+    used_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    user = db.relationship('User', backref=db.backref('invitation', uselist=False))
+    
+    
 class Population(db.Model):
     __tablename__ = 'populations'
     
@@ -55,9 +91,14 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=True) 
     is_confirmed = db.Column(db.Boolean, default=False)
     confirm_token = db.Column(db.String(100), nullable=True)
-    
+    subscription = db.relationship('Subscription', back_populates='user', uselist=False)
+
     def __repr__(self):
         return f'<User {self.email}>'
+
+    @property
+    def active_subscription(self):
+        return self.subscription if self.subscription and self.subscription.is_active else None
         
 class OAuth(OAuthConsumerMixin, db.Model):
     __tablename__ = 'oauth'

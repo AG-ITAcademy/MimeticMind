@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from markupsafe import Markup
 from flask_login import login_required, current_user
 from models import db, Project,  ProfileModel, FilterModel, SurveyTemplate, ProjectSurvey, Population
 from filter_utils import populate_filter_form_choices, apply_filters_to_query, create_segment_from_form
@@ -8,7 +9,9 @@ from flask_wtf.csrf import CSRFProtect
 from config import Config
 import redis
 from sqlalchemy.orm import aliased
+from sqlalchemy import func
 from survey import Survey, get_survey_progress
+
 
 # Create a Blueprint for project-related routes
 projects_bp = Blueprint('projects_bp', __name__)
@@ -77,6 +80,12 @@ def project_dashboard(project_id):
 @login_required
 def create_project():
     form = ProjectForm()
+
+    active_projects_count = Project.query.filter_by(user_id=current_user.id, status='active').count()
+    if active_projects_count >= current_user.subscription.max_projects:
+        upgrade_button = Markup('<a href="{}" class="btn btn-sm btn-primary">Upgrade Plan</a>'.format(url_for('pricing')))
+        flash(Markup(f"You have reached the maximum number of projects ({current_user.subscription.max_projects}) allowed for your subscription tier. Please upgrade your plan to create more projects. {upgrade_button}"), "warning")
+        return redirect(url_for('dashboard_bp.dashboard'))  # Or redirect to an appropriate page
 
     if form.validate_on_submit():
         new_project = Project(
@@ -229,44 +238,64 @@ def remove_survey(project_id, survey_id):
 
     return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
     
+from flask import Blueprint, flash, redirect, url_for
+from flask_login import login_required, current_user
+from sqlalchemy import func
+from models import db, Project, ProjectSurvey, FilterModel, SurveyTemplate, ProfileModel
+from filter import Filter
+from survey import Survey
+
 @projects_bp.route('/project/<int:project_id>/run_survey/<int:survey_id>', methods=['POST'])
 @login_required
 def run_survey(project_id, survey_id):
     # Step 1: Retrieve the project and the survey
     project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
     project_survey = ProjectSurvey.query.filter_by(id=survey_id, project_id=project_id).first_or_404()
-
+    
     # Set the completion_percentage to 0 to indicate that survey is running
     project_survey.completion_percentage = 0
     db.session.commit()
-
+    
     # Step 2: Get the filter associated with the survey
     filter_model = FilterModel.query.filter_by(id=project_survey.segment_id).first_or_404()
     applied_filter = Filter.from_model(filter_model)
-
+    
     # Step 3: Get the survey template associated with the project survey
     survey_template = SurveyTemplate.query.filter_by(id=project_survey.survey_template_id).first_or_404()
-
-    # Step 4: Prepare custom parameters (can be customized or fetched based on survey requirements)
-    custom_params = {
-        'PRODUCT/SERVICE': 'Smartphone',
-        'PRICE INCREASE PERCENTAGE': '10',
-        'FEATURE': '5G',
-        'PRODUCT/SERVICE DESCRIPTION': (
-            'This phone has a bright, clear display and a fast processor, making it quick and smooth to use. '
-            'It comes with a great camera that takes high-quality photos, even in low light. The battery lasts longer, '
-            'and it works with 5G for faster internet speeds. It also supports magnetic accessories and runs on the '
-            'latest software, which includes new features like more privacy options and customizable screens. '
-            'You can choose from different colors and storage sizes to fit your needs.'
-        )
-    }
-
-    # Step 5: Run the survey using the Survey class
-    survey = Survey(applied_filter, db.session, survey_template, custom_parameters_dict=custom_params)
+    
+    # Step 4: Count respondents and calculate interactions
+    query = db.session.query(func.count(ProfileModel.id))
+    filtered_query = applied_filter.apply_filters(query)
+    respondents_count = filtered_query.scalar()
+    interactions_count = respondents_count * len(survey_template.query_templates)
+    
+    # Step 5: Check subscription limits
+    if not current_user.subscription or not current_user.subscription.is_active:
+        flash("No active subscription found", 'warning')
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+    
+    active_projects = Project.query.filter_by(user_id=current_user.id, status='active').count()
+    if active_projects > current_user.subscription.max_projects:
+        flash(f"Project limit exceeded. Maximum allowed: {current_user.subscription.max_projects}", 'warning')
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+    
+    if respondents_count > current_user.subscription.max_respondents_per_survey:
+        flash(f"Respondents per survey limit exceeded. Maximum allowed: {current_user.subscription.max_respondents_per_survey}", 'warning')
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+    
+    if interactions_count > current_user.subscription.remaining_interactions:
+        flash(f"Insufficient interaction credits. Available: {current_user.subscription.remaining_interactions}", 'warning')
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+    
+    # Deduct interactions from remaining_interactions
+    current_user.subscription.remaining_interactions -= interactions_count
+    db.session.commit()
+    
+    # Step 6: Run the survey using the Survey class
+    survey = Survey(applied_filter, db.session, survey_template, custom_parameters_dict={})
     result = survey.run_survey(project_survey_id=survey_id)
     
-    
-    # Step 6: Provide feedback and redirect to the project dashboard
+    # Step 7: Provide feedback and redirect to the project dashboard
     flash(f'Survey "{project_survey.survey_alias}" has been queued...', 'success')
     return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
 

@@ -56,11 +56,6 @@ class RegistrationForm(FlaskForm):
     ])
     submit = SubmitField('Register')
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data.lower()).first()
-        if user and user.is_confirmed:
-            raise ValidationError('Email is already in use by a confirmed account.')
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=150)])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -107,3 +102,5 @@ class PopulationFilterForm(FlaskForm):
         ('Medium', 'Medium'),
         ('High', 'High')
     ])
+    
+    

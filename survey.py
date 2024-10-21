@@ -86,6 +86,7 @@ def process_survey_results(results):
     return result_parameters
 
 class Survey:
+    # DE ELIMINAT CUSTOM PARAMETERS !!!
     def __init__(self, filter_obj: Filter, session: Session, survey_template: SurveyTemplate, custom_parameters_dict: dict = None):
         self.filter = filter_obj
         self.session = session
