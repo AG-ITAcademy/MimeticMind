@@ -5,4 +5,7 @@ migrations/
 static/
 config.py
 zz_start_celery.bat
-_*.py
+_generate_n_profiles.py
+_process_profiles_with_llm.py
+_test_reports.py
+_test_survey_new.py

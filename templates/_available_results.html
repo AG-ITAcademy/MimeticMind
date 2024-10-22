@@ -4,18 +4,18 @@
         {% if completed_surveys %}
             <p>Analysis data is available for the following surveys:</p>
             <div class="table-responsive">
-                <table class="table table-hover table-bordered">
+                <table class="table table-hover table-bordered table-sm">
                     <thead class="table-active">
                         <tr>
                             <th scope="col">Survey</th>
-                            <th scope="col">Actions</th>
+                            <th scope="col" class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for survey in completed_surveys %}
                             <tr>
                                 <td>{{ survey.survey_alias }}</td>
-                                <td>
+                                <td class="text-end">
                                     {% if project_population %}
                                         <a href="{{ url_for('survey_analysis_bp.survey_analysis', project_survey_id=survey.id, population_tag=project_population.tag) }}" 
                                            class="btn btn-outline-primary btn-sm">View Analysis</a>

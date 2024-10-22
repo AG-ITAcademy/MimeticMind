@@ -22,6 +22,11 @@
 
                         <form method="POST" id="registerForm">
                             {{ form.hidden_tag() }}
+                            
+                            <div class="mb-3">
+                                {{ form.fullname.label(class="form-label") }}
+                                {{ form.fullname(class="form-control", placeholder="Full Name") }}
+                            </div>
 
                             <div class="mb-3">
                                 {{ form.email.label(class="form-label") }}

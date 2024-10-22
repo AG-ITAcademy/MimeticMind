@@ -5,6 +5,9 @@ from answer_schema import get_data_from_schema
 from flask_login import login_required
 from sqlalchemy import text
 from analysis_utils import perform_sentiment_analysis, calculate_word_frequency
+from flask import send_file
+import csv
+import io
 
 survey_analysis_bp = Blueprint('survey_analysis_bp', __name__)
 
@@ -88,6 +91,53 @@ def survey_analysis(project_survey_id):
                            data=response_data,
                            question_data=question_data,
                            all_analysis_methods=all_analysis_methods)
+
+@survey_analysis_bp.route('/download_raw_data/<int:project_survey_id>', methods=['GET'])
+@login_required
+def download_raw_data(project_survey_id):
+    project_survey = ProjectSurvey.query.get_or_404(project_survey_id)
+    survey_template = SurveyTemplate.query.get(project_survey.survey_template_id)
+    questions = survey_template.query_templates
+    
+    # Create a StringIO object to store CSV data
+    si = io.StringIO()
+    cw = csv.writer(si)
+
+    # Write header
+    header = ['Profile ID', 'Question', 'Response']
+    cw.writerow(header)
+
+    # Fetch and write data
+    for question in questions:
+        result = db.session.execute(text("""
+            SELECT p.id, p.birth_date, p.gender, p.education_level, p.occupation, p.income_range, 
+            p.location, p.health_status, p.ethnicity, p.legal_status, p.religion, p.marital_status,
+            p.hobbies, qt.query_text, i.answer_text
+            FROM interactions i
+            JOIN query_templates qt ON i.template_id = qt.id
+            JOIN profiles p on p.id = i.profile_id
+            WHERE i.project_survey_id = :project_survey_id AND i.template_id = :question_id
+        """), {'project_survey_id': project_survey_id, 'question_id': question.id})
+
+        for row in result:
+            cw.writerow([
+                row.id, row.birth_date, row.gender, row.education_level, row.occupation,
+                row.income_range, row.location, row.health_status, row.ethnicity, row.legal_status,
+                row.religion, row.marital_status, row.hobbies, row.query_text, row.answer_text
+            ])
+
+    # Prepare the CSV file for download
+    output = io.BytesIO()
+    output.write(si.getvalue().encode('utf-8'))
+    output.seek(0)
+    
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f'survey_data_{project_survey_id}.csv',
+        mimetype='text/csv'
+    )
+
 
 
 def build_options(question_data):

@@ -9,10 +9,12 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
+                    
                     <h2 class="h5 mb-0">Survey Summary: <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span></h2>
                     <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSummary" aria-expanded="false" aria-controls="collapseSummary">
                         <i class="fas fa-expand text-light"></i>
                     </button>
+
                 </div>
                 <div id="collapseSummary" class="collapse" aria-labelledby="headingSummary">
                     <div class="card-body">
@@ -110,9 +112,12 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="h5 mb-0">Raw Survey Data</h2>
-                    <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRawData" aria-expanded="true" aria-controls="collapseRawData">
-                        <i class="fas fa-expand text-light"></i>
-                    </button>
+                    <div>
+                        <button id="downloadRawData" class="btn btn-outline-primary pt-0 pb-0 me-2 invisible">Download Raw Data</button>
+                        <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRawData" aria-expanded="true" aria-controls="collapseRawData">
+                            <i class="fas fa-expand text-light"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="collapseRawData" class="collapse show" aria-labelledby="headingRawData">
                     <div class="card-body">
@@ -133,6 +138,7 @@ $(document).ready(function() {
     const analysisTabs = document.getElementById('analysis-tabs');
     const loadingSpinner = document.getElementById('loading-spinner');
     const analysisContent = document.getElementById('analysis-content');
+    const downloadButton = document.getElementById('downloadRawData');
     const analysisPlaceholder = document.getElementById('analysis-placeholder');
     const questionSelect = $('#question-select');
     const chartControlsContainer = document.getElementById('chart-controls-container');
@@ -165,12 +171,19 @@ $(document).ready(function() {
         data: {{ data | tojson | safe }}
     });
     
+    // download data button
+    document.getElementById('downloadRawData').addEventListener('click', function() {
+        window.location.href = "{{ url_for('survey_analysis_bp.download_raw_data', project_survey_id=project_survey.id) }}";
+    });
+    
     // Enable form fields and submit button when a question is selected
     questionSelect.on('change', function() {
         const selectedValue = $(this).val();
         if (selectedValue) {
             formFields.prop('disabled', false);
             submitButton.prop('disabled', false);
+            downloadButton.classList.remove('invisible');
+            downloadButton.classList.add('visible');
             fetchAndUpdateData(new FormData(form[0]));
         } else {
             formFields.prop('disabled', true);

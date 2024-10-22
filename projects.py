@@ -178,14 +178,27 @@ def define_segments(project_id):
 @projects_bp.route('/projects/<int:project_id>/remove_segment/<int:segment_id>', methods=['POST'])
 @login_required
 def remove_segment(project_id, segment_id):
-    project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
-    segment = FilterModel.query.filter_by(id=segment_id, project_id=project.id).first_or_404()
+    try:
+        project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
+        segment = FilterModel.query.filter_by(id=segment_id, project_id=project.id).first_or_404()
+        surveys_count = ProjectSurvey.query.filter_by(segment_id=segment_id).count()
+        db.session.begin_nested()
+        ProjectSurvey.query.filter_by(segment_id=segment_id).delete()
 
-    db.session.delete(segment)
-    db.session.commit()
-
-    flash(f"Segment '{segment.alias}' has been removed.", "success")
-    return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+        db.session.delete(segment)
+        db.session.commit()
+        
+        if surveys_count > 0:
+            flash(f"Segment '{segment.alias}' and its {surveys_count} associated surveys have been removed.", "success")
+        else:
+            flash(f"Segment '{segment.alias}' has been removed.", "success")
+            
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occurred while removing the segment: {str(e)}", "danger")
+        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
     
 @projects_bp.route('/project/<int:project_id>/create_survey', methods=['POST'])
 @login_required
@@ -238,12 +251,6 @@ def remove_survey(project_id, survey_id):
 
     return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
     
-from flask import Blueprint, flash, redirect, url_for
-from flask_login import login_required, current_user
-from sqlalchemy import func
-from models import db, Project, ProjectSurvey, FilterModel, SurveyTemplate, ProfileModel
-from filter import Filter
-from survey import Survey
 
 @projects_bp.route('/project/<int:project_id>/run_survey/<int:survey_id>', methods=['POST'])
 @login_required

@@ -90,7 +90,7 @@ def register():
                 existing_user.password = generate_password_hash(form.password.data)
                 new_user = existing_user
             else:
-                new_user = User(email=form.email.data.lower(), password=generate_password_hash(form.password.data))
+                new_user = User(full_name=form.fullname.data, email=form.email.data.lower(), password=generate_password_hash(form.password.data))
                 db.session.add(new_user)
             
             db.session.commit()

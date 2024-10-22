@@ -88,7 +88,7 @@
             <div class="h-100 text-center p-4">
               <h3 class="fw-normal text-white">Enterprise</h3>
               <p class="mt-3 text-white-50">Maximize impact with enterprise-level market intelligence</p>
-              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="299" data-monthly="29">299</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="499" data-monthly="49">499</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
                 <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
                   <input type="hidden" name="tier" value="ENTERPRISE">
                   <input type="hidden" name="billing_cycle" value="yearly" class="billing-cycle-input">
@@ -197,14 +197,12 @@ function initializePricing() {
         if (billingLabelElement) billingLabelElement.textContent = isYearly ? 'Switch to monthly billing' : 'Switch to yearly billing';
     };
 
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.form-check-input')) {
-            const newState = !billingSwitch.checked;
-            updatePricing(!newState);
-        }
+    billingSwitch.addEventListener('change', (e) => {
+        updatePricing(!e.target.checked);
     });
 
-    updatePricing(!billingSwitch.checked);
+    // Initialize with yearly pricing
+    updatePricing(true);
 
     const updateButtons = () => {
         document.querySelectorAll('button[name="tier"]').forEach(button => {

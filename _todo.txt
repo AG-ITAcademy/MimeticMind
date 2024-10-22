@@ -1,7 +1,5 @@
 - la pricing:
-	- de afisat planul curent si limitele in sidebar jos	
 	- integrare cu Stripe
-	- revizuite preturile 
 
 - implementat A/B testing
 - implementat Reports
@@ -9,19 +7,12 @@
 + sectiunea de settings
 	- optiuni pentru inference engine (ales LLM-ul)
 
-- rezolvat fluxul de login/register/reset  - MAI TREBUIE TESTAT SI LUCRAT LA MAILURI
-	- de adaugat fullname la register
-	- nu mai afiseaza eroarea in caz ca vreau sa fac register la un mail deja existent
-	- de vazut daca sterg tabela oauth ca nu mai e folosita deocamdata
-
 - AI Assistant pentru crearea de survey-uri
 
 - pregatite template-uri de survey default
 - pregatite populatii
 
-- * BUG - pe ecrane mai mici nu se pot crea segmente (e prea mica cutia)
-- * BUG - pe laptop se misca imaginea din landing cand se schimba scrisul. trebuie corectat cumva
-- * BUG - pe telefoane nu mai apare sidebar (nu stiu de ce sau de cand - posibil de cand am pus logo in sidebar)
+- * BUG - pe telefoane SI ECRANE MICI nu mai apare sidebar (nu stiu de ce sau de cand - posibil de cand am pus logo in sidebar)
 - * BUG - nu merge butonul de reports din Dashboard
 
 - optimizat site-ul pentru loading times
@@ -33,6 +24,8 @@
 	- teoria mimetica
 	- eventuale studii
 	- date despre piata de survey-uri
+
+- adaugat film de prezentare embedded intr-un modal fain
 
 - PROMOVARE CU CLAUDE (Showcase despre ce se poate face cu el)
 

@@ -49,6 +49,7 @@ class SegmentCreationForm(FlaskForm):
     income_range = SelectField('Income Range', validators=[Optional()])
 
 class RegistrationForm(FlaskForm):
+    fullname = StringField('Full Name', validators=[DataRequired(), Length(max=150)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=150)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[

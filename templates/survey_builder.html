@@ -17,9 +17,9 @@
                   {{ form.name(class="form-control", id="name", placeholder="Survey Name") }}
                   <label for="name">Survey Name</label>
                 </div>
-                <div class="mb-3">
-                  <label for="context_prompt" class="form-label">Context Prompt</label>
-                  {{ form.context_prompt(class="form-control", id="context_prompt", rows="4") }}
+                <div class="form-floating mb-0">
+                  {{ form.context_prompt(class="form-control h-100", id="context_prompt", placeholder="Context Prompt", rows="4") }}
+                  <label for="context_prompt">Context Prompt</label>
                 </div>
               </div>
               <div class="col-md-6">
