@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-0 ps-0 pe-0">
   <div class="row mb-3">
     <div class="col-12">
       <div class="card">
@@ -10,7 +10,7 @@
           <div class="row mt-4">
           
             <div class="col-md-4">
-              <a href="{{ url_for('survey_builder_bp.build_survey') }}" class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6">
+              <a id="create-scratch-btn"  href="{{ url_for('survey_builder_bp.build_survey') }}" class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6">
                 <div>
                    <i class="fas fa-file-alt fa-5x mb-3"></i>
                   <h5 class="mb-2">Create one from scratch</h5>
@@ -20,7 +20,7 @@
             </div>
             
             <div class="col-md-4">
-              <button class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6" type="button" onclick="showTemplateSelection()">
+              <button id="template-btn" class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6" type="button" onclick="showTemplateSelection()">
                <div>
                    <i class="fas fa-edit fa-5x  mb-3"></i>
                   <h5 class="mb-2">Start from an existing template</h5>
@@ -30,7 +30,7 @@
             </div>
             
             <div class="col-md-4">
-              <button class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6" type="button" onclick="">
+              <button id="ai-assistant-btn" class="btn btn-outline-primary h-100 w-100 d-flex flex-column justify-content-center align-items-center text-center p-6" type="button" onclick="">
                 <div>
                    <i class="fas fa-robot fa-5x  mb-3"></i>
                   <h5 class="mb-2">Not sure what you need?</h5>
@@ -78,11 +78,84 @@
       </div>
     </div>
   </div>
+
+
+    <div id="ai-assistant-form" class="row mb-3" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Describe Your Survey</h5>
+                    <form id="generate-survey-form" action="{{ url_for('survey_builder_bp.generate_survey') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="mb-3">
+                                <textarea class="form-control" id="survey-description"  name="survey-description" rows="4" placeholder="Please describe what you want to achieve with your survey. For example: I want to create a customer satisfaction survey for my coffee shop to understand what customers think about our new breakfast menu..." required></textarea>
+                            </div>
+                        <div class="text-center">
+                            <button type="submit" id="generate-survey-btn" class="btn btn-primary">Generate Survey</button>
+                        </div>
+                        <!-- Loading Spinner -->
+                        <div id="loading-spinner" class="text-center d-none">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Generating...</span>
+                            </div>
+                            <p class="mt-2">Generating your survey...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+    
 <script>
 function showTemplateSelection() {
-  document.getElementById('template-selection').style.display = 'block';
+    document.getElementById('template-selection').style.display = 'block';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all the required elements
+    const templateSection = document.getElementById('template-selection');
+    const aiAssistantForm = document.getElementById('ai-assistant-form');
+    const createScratchBtn = document.getElementById('create-scratch-btn');
+    const templateBtn = document.getElementById('template-btn');
+    const aiAssistantBtn = document.getElementById('ai-assistant-btn');
+    const generateSurveyForm = document.getElementById('generate-survey-form');
+    const generateSurveyBtn = document.getElementById('generate-survey-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    // Add click handlers for the three options
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            // If it's the AI Assistant option
+            if (this.textContent.includes('AI Assistant')) {
+                e.preventDefault();
+                templateSection.style.display = 'none';
+                aiAssistantForm.style.display = 'flex';
+            }
+            // For template option
+            else if (this.textContent.includes('template')) {
+                e.preventDefault();
+                aiAssistantForm.style.display = 'none';
+                templateSection.style.display = 'flex';
+            }
+        });
+    });
+
+    // Add form submit handler
+    if (generateSurveyForm) {
+        generateSurveyForm.addEventListener('submit', function(e) {
+            // Hide submit button and show spinner
+            generateSurveyBtn.style.display = 'none';
+            loadingSpinner.classList.remove('d-none');
+            
+            // Disable all main option buttons
+            createScratchBtn.classList.add('disabled');
+            templateBtn.disabled = true;
+            aiAssistantBtn.disabled = true;
+        });
+    }
+});
+
 </script>
 {% endblock %}

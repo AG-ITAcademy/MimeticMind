@@ -1,14 +1,17 @@
-<nav class="navbar navbar-light navbar-vertical navbar-expand-xl navbar-card" id="navbarVertical">
+<nav class="navbar navbar-light navbar-vertical navbar-expand-lg navbar-card mt-2" id="navbarVertical">
  
   <div class="d-flex align-items-center">
-    <div class="toggle-icon-wrapper me-0">
-      <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" aria-label="Toggle Navigation" data-bs-original-title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+    <div class="toggle-icon-wrapper me-0 ms-0">
+     <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
     </div>
-    <a class="navbar-brand d-flex align-items-center mb-3 mt-3" href="../landing">
-      <!--<img class="me-0" src="{{ url_for('static', filename='images/logo.png') }}" alt="Mimetic logo" width="40">-->
-      <span class="font-sans-serif text-secondary fs-6">MimeticMind</span>
+    <a class="navbar-brand" href="../landing">
+        <div class="d-flex align-items-center py-3">
+          <!--<img class="me-0" src="{{ url_for('static', filename='images/logo.png') }}" alt="Mimetic logo" width="40">-->
+          <span class="font-sans-serif text-secondary fs-7 ms-3">MimeticMind</span>
+         </div>
     </a>
   </div>
+  
   
   <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
     <div class="navbar-vertical-content scrollbar d-flex flex-column" style="height: calc(100vh - 80px);">

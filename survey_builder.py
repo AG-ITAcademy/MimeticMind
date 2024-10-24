@@ -6,6 +6,9 @@ from flask_wtf.csrf import CSRFProtect
 from flask import jsonify
 from answer_schema import schema_mapping
 from forms import SurveyForm
+from openai import OpenAI
+from config_prompts import survey_generation_messages
+import json
 
 survey_builder_bp = Blueprint('survey_builder_bp', __name__)
 csrf = CSRFProtect()
@@ -77,13 +80,6 @@ def build_survey():
             survey.query_templates.append(new_query)
     else:
         survey = SurveyTemplate(name="New Survey", user_id=current_user.id)
-    
-    if form.validate_on_submit():
-        form.populate_obj(survey)
-        db.session.add(survey)
-        db.session.commit()
-        flash('Survey created successfully.', 'success')
-        return redirect(url_for('survey_builder_bp.edit_survey', template_id=survey.id))
 
     # Extract schema options from schema_mapping
     schema_options = list(schema_mapping.keys()) if schema_mapping else []
@@ -144,7 +140,73 @@ def save_survey():
     
     try:
         db.session.commit()
+        flash("Survey saved successfully!", "success")
         return jsonify({'message': 'Survey saved successfully', 'survey_id': survey.id}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+   
+
+@survey_builder_bp.route('/survey/generate', methods=['POST'])
+@login_required
+def generate_survey():
+    description = request.form.get('survey-description', '')  
+    if not description:
+        flash('Please provide a survey description.', 'error')
+        return redirect(url_for('survey_builder_bp.create_survey'))
+        
+    # Load the messages and update with user's description
+    messages = json.loads(survey_generation_messages)
+    messages[-1]["content"] = f"The user query is: {description}"
+    
+    try:
+        client = OpenAI()  
+        response = client.chat.completions.create(
+            model='gpt-4o',
+            messages=messages,
+            response_format={ "type": "json_object" }
+        )
+        
+        # Get the AI response
+        ai_response = json.loads(response.choices[0].message.content)
+        print("AI Response:", ai_response)  # For debugging
+        
+        # Check if the description was inadequate
+        if isinstance(ai_response, str) and "Inadequate description" in ai_response:
+            flash('Your survey description was not specific enough. Please provide more details about what kind of survey you want to create.', 'error')
+            return redirect(url_for('survey_builder_bp.create_survey'))
+            
+        # Create the form and survey with AI-generated content
+        form = SurveyForm()
+        form.name.data = ai_response['title']
+        form.description.data = ai_response['description']
+        form.context_prompt.data = "AI Assistant generated survey - Feel free to modify this context prompt to better suit your needs."
+        
+        survey = SurveyTemplate(
+            name=ai_response['title'],
+            description=ai_response['description'],
+            context_prompt=form.context_prompt.data,
+            user_id=current_user.id
+        )
+        
+        # Add the AI-generated questions
+        for question in ai_response['questions']:
+            query = QueryTemplate(
+                name=question['question_text'],
+                query_text=question['question_text'],
+                schema=question['schema']
+            )
+            survey.query_templates.append(query)
+        
+        schema_options = list(schema_mapping.keys()) if schema_mapping else []
+        return render_template('survey_builder.html', form=form, survey=survey, schema_options=schema_options, source='ai')
+        
+    except json.JSONDecodeError as e:
+        flash('An error occurred while processing your request. The response was not in the expected format.', 'error')
+        print(f"JSON Decode Error: {e}")
+        return redirect(url_for('survey_builder_bp.create_survey'))
+        
+    except Exception as e:
+        flash('An unexpected error occurred while generating your survey. Please try again.', 'error')
+        print(f"Error: {e}")
+        return redirect(url_for('survey_builder_bp.create_survey'))

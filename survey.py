@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine, text
 from filter import Filter
-from models import ProfileModel, SurveyTemplate, SurveyQueryParameter,Interaction, Project, ProjectSurvey
+from models import ProfileModel, SurveyTemplate, Interaction, Project, ProjectSurvey
 from config import Config
 from datetime import datetime
 from celery import group, chord, shared_task
@@ -113,50 +113,27 @@ class Survey:
         # Set the total number of tasks in Redis and reset completed tasks
         r.set(f"survey_total_tasks_{project_survey_id}", total_tasks)
         r.set(f"survey_completed_tasks_{project_survey_id}", 0)
-
         # Retrieve the user_id associated with the project
         project_survey = self.session.query(ProjectSurvey).filter_by(id=project_survey_id).first()
         project = self.session.query(Project).filter_by(id=project_survey.project_id).first()
         user_id = project.user_id
-
         for profile_model in filtered_profiles:
             profile = Profile.from_model(self.session, profile_model)
-
             for query_template in query_templates:
-                db_custom_parameters = self.session.query(SurveyQueryParameter).filter_by(
-                    survey_template_id=self.survey_template.id,
-                    query_template_id=query_template.id
-                ).all()
-
-                customized_query = query_template.query_text
-
-                # Replace placeholders in the query with values from custom_parameters_dict
-                for placeholder, value in self.custom_parameters_dict.items():
-                    customized_query = customized_query.replace(f"[{placeholder}]", value)
-
-                # Replace placeholders in the query with values from SurveyQueryParameter
-                for param in db_custom_parameters:
-                    placeholder = f"[{param.parameter_name}]"
-                    if placeholder in customized_query:
-                        customized_query = customized_query.replace(placeholder, param.parameter_value)
-
                 # Enqueue the query with the retrieved user_id
                 task = profile.enqueue_query(
                     user_id=user_id,
                     profile_id=profile_model.id,
-                    query=customized_query,
+                    query=query_template.query_text,
                     schema=query_template.schema,
                     query_template_id=query_template.id,
                     project_survey_id=project_survey_id  
                 )
                 task_group.append(task)
-
                 print(f"Profile ID: {profile_model.id}, Name: {profile_model.profile_name}")
                 print(f"Queued task for query template '{query_template.name}'")
-
         batch = chord(task_group)(celery.signature('survey.process_survey_results'))
         print('\n\nchord: ' + str(batch.id))
-
         return f"{len(filtered_profiles)} profiles surveyed with {len(query_templates)} query templates."
         
         

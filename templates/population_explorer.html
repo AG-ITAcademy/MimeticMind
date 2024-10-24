@@ -1,18 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
 <script src="{{ url_for('static', filename='assets/js/population_charts.js') }}"></script>
+<script src="{{ url_for('static', filename='vendors/countup/countUp.umd.js') }}"></script>
 
-<div class="container-fluid">
+<div class="container-fluid mt-0 ps-0 pe-0">
     <div class="row g-3">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/illustrations/crm-bar-chart.png') }});"></div>
-                    <h2 class="card-title">Population Explorer: {{ population.name }}</h2>
-                    <p>{{ population.description }}</p>
+                    <div class="d-flex justify-content-between">
+                        <div class="text-start">
+                            <h2 class="card-title">Population Explorer: {{ population.name }}</h2>
+                            <p>{{ population.description }}</p>
+                        </div>
+                        <div data-countup='{"endValue":{{ profiles|length }}}' class="text-end fs-8 me-4">0</div>
+                    </div>
                 </div>
             </div>
         </div>
+
 
         <div class="col-12">
             <div class="card">

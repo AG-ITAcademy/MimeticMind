@@ -192,17 +192,6 @@ survey_template_query_template = db.Table(
 )
 
 
-class SurveyQueryParameter(db.Model):
-    __tablename__ = 'survey_query_parameters'
-
-    id = db.Column(db.Integer, primary_key=True)
-    survey_template_id = db.Column(db.Integer, db.ForeignKey('survey_templates.id', ondelete="CASCADE"))
-    query_template_id = db.Column(db.Integer, db.ForeignKey('query_templates.id', ondelete="CASCADE"))
-    parameter_name = db.Column(db.String(255), nullable=False) 
-    parameter_value = db.Column(db.String(255), nullable=False)
-    survey_template = db.relationship("SurveyTemplate", backref="query_parameters")
-    query_template = db.relationship("QueryTemplate", backref="survey_parameters")
-
 class QueryTemplate(db.Model):
     __tablename__ = 'query_templates'
     

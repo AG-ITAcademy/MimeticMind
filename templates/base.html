@@ -54,7 +54,7 @@
 <body>
     <!-- Main Content Area -->
     <main class="main" id="top">
-       <div class="container" data-layout="container" style="background-image: url('{{ url_for('static', filename='assets/img/people_earth_v2.png') }}'); background-size: 96% auto; background-position: center calc(100% - 30px); background-repeat: no-repeat; min-height: 100vh;">
+       <div class="container" data-layout="container" style="background-image: url('{{ url_for('static', filename='assets/img/people_earth_v2.png') }}'); background-size: 97.8% auto; background-position: center calc(100% - 30px); background-repeat: no-repeat; min-height: 100vh;">
                        
                 <!-- Include Sidebar Only If User is Authenticated -->
                 {% if current_user.is_authenticated %}
@@ -62,7 +62,7 @@
                 {% endif %}
                 
                 <!-- Page-Specific Content -->
-                <div class="content">
+                <div class="content" data-layout="container">
 
                     {% if current_user.is_authenticated %}
                         {% include '_top_navbar.html' %}

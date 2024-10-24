@@ -3,7 +3,6 @@
 from pydantic import BaseModel
 from typing import List, Dict
 
-# Keep the original classes
 class ScaleSchema(BaseModel):
     rating: int
 

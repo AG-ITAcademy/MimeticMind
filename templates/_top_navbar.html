@@ -2,9 +2,12 @@
 
 <nav class="navbar navbar-light navbar-glass navbar-top navbar-expand ms-0">
 
-  <ul class="navbar-nav align-items-center d-none d-lg-block">
+  <!--<ul class="navbar-nav align-items-center d-none d-lg-block"></ul>-->
+  
+  <ul class="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center">
+    
     <li class="nav-item">
-      <div class="search-box ms-0" data-list='{"valueNames":["title"]}'>
+      <div class="search-box me-3" data-list='{"valueNames":["title"]}'>
         <form class="position-relative" data-bs-toggle="search" data-bs-display="static">
           <input class="form-control search-input fuzzy-search" type="search" placeholder="Search..." aria-label="Search" />
           <span class="fas fa-search search-box-icon"></span>
@@ -24,9 +27,6 @@
         
       </div>
     </li>
-  </ul>
-  
-  <ul class="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center">
     
     <li class="nav-item d-none d-sm-block">
         <a class="nav-link px-0 fa-icon-wait" id="layout-toggle" href="#!">
@@ -107,7 +107,7 @@
       </div>
     </li>
     
-    <li class="nav-item dropdown">
+    <li class="nav-item dropdown me-3">
       <a class="nav-link pe-0 ps-2" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <div class="avatar avatar-xl">
           <img class="rounded-circle" src="{{ url_for('static', filename='/assets/img/team/avatar.png') }}" alt="User">
