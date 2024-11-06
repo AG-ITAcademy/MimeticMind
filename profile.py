@@ -3,32 +3,69 @@ from datetime import date, datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from models import ProfileModel, QueryTemplate , Population
+from models import ProfileModel, QueryTemplate , Population, LLM, User
 from openai import OpenAI
-from answer_schema import schema_mapping
+from groq import Groq
+import instructor
+from answer_schema import schema_mapping, MultipleChoiceSchema, OpenEndedSchema, YesNoSchema, ScaleSchema, RankingSchema, schema_mapping
 from pydantic import BaseModel
 import json
 from config import Config
 from celery import chord
 from celery_app import celery
 import redis
+import re
+from mistralai import Mistral
+from llama_index.llms.nvidia import NVIDIA
+from llama_index.core.llms import ChatMessage, MessageRole
 
 @celery.task
-def query_LLM (model: str, messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int):
+def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int, model: str, llm_id: int, base_url: str, api_key: str, summary: str, query:str):
     messages_obj = json.loads(messages)
     schema_class = schema_mapping.get(schema)
-    client = OpenAI()  
-    response = client.beta.chat.completions.parse(
-        model=model,
-        messages=messages_obj,
-        response_format=schema_class
-    )
     
+    if llm_id==0:
+        client = OpenAI(base_url=base_url, api_key=api_key)  
+        response = client.beta.chat.completions.parse(
+            model=model,
+            temperature=1,
+            messages=messages_obj,
+            response_format=schema_class
+        )
+        content = response.choices[0].message.content.lower()
+        prompt_tokens = response.usage.prompt_tokens
+        completion_tokens = response.usage.completion_tokens
+        
+    elif llm_id==1:
+        client = client = Mistral(api_key=api_key)
+        response = client.chat.complete(
+            model= model, 
+            messages=messages_obj,
+            response_format = {"type": "json_object"}
+        )
+        prompt_tokens=0
+        completion_tokens=0
+
+        content=response.choices[0].message.content.lower()
+        
+    elif llm_id==2:
+        LLM = NVIDIA(base_url=base_url, api_key=api_key, model=model, temperature=1)  
+        LLM = LLM.as_structured_llm (output_cls=schema_class)
+        messages = [
+            ChatMessage(role=MessageRole.SYSTEM, content=(f"You will assume the following identity: {summary}\n\n")),
+            ChatMessage(role=MessageRole.ASSISTANT, content=("Adapt your vocabulary, knowledge level and language style to the assumed identity. Try to mimick the assumed identity as accurate as possible, ignoring your own biased opinion about the topic. \n")),
+            ChatMessage(role=MessageRole.USER, content=(f"Answer in English to the following query without adding any other details: {query}.\n"), ),
+        ]
+        content = str(LLM.chat(messages))
+        content = re.sub(r'^assistant:\s*', '', content.lower())
+        prompt_tokens =0
+        completion_tokens =0
+
     # After task completion, update progress in Redis
     r = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
     r.incr(f"survey_completed_tasks_{project_survey_id}")
     
-    return response.choices[0].message.content, response.usage.prompt_tokens, response.usage.completion_tokens, user_id, profile_id, query_template_id, query_text, project_survey_id
+    return content, prompt_tokens, completion_tokens, user_id, profile_id, query_template_id, query_text, project_survey_id
 
 
 @dataclass
@@ -47,7 +84,7 @@ class Profile:
     religion: Optional[str] = None
     marital_status: Optional[str] = None
     big_five_ocean_profile: Optional[str] = None
-    enneagram_profile: Optional[int] = None
+    children: Optional[int] = None
     mbti_profile: Optional[str] = None
     personal_values: Optional[str] = None
     hobbies: Optional[str] = None
@@ -70,7 +107,7 @@ class Profile:
             religion=self.religion,
             marital_status=self.marital_status,
             big_five_ocean_profile=self.big_five_ocean_profile,
-            enneagram_profile=self.enneagram_profile,
+            children=self.children,
             mbti_profile=self.mbti_profile,
             personal_values=self.personal_values,
             hobbies=self.hobbies,
@@ -80,6 +117,17 @@ class Profile:
         self.session.add(profile_record)
         self.session.commit()
         return profile_record.id
+        
+    @staticmethod
+    def ocean_profile_to_string(ocean_code):
+        levels = {1: "Very Low", 2: "Low", 3: "Medium", 4: "High", 5: "Very High"}
+        traits = ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Non-Negativity"]
+        
+        ocean_code_str = str(ocean_code)
+        if len(ocean_code_str) != 5 or not ocean_code_str.isdigit():
+            raise ValueError("Input must be a 5-digit number with each digit from 1 to 5.")
+        
+        return ", ".join(f"{traits[i]}={levels[int(digit)]}" for i, digit in enumerate(ocean_code_str))
 
     def summarize_attributes(self) -> str:
         """Summarize profile attributes into a string."""
@@ -95,13 +143,14 @@ class Profile:
             f"Location: {self.location}\n"
             f"Education Level: {self.education_level}\n"
             f"MBTI Traits: {self.mbti_profile}\n"
-            f"Big Five OCEAN Profile: {self.big_five_ocean_profile} - each OCEAN trait is measured on a scale from 1 to 5\n"
+            + (f"Children: {self.children}\n" if self.children > 0 else "") +
+            f"Big Five OCEAN Profile: {self.ocean_profile_to_string(self.big_five_ocean_profile)}\n"
             f"Ethnicity: {self.ethnicity}\n"
             f"Legal Status: {self.legal_status}\n"
             f"Health Status: {self.health_status}\n"
         )
 
-        if age > 10:
+        if age > 16:
             summary += (
                 f"Occupation: {self.occupation}\n"
                 f"Income Range: {self.income_range}\n"
@@ -117,6 +166,10 @@ class Profile:
                 f"Parent's Religion: {self.religion}\n"
             )
 
+        summary+= (
+            f"Detailed profile: {self.llm_persona}\n"
+            f"Typical day: {self.llm_typical_day}\n"
+        )
         return summary
         
     def get_population_prompt_template(self, population_tag: str) -> Optional[str]:
@@ -135,25 +188,32 @@ class Profile:
         # Fetch the prompt template from the populations table
         prompt_template = self.get_population_prompt_template(population_tag)
 
+        # Get user's LLM settings
+        user = self.session.query(User).get(user_id)
+        llm = self.session.query(LLM).get(user.llm_id)
+        model = llm.settings
+        
         # Summarize the profile's attributes
         summary = self.summarize_attributes()
         
         # Replace placeholders in the prompt template with summary and query values
         for message in prompt_template:
             message['content'] = message['content'].replace("{summary}", summary).replace("{query}", query)
-
-        print ("querying...")
         
-        model = "gpt-4o-mini"  # This model can be customized if needed
         task_signature = query_LLM.s(
-            str(model),
             json.dumps(prompt_template),  
             str(schema),
             user_id,
             profile_id,
             query_template_id,
             query,
-            project_survey_id
+            project_survey_id,
+            model,          
+            user.llm_id,
+            llm.base_url,
+            llm.api_key,
+            summary,
+            query
         )
         print(f"Task signature created for query template id: {query_template_id}")
 
@@ -200,7 +260,7 @@ class Profile:
             religion=model.religion,
             marital_status=model.marital_status,
             big_five_ocean_profile=model.big_five_ocean_profile,
-            enneagram_profile=model.enneagram_profile,
+           children=model.children,
             mbti_profile=model.mbti_profile,
             personal_values=model.personal_values,
             hobbies=model.hobbies,

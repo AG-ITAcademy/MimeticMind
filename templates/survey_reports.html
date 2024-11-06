@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-0 ps-0 pe-0">
+    <div class="row g-3">
+        <!-- Header Card -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body bg-gradient">
+                    <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/illustrations/reports-greeting.png') }}); background-size: 7%; background-position: calc(100% - 60px) center;"></div>
+
+                    <div class="d-flex justify-content-between">
+                        <div class="text-start">
+                            <h2 class="card-title">Survey Reports</h2>
+                            <p>Analyze and visualize your survey results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Projects and Surveys Table -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Project Name:</th>
+                                    <th>Population:</th>
+                                    <th>Survey Alias:</th>
+                                    <th class="text-center">Credits Used:</th>
+                                    <th>Created:</th>
+                                    <th class="text-end">Actions:</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project_data in projects_data %}
+                                    {% for survey, survey_meta in project_data.surveys %}
+                                        {% set time_diff = ((now - survey_meta.created_at).total_seconds() / 3600)|round(1) %}
+                                        {% set relative_time = '%d days ago' % (time_diff / 24) if time_diff >= 24 else '%d hours ago' % time_diff %}
+                                        <tr>
+                                            <td>
+                                                {{ project_data.project.name }}
+                                            </td>
+                                            <td>
+                                                {% if project_data.population %}
+                                                    {{ project_data.population.name }}
+                                                {% else %}
+                                                    <span class="text-muted">No population assigned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if survey.survey_alias %}
+                                                    {{ survey.survey_alias }}
+                                                {% else %}
+                                                    <span class="text-muted">Unnamed Survey</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-warning">{{ survey_meta.credits }}</span>
+                                            </td>
+                                            <td>
+                                                <span data-bs-toggle="tooltip" 
+                                                      data-bs-placement="top" 
+                                                      title="{{ survey_meta.created_at.strftime('%Y-%m-%d %H:%M:%S') }}">
+                                                    {{ relative_time }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{{ url_for('survey_analysis_bp.survey_analysis', project_survey_id=survey.id, population_tag=project_data.population.tag if project_data.population else '') }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    View Analysis
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <p class="text-muted mb-0">No completed surveys found</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Initialize tooltips -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+</script>
+
+{% endblock %}

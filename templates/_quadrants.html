@@ -107,7 +107,7 @@
                         {% endif %}
                         <!--<p>{{ segments|length }} segment(s) defined.</p>-->
                         <div class="d-grid gap-2 mt-auto">
-                            <button class="btn btn-outline-primary me-2" id="define-segments-button">Define Segments</button>
+                            <button class="btn btn-outline-primary me-2" id="define-segments-button">Define Population Segments</button>
                         </div>
                     </div>
 
@@ -170,7 +170,8 @@
                     <table class="table table-striped table-sm">
                         <thead class="table-active">
                             <tr>
-                                <th>Survey Alias:</th>
+                                <!--<th>Survey Alias:</th>-->
+                                <th>Survey Template:</th>
                                 <th>Segment:</th>
                                 <th>Progress</th>
                                 <th class="text-end">Actions</th>
@@ -179,7 +180,8 @@
                         <tbody>
                             {% for survey in project_surveys %}
                             <tr>
-                                <td>{{ survey.survey_alias }}</td>
+                                <!--<td>{{ survey.survey_alias }}</td>-->
+                                <th>{{ survey.template }}</th>
                                 <td>{{ survey.segment_alias }}</td>
                                 <td>
                                     <div class="progress" style="height: 20px;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -193,7 +195,7 @@
                                     </form>
                                     <form action="{{ url_for('projects_bp.run_survey', project_id=project.id, survey_id=survey.id) }}" method="POST" style="display: inline;">
                                         {{ form.hidden_tag() }}
-                                        <button type="submit" class="btn btn-outline-success btn-sm" id="execute-survey-{{ survey.id }}" data-survey-id="{{ survey.id }}">Execute</button>
+                                        <button type="submit" class="btn btn-outline-success btn-sm" id="execute-survey-{{ survey.id }}" data-survey-id="{{ survey.id }}" {% if survey.is_running %}disabled{% endif %}>{% if survey.is_running %}Running...{% else %}Execute{% endif %}</button>
                                     </form>
                                 </td>
                             </tr>
@@ -219,10 +221,12 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <!--
                         <div class="mb-3">
                             <label for="survey_alias" class="form-label">Survey Alias:</label>
                             <input type="text" name="survey_alias" id="survey_alias" class="form-control" required>
                         </div>
+                            -->
                         <div class="mb-3">
                             <label for="segment_id" class="form-label">Select Segment:</label>
                             <select name="segment_id" id="segment_id" class="form-select" required>
@@ -253,7 +257,7 @@
                         <h2 class="card-title">Survey results</h2> 
                             <div class="alert alert-warning" role="alert">No data available!</div>
                             <p>Generate data by executing a survey</p>      
-                            <h5 class="card-title placeholder-glow"><span class="placeholder col-6"></span></h5>
+                            <h5 class="card-title placeholder-glow"><span class="placeholder col-12"></span></h5>
                     </div>
                 </div>
             </div>
@@ -369,45 +373,44 @@
             });
         } 
         
+        
     });
 
     // Function to update progress for a single survey
-    function updateSurveyProgress(surveyId) {
-      fetch(`/survey_progress/${surveyId}`)
+function updateSurveyProgress(surveyId) {
+    fetch(`/survey_progress/${surveyId}`)
         .then(response => response.json())
         .then(data => {
-          const progressBar = document.querySelector(`#progress-bar-${surveyId}`);
-          const executeButton = document.querySelector(`#execute-survey-${surveyId}`);
-          
-          if (progressBar) {
-            progressBar.style.width = `${data.progress}%`;
-            progressBar.textContent = `${data.progress}%`;
+            const progressBar = document.querySelector(`#progress-bar-${surveyId}`);
+            const executeButton = document.querySelector(`#execute-survey-${surveyId}`);
+            
+            if (progressBar) {
+                progressBar.style.width = `${data.progress}%`;
+                progressBar.textContent = `${data.progress}%`;
 
-            if (data.progress < 100 && data.progress > 0) {
-              executeButton.disabled = true;
-              executeButton.classList.add('disabled');
-              executeButton.textContent = 'Running...';
-              progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
-            } else {
-              executeButton.disabled = false;
-              executeButton.classList.remove('disabled');
-              executeButton.textContent = 'Execute';
-              progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                if (data.progress === 100) {  // Only reset when complete
+                    executeButton.disabled = false;
+                    executeButton.classList.remove('disabled');
+                    executeButton.textContent = 'Execute';
+                    progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                    
+                    // Update available results
+                    const projectId = document.querySelector('meta[name="project-id"]').getAttribute('content');
+                    fetch(`/project/${projectId}/available_results`)
+                        .then(response => response.text())
+                        .then(html => {
+                            const availableResultsSection = document.getElementById('available-results-section');
+                            availableResultsSection.innerHTML = html;
+                        });
+                } else {  // Any other progress (including 0) shows as running
+                    executeButton.disabled = true;
+                    executeButton.classList.add('disabled');
+                    executeButton.textContent = 'Running...';
+                    progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                }
             }
-
-            if (data.progress === 100) {
-              // Survey completed, update the Available Results section
-              const projectId = document.querySelector('meta[name="project-id"]').getAttribute('content');
-              fetch(`/project/${projectId}/available_results`)
-                .then(response => response.text())
-                .then(html => {
-                  const availableResultsSection = document.getElementById('available-results-section');
-                  availableResultsSection.innerHTML = html;
-                });
-            }
-          }
         });
-    }
+}
 
     function updateAllSurveyProgress() {
       document.querySelectorAll('.progress-bar[data-survey-id]').forEach(progressBar => {

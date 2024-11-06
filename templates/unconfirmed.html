@@ -1,6 +1,5 @@
 {% extends 'base_landing.html' %}
 {% block content %}
-
   <!-- ============================================-->
       <!-- <section> begin ============================-->
     <section class="py-11 overflow-hidden  d-flex align-items-center position-relative" id="banner" data-bs-theme="dark">
@@ -12,12 +11,33 @@
             <h2 class="text-white fs-4 fs-md-5 fs-lg-6">Email Confirmation Required</h2>
             <p class="text-white-100">Your account is not confirmed. Please check your email for the confirmation link.</p>
             <p class="text-white-100">If you did not receive the email, click the button below to resend it.</p>
-            <a href="{{ url_for('access_control.resend_confirmation') }}" class="btn btn-primary">Resend Confirmation Email</a>
+            <a href="{{ url_for('access_control.resend_confirmation', email=email) }}" 
+               class="btn btn-primary" 
+               id="resendBtn"
+               onclick="showSpinner(event)">Resend Confirmation Email</a>
+            <div class="d-flex justify-content-center mt-3">
+                <div id="loadingSpinner" class="spinner-border text-light d-none" role="status">
+                    <span class="visually-hidden">Please wait...</span>
+                </div>
+            </div>
           </div>
         </div>
-        
       </div>
     </section>
-            
     
+    <script>
+        function showSpinner(event) {
+            event.preventDefault();  // Prevent immediate navigation
+            const resendBtn = document.getElementById('resendBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            resendBtn.classList.add('d-none');  // Hide the button
+            loadingSpinner.classList.remove('d-none');  // Show the spinner
+            
+            // Navigate to the resend URL after a short delay
+            setTimeout(() => {
+                window.location.href = resendBtn.href;
+            }, 100);
+        }
+    </script>
 {% endblock %}

@@ -14,6 +14,7 @@ from population_explorer import population_explorer_bp
 from survey_analysis import survey_analysis_bp
 from access_control import access_control_bp
 from subscription_routes import subscription_bp
+from survey_reports import survey_reports_bp
 from config import Config
 from flask_wtf.csrf import CSRFProtect
 import celery_app
@@ -58,6 +59,7 @@ app.register_blueprint(population_explorer_bp)
 app.register_blueprint(survey_builder_bp)
 app.register_blueprint(access_control_bp)
 app.register_blueprint(subscription_bp)
+app.register_blueprint(survey_reports_bp)
 
 
 @app.before_request
@@ -114,6 +116,7 @@ def search():
     # Search in projects
     projects = Project.query.filter(
         Project.user_id == current_user.id,
+        Project.status == 'active',
         or_(
             Project.name.ilike(f'%{query}%'),
             Project.description.ilike(f'%{query}%')

@@ -5,22 +5,28 @@
 <div class="container-fluid dashboard-container ps-0 pe-0">
     <div class="row g-3">
         <div class="col-12">
-            <div class="card mb-3 border">
+            <div class="card mb-3  bg-gradient">
                 <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/icons/spot-illustrations/authentication-corner.png') }});"></div>
                 <div class="card-body position-relative">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h1 class="card-title mb-0 fs-6 d-flex align-items-center" id="project-name">
+
+                        <h1 class="font-monospace fst-italic mb-0 fs-6 d-flex align-items-left" id="project-name">
                             {% if project_population and project_population.population.flag %}
                                 <span class="fi fi-{{ project_population.population.flag }} me-2 fs-6"></span>
                             {% endif %}
                             {{ project.name }}
+                            <button type="button" class="btn btn-sm btn-link text-primary me-2" id="rename-project-btn" title="Rename Project">
+                                <i class="fas fa-pencil-alt  fa-lg"></i>
+                            </button>
                         </h1>
                         <div class="header-buttons">
-                            <button class="btn btn-primary btn-sm me-2" id="rename-project-btn">Rename Project</button>
-                            <button class="btn btn-danger btn-sm" id="delete-project-btn">Delete Project</button>
+                            
+                            <button type="button" class="btn btn-sm btn-link text-danger fa-2x" id="delete-project-btn" title="Delete Project">
+                                <i class="fas fa-trash-alt fa-2x"></i>
+                            </button>
                         </div>
                     </div>
-                    <p class="mt-2">{{ project.description }}</p>
+                    <p class="mt-2 fs-10">Project Description: {{ project.description }}</p>
                 </div>
             </div>
         </div>

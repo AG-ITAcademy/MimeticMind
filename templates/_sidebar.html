@@ -2,18 +2,19 @@
  
   <div class="d-flex align-items-center">
     <div class="toggle-icon-wrapper me-0 ms-0">
-     <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+        <button class="btn navbar-toggler-humburger-icon navbar-vertical-toggle" data-bs-toggle="tooltip" data-bs-placement="left" title="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
     </div>
     <a class="navbar-brand" href="../landing">
-        <div class="d-flex align-items-center py-3">
-          <!--<img class="me-0" src="{{ url_for('static', filename='images/logo.png') }}" alt="Mimetic logo" width="40">-->
-          <span class="font-sans-serif text-secondary fs-7 ms-3">MimeticMind</span>
+        <div class="d-flex align-items-center py-3 mt-0">
+          <img class="me-0 ms-0 p-0" src="{{ url_for('static', filename='images/logo.png') }}" alt="Mimetic logo" width="30">
+          <span class="font-sans-serif text-muted fs-7 ms-0 mt-0">MimeticMind</span>
+          
          </div>
     </a>
   </div>
   
   
-  <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
+  <div class="collapse navbar-collapse  bg-gradient" id="navbarVerticalCollapse">
     <div class="navbar-vertical-content scrollbar d-flex flex-column" style="height: calc(100vh - 80px);">
       <ul class="navbar-nav flex-column mb-3" id="navbarVerticalNav">
         
@@ -112,15 +113,15 @@
         
         <!-- Survey Reports Section -->
         <li class="nav-item">
-          <a class="nav-link" href="">
+          <a class="nav-link" href="../survey_reports">
             <div class="d-flex align-items-center">
               <span class="nav-link-icon"><i class="fas fa-poll"></i></span>
-              <span class="nav-link-text ps-1">Survey Reports</span>
+              <span class="nav-link-text ps-1">Survey Analysis</span>
             </div>
           </a>
         </li>
         
-        <!-- A/B Testing Section -->
+        <!-- A/B Testing Section 
         <li class="nav-item">
           <a class="nav-link" href="">
             <div class="d-flex align-items-center">
@@ -128,7 +129,7 @@
               <span class="nav-link-text ps-1">A/B Testing</span>
             </div>
           </a>
-        </li>
+        </li>-->
        
       </ul>
       
@@ -136,8 +137,8 @@
       
       <!-- Subscription info -->
         <div class="settings my-3">
-          <div class="card shadow-none">
-            <div class="card-body alert mb-0" role="alert">
+          <div class="card shadow-none bg-transparent">
+            <div class="card-body alert mb-0 " role="alert">
               <div class="btn-close-falcon-container"></div>
               <div class="text-center">                    
                 {% if current_user.is_authenticated and subscription_info %}

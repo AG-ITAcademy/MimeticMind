@@ -7,6 +7,7 @@ from flask import jsonify
 from answer_schema import schema_mapping
 from forms import SurveyForm
 from openai import OpenAI
+from config import Config
 from config_prompts import survey_generation_messages
 import json
 
@@ -122,14 +123,14 @@ def save_survey():
             # Update existing query
             query = QueryTemplate.query.get(query_id)
             if query:
-                query.name = query_data.get('name') or query_data.get('query_text', 'Untitled Query')
+                query.name = 'Untitled Query'
                 query.query_text = query_data.get('query_text')
                 query.schema = query_data.get('schema')
                 updated_queries.append(query)
         else:
             # Add new query
             new_query = QueryTemplate(
-                name=query_data.get('name') or query_data.get('query_text', 'Untitled Query'),
+                name= 'Untitled Query',
                 query_text=query_data.get('query_text'),
                 schema=query_data.get('schema')
             )
@@ -155,21 +156,14 @@ def generate_survey():
         flash('Please provide a survey description.', 'error')
         return redirect(url_for('survey_builder_bp.create_survey'))
         
-    # Load the messages and update with user's description
     messages = json.loads(survey_generation_messages)
     messages[-1]["content"] = f"The user query is: {description}"
     
     try:
-        client = OpenAI()  
-        response = client.chat.completions.create(
-            model='gpt-4o',
-            messages=messages,
-            response_format={ "type": "json_object" }
-        )
+        client = OpenAI(api_key=Config.OPENAI_API_KEY)  
+        response = client.chat.completions.create(model='gpt-4o', messages=messages, response_format={ "type": "json_object" })
         
-        # Get the AI response
         ai_response = json.loads(response.choices[0].message.content)
-        print("AI Response:", ai_response)  # For debugging
         
         # Check if the description was inadequate
         if isinstance(ai_response, str) and "Inadequate description" in ai_response:

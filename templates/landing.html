@@ -1,6 +1,8 @@
 {% extends 'base_landing.html' %}
 {% block content %}
-
+    
+    <script src="../static/vendors/lottie/lottie.min.js"></script>
+    
       <!-- ============================================-->
       <!-- <section> begin ============================-->
       <section class="py-0 overflow-hidden" id="banner" data-bs-theme="light">
@@ -28,7 +30,7 @@
 
       <!-- ============================================-->
       <!-- <section> begin ===========LOGO-uri=================-->
-      <section class="py-3 bg-body-tertiary shadow-sm ">
+      <section class="py-3 bg-body-tertiary shadow-sm  bg-gradient">
 
         <div class="container h-50">
           <div class="row flex-center d-flex align-items-stretch h-100">
@@ -60,27 +62,31 @@
               <p class="lead">Our synthetic, yet statistically relevant data will increase your market confidence and help you make the best decisions at a <span class="text-danger">fraction of the cost</span> and time of typical market research.</p>
             </div>
           </div>
-          <div class="row flex-center mt-8">
-            <div class="col-md col-lg-5 col-xl-4 ps-lg-6"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/roboti_tinta_ok.jpg" alt="" /></div>
+          <div class="row flex-center mt-5">
+            <!--<div class="col-md col-lg-5 col-xl-4 ps-lg-6"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/roboti_tinta_ok.jpg" alt="" /></div>-->
+            <div class="col-lg-4"><div class="lottie mx-auto" style="width: 380px; height: 380px;" data-options='{"path":"../static/assets/img/animated-icons/population.json"}'></div></div>
+          
             <div class="col-md col-lg-5 col-xl-4 mt-4 mt-md-0">
               <h5 class="text-danger"><span class="fas fa-bullseye me-2"></span>TARGET</h5>
               <h3>Chose Populations &amp; Segments </h3>
               <p>Select from a multitude of countries and target specific population segments</p>
             </div>
           </div>
-          <div class="row flex-center mt-7">
-            <div class="col-md col-lg-5 col-xl-4 pe-lg-6 order-md-2"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/design_tinta_ok.jpg" alt="" /></div>
+          <div class="row flex-center mt-5">
+            <!--<div class="col-md col-lg-5 col-xl-4 pe-lg-6 order-md-2"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/design_tinta_ok.jpg" alt="" /></div>-->
             <div class="col-md col-lg-5 col-xl-4 mt-4 mt-md-0">
               <h5 class="text-info"> <span class="fas fa-drafting-compass me-2"></span>DESIGN</h5>
-              <h3>Your Own Surveys</h3>
+              <h3>Your own Surveys</h3>
               <p>Create one from scratch or start from the <u>8 default templates</u> available for specific use cases, such as generic market reasearch, product development or public policy making</p>
             </div>
+            <div class="col-lg-4"><div class="lottie mx-auto" style="width: 250px; height: 250px;" data-options='{"path":"../static/assets/img/animated-icons/design.json"}'></div></div>
           </div>
-          <div class="row flex-center mt-7">
-            <div class="col-md col-lg-5 col-xl-4 ps-lg-6"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/finger_button_ok.jpg" alt="" /></div>
+          <div class="row flex-center mt-5">
+           <!-- <div class="col-md col-lg-5 col-xl-4 ps-lg-6"><img class="rounded-circle w-75 img-fluid px-6 px-md-0" src="../static/assets/img/finger_button_ok.jpg" alt="" /></div>-->
+            <div class="col-lg-4"><div class="lottie mx-auto" style="width: 250px; height: 250px;" data-options='{"path":"../static/assets/img/animated-icons/decision.json"}'></div></div>
             <div class="col-md col-lg-5 col-xl-4 mt-4 mt-md-0">
               <h5 class="text-success"><span class="fas fa-chart-bar me-2"></span>ANALYZE</h5>
-              <h3>... and Make Decisions</h3>
+              <h3>And make the Best Decisions</h3>
               <p>Visualize the resulting data. Apply <strong>psychographic</strong> and <strong>demographic</strong> filters to understand specific segments and their particularities. Understand correlations, and perform <strong>A/B analysis</strong> to visualize different scenarios</p>
             </div>
           </div>
@@ -107,7 +113,7 @@
             <div class="col-lg-4">
               <div class="card card-span h-100">
                 <div class="card-span-img"><span class="fas fa-user-friends fs-5 text-info"></span></div>
-                <div class="card-body pt-6 pb-4">
+                <div class="card-body pt-6 pb-4 bg-gradient">
                   <h5 class="mb-2">Realistic Populations</h5>
                   <p>Our AI individuals aren't just modeled on demographic statistics. They have rich, <span class="text-warning-emphasis">realistic personalities</span> and life story narratives that greatly increase the quality of their responses.</p>
                 </div>
@@ -116,7 +122,7 @@
             <div class="col-lg-4 mt-6 mt-lg-0">
               <div class="card card-span h-100">
                 <div class="card-span-img"><span class="fas fa-robot fs-4 text-success"></span></div>
-                <div class="card-body pt-6 pb-4">
+                <div class="card-body pt-6 pb-4 bg-gradient">
                   <h5 class="mb-2">Not Sure What you Need?</h5>
                   <p>In our digital reality, answers abound. But knowing the right question to ask can be a true pain point. Our <span class="text-warning-emphasis">integrated AI assistant</span> will guide you in selecting the ideal survey types and questions for your purposes.</p>
                 </div>
@@ -125,7 +131,7 @@
             <div class="col-lg-4 mt-6 mt-lg-0">
               <div class="card card-span h-100">
                 <div class="card-span-img"><span class="fas fa-database fs-3 text-danger"></span></div>
-                <div class="card-body pt-6 pb-4">
+                <div class="card-body pt-6 pb-4 bg-gradient">
                   <h5 class="mb-2">Your Data is All Yours</h5>
                   <p>Looking to dive deeper into your analysis or correlate results with your own proprietary insights? No problem. All the data generated with our engine is <span class="text-warning-emphasis">fully downloadable.</span></p>
                 </div>

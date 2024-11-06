@@ -1,21 +1,23 @@
 <div class="card h-100 d-flex flex-column">
     <div class="card-body position-relative flex-grow-1 d-flex flex-column">
-        <h2 id="available-results" class="card-title">Available Survey Results</h2>
-        {% if completed_surveys %}
-            <p>Analysis data is available for the following surveys:</p>
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered table-sm">
-                    <thead class="table-active">
-                        <tr>
-                            <th scope="col">Survey</th>
-                            <th scope="col" class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for survey in completed_surveys %}
+        <h2 class="card-title" id="available-results">Available Survey Results</h2>
+
+        {% if completed_surveys or in_progress_surveys %}
+            {% if completed_surveys %}
+                <p>Analysis data is available for the following surveys:</p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Survey</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for survey in completed_surveys %}
                             <tr>
                                 <td>{{ survey.survey_alias }}</td>
-                                <td class="text-end">
+                                <td>
                                     {% if project_population %}
                                         <a href="{{ url_for('survey_analysis_bp.survey_analysis', project_survey_id=survey.id, population_tag=project_population.tag) }}" 
                                            class="btn btn-outline-primary btn-sm">View Analysis</a>
@@ -24,12 +26,29 @@
                                     {% endif %}
                                 </td>
                             </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if in_progress_surveys %}
+                <div class="mt-3">
+                    <p>Surveys in progress:</p>
+                    <ul class="list-group">
+                        {% for survey in in_progress_surveys %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ survey.survey_alias }}
+                            <span class="badge bg-primary rounded-pill">{{ survey.completion_percentage }}%</span>
+                        </li>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    </ul>
+                </div>
+            {% endif %}
         {% else %}
-            <div class="alert alert-warning" role="alert">No data available!</div>
+            <div class="alert alert-warning" role="alert">
+                No data available!
+            </div>
             <p>Generate data by executing surveys</p>
         {% endif %}
     </div>

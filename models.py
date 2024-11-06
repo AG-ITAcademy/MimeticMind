@@ -79,6 +79,20 @@ class FilterModel(db.Model):
     project = db.relationship('Project', backref=db.backref('filters', cascade="all, delete"))
 
 
+class LLM(db.Model):
+    __tablename__ = 'llms'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text)
+    api_key = db.Column(db.Text)
+    settings = db.Column(db.Text)
+    base_url = db.Column(db.Text)
+    users = db.relationship('User', backref='llm')
+    
+    def __repr__(self):
+        return f'<LLM {self.name}>'
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     
@@ -92,6 +106,11 @@ class User(db.Model, UserMixin):
     is_confirmed = db.Column(db.Boolean, default=False)
     confirm_token = db.Column(db.String(100), nullable=True)
     subscription = db.relationship('Subscription', back_populates='user', uselist=False)
+    
+    # changed @1nov
+    llm_id = db.Column(db.Integer, db.ForeignKey('llms.id'), default=0)
+    tooltips = db.Column(db.Boolean, default=True)
+    recommendations = db.Column(db.Boolean, default=True)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -100,12 +119,6 @@ class User(db.Model, UserMixin):
     def active_subscription(self):
         return self.subscription if self.subscription and self.subscription.is_active else None
         
-class OAuth(OAuthConsumerMixin, db.Model):
-    __tablename__ = 'oauth'
-    
-    provider_user_id = db.Column(db.String(256), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-    user = db.relationship(User)
 
 class ProfileModel(db.Model):
     __tablename__ = 'profiles'
@@ -129,7 +142,7 @@ class ProfileModel(db.Model):
     marital_status = db.Column(db.String(255), nullable=False)
 
     big_five_ocean_profile = db.Column(db.String(5), nullable=True)
-    enneagram_profile = db.Column(db.Integer, nullable=True)
+    children = db.Column(db.Integer, nullable=True)
     mbti_profile = db.Column(db.String(4), nullable=True)
     personal_values = db.Column(db.String, nullable=True)
     hobbies = db.Column(db.String, nullable=True)
@@ -197,7 +210,7 @@ class QueryTemplate(db.Model):
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(255), nullable=False, default="New Survey")
-    query_text = db.Column(db.String, nullable=True)
+    query_text = db.Column(db.Text, nullable=True)
     schema = db.Column(db.Text, nullable=False)
     customizable_parameters = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -215,7 +228,7 @@ class SurveyTemplate(db.Model):
     context_prompt = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     query_templates = db.relationship('QueryTemplate', secondary=survey_template_query_template, backref="survey_templates")
-    project_surveys = db.relationship('ProjectSurvey', back_populates='survey_template')
+    project_surveys = db.relationship('ProjectSurvey', back_populates='survey_template', cascade='all, delete-orphan' )
     
     def __init__(self, name="New Survey", description=None, context_prompt=None, user_id=None, query_templates=None):
         self.name = name
@@ -240,7 +253,7 @@ class ProjectSurvey(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
-    survey_template_id = db.Column(db.Integer, db.ForeignKey('survey_templates.id'), nullable=False)
+    survey_template_id = db.Column(db.Integer, db.ForeignKey('survey_templates.id', ondelete='CASCADE'), nullable=False)
     survey_alias = Column(String, nullable=True)
     completion_percentage = Column(Integer, nullable=True)
     segment_id = db.Column(db.Integer, db.ForeignKey('filters.id'), nullable=False)

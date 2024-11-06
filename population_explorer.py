@@ -137,7 +137,7 @@ def get_marital_status(profiles):
 def get_hobbies(profiles):
     all_hobbies = []
     for profile in profiles:
-        if profile.hobbies:  # Check if hobbies field is not empty
+        if profile.hobbies and profile.hobbies != 'N/A':  # Check if hobbies field is not empty
             hobbies = [hobby.strip() for hobby in profile.hobbies.split(',')]
             all_hobbies.extend(hobbies)
     
@@ -154,7 +154,7 @@ def get_hobbies(profiles):
         }
     
     # Select top 6 hobbies by frequency
-    top_hobbies = hobby_counts.most_common(6)
+    top_hobbies = hobby_counts.most_common(15)
     
     # Calculate the percentage of hobby mentions
     total_hobby_mentions = sum(count for _, count in top_hobbies)

@@ -1,38 +1,126 @@
-{% extends 'base.html' %}
-
-{% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
-{% endblock %}
-
+{% extends 'base.html' %} 
 {% block content %}
+
 <div class="container-fluid">
-    
-    <div class="row">
-        <!-- Main Content Area -->
-        <main class="col ps-md-0 pt-0">
+   <div class="row">
+       <div class="col ps-md-0 pt-0" role="main">
+           <div class="row g-3">
+               <div class="col-12">
+                   <div class="card bg-gradient">
+                       <div class="card-body">
+                           <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/illustrations/cogwheel_decoration.png') }}); background-position: calc(100% - 40px) center;">
+                           </div>
+                           <h2 class="card-title mb-0">Settings</h2>
+                           <p>You can choose your preferred LLM used for survey generation and configure general settings</p>
+                       </div>
+                   </div>
+               </div>
 
-            <!-- Content Sections -->
-            <div class="row g-3">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h1 class="h3 mb-0">Settings</h1>
-                            <p>Adjust your account settings here.</p>
-                        </div>
-                    </div>
-                </div>
+               <div class="col-12">
+                   <div class="card h-100">
+                       <div class="card-body">
+                           <form id="preferencesForm" action="{{ url_for('dashboard_bp.update_preferences') }}" method="POST">
+                               <input type="hidden" name="llm_id" id="llm_id" value="{{ current_user.llm_id }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                               <div class="row g-3">
+                                   {% for llm in llms %}
+                                   <div class="col-md-4">
+                                       <div class="card h-100">
+                                           <div class="bg-holder bg-card position-absolute w-100 h-100" style="background-image: url({{ url_for('static', filename='assets/img/illustrations/half-circle.png') }}); background-size: cover; background-position: center; pointer-events: none; z-index: 0;"></div>
+                                           <div class="position-relative" style="height: 66%; z-index: 1;"><img src="{{ url_for('static', filename='assets/img/illustrations/llm_' ~ ('openai' if llm.id == 0 else 'mistral' if llm.id == 1 else 'nvidia') ~ '.png') }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ llm.name }}"></div>
 
-                <div class="col-12">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <p class="card-text">No settings can be adjusted at the moment</p>
-                        </div>
-                    </div>
-                </div>
+                                           <div class="card-body d-flex flex-column position-relative" style="z-index: 1;">
+                                               <div class="text-center">
+                                                   <h5 class="mb-2">{{ llm.name }}</h5>
+                                                   <p>{{ llm.description }}</p>
+                                               </div>
+                                               <div class="text-end mt-auto">
+                                                   {% if current_user.llm_id == llm.id %}
+                                                       <button type="button" class="btn btn-outline-secondary me-6 mb-3" disabled>Selected</button>
+                                                   {% else %}
+                                                       <button type="button" class="btn btn-outline-primary me-7 mb-3" onclick="selectLLM({{ llm.id }})">Select</button>
+                                                   {% endif %}
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   {% endfor %}
+                               </div>
 
-            </div>
-        </main>
-    </div>
+                               <div class="row g-3 mt-2">
+                                   <div class="col-12">
+                                       <div class="card">
+                                           <div class="card-body">
+                                               <h2 class="card-title mb-0">General preferences</h2>
+                                               <div class="d-flex justify-content-between align-items-center mt-3">
+                                                   <div class="form-check d-flex flex-column gap-2">
+                                                       <div class="form-check form-switch">
+                                                           <input class="form-check-input" type="checkbox" 
+                                                               name="tooltips" id="tooltips" 
+                                                               {% if current_user.tooltips %}checked{% endif %}>
+                                                           <label class="form-check-label" for="tooltips">
+                                                               Show guiding tool-tips
+                                                           </label>
+                                                       </div>
+
+                                                       <div class="form-check form-switch">
+                                                           <input class="form-check-input" type="checkbox" 
+                                                               name="recommendations" id="recommendations"
+                                                               {% if current_user.recommendations %}checked{% endif %}>
+                                                           <label class="form-check-label" for="recommendations">
+                                                               Show recommendations
+                                                           </label>
+                                                       </div>
+                                                   </div>
+                                                   <button type="submit" class="btn btn-primary">Save Preferences</button>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                               
+                           </form>
+                           
+                       </div>
+                   </div>
+               </div>
+               
+               
+           </div>
+       </div>
+   </div>
 </div>
 
+
+<script>
+function selectLLM(llmId) {
+    // Create form data
+    const formData = new FormData();
+    formData.append('llm_id', llmId);
+    formData.append('tooltips', document.getElementById('tooltips').checked ? 'on' : 'off');
+    formData.append('recommendations', document.getElementById('recommendations').checked ? 'on' : 'off');
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+    // Submit using fetch
+    fetch('{{ url_for("dashboard_bp.update_preferences") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-Token': document.querySelector('input[name="csrf_token"]').value
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Reload the page to show the new selection
+            window.location.reload();
+        } else {
+            throw new Error('Failed to update LLM selection');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update LLM selection. Please try again.');
+    });
+}
+</script>
 {% endblock %}

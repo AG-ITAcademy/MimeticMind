@@ -56,12 +56,12 @@
             <div class="h-100 text-center p-4">
               <h3 class="fw-normal text-white">Advanced</h3>
               <p class="mt-3 text-white-50">Go beyond the basics: more tools and advanced analytics for better results</p>
-              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="advancedPrice" data-yearly="99" data-monthly="9">99</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="advancedPrice" data-yearly="150" data-monthly="15">150</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
                 <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
                   <input type="hidden" name="tier" value="ADVANCED">
                   <input type="hidden" name="billing_cycle" value="yearly" class="billing-cycle-input">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" name="tier" value="ADVANCED" class="btn btn-primary">
+                  <button type="submit" name="tier" value="ADVANCED" class="btn btn-primary disabled">
                     {% if not current_user.is_authenticated %}
                       Sign Up
                     {% elif current_user.subscription and current_user.subscription.tier == 'ADVANCED' %}
@@ -88,12 +88,12 @@
             <div class="h-100 text-center p-4">
               <h3 class="fw-normal text-white">Enterprise</h3>
               <p class="mt-3 text-white-50">Maximize impact with enterprise-level market intelligence</p>
-              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="499" data-monthly="49">499</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
+              <h2 class="fw-medium my-4 text-white"><sup class="fw-normal fs-7 me-1">$</sup><span id="enterprisePrice" data-yearly="999" data-monthly="99">999</span><small class="fs-10 text-white-50">/ <span class="billing-period">year</span></small></h2>
                 <form action="{{ url_for('subscription_bp.set_subscription') }}" method="POST">
                   <input type="hidden" name="tier" value="ENTERPRISE">
                   <input type="hidden" name="billing_cycle" value="yearly" class="billing-cycle-input">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <button type="submit" name="tier" value="ENTERPRISE" class="btn btn-outline-light">
+                  <button type="submit" name="tier" value="ENTERPRISE" class="btn btn-outline-light disabled">
                     {% if not current_user.is_authenticated %}
                       Sign Up
                     {% elif current_user.subscription and current_user.subscription.tier == 'ENTERPRISE' %}

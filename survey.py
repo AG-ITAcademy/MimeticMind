@@ -9,7 +9,7 @@ from datetime import datetime
 from celery import group, chord, shared_task
 from celery_app import celery
 from profile import Profile
-from models import ProjectSurvey
+from models import ProjectSurvey, Population
 import redis
 
 
@@ -33,6 +33,7 @@ def collect_results(result_parameters):
                 interaction_timestamp=datetime.utcnow()
             )
 
+            print('*** '+str(result)+' ***')
             # Step 3: Add the interaction to the session
             session.add(interaction)
 
@@ -86,21 +87,39 @@ def process_survey_results(results):
     return result_parameters
 
 class Survey:
-    # DE ELIMINAT CUSTOM PARAMETERS !!!
     def __init__(self, filter_obj: Filter, session: Session, survey_template: SurveyTemplate, custom_parameters_dict: dict = None):
         self.filter = filter_obj
         self.session = session
         self.survey_template = survey_template
         self.custom_parameters_dict = custom_parameters_dict or {}
 
-    def get_filtered_profiles(self):
+    def get_filtered_profiles(self, project_survey_id=None):
         query = self.session.query(ProfileModel)
+        query = query.join(
+            Interaction, 
+            ProfileModel.id == Interaction.profile_id, 
+            isouter=True
+        ).join(
+            ProjectSurvey, 
+            ProjectSurvey.id == project_survey_id
+        ).join(
+            Project, 
+            Project.id == ProjectSurvey.project_id
+        ).join(
+            Population, 
+            Project.population_id == Population.id
+        ).filter(
+            ProfileModel.tags.contains(Population.tag)  
+        )
+        
+        # Apply the existing filters
         query = self.filter.apply_filters(query)
+        
         return query.all()
 
     def run_survey(self, project_survey_id=None):
         cleanup_survey_data(project_survey_id)
-        filtered_profiles = self.get_filtered_profiles()
+        filtered_profiles = self.get_filtered_profiles(project_survey_id)
         return self._survey_profiles(filtered_profiles, project_survey_id=project_survey_id)
 
     def _survey_profiles(self, filtered_profiles, project_survey_id=None):

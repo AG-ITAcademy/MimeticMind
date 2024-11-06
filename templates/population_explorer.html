@@ -6,7 +6,7 @@
 <div class="container-fluid mt-0 ps-0 pe-0">
     <div class="row g-3">
         <div class="col-12">
-            <div class="card">
+            <div class="card bg-gradient">
                 <div class="card-body">
                     <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/illustrations/crm-bar-chart.png') }});"></div>
                     <div class="d-flex justify-content-between">
@@ -14,7 +14,11 @@
                             <h2 class="card-title">Population Explorer: {{ population.name }}</h2>
                             <p>{{ population.description }}</p>
                         </div>
-                        <div data-countup='{"endValue":{{ profiles|length }}}' class="text-end fs-8 me-4">0</div>
+                        <div class="mt-0">
+                        <p class="fs-10 mb-0 me-1">individuals:</p>
+                        <div data-countup='{"endValue":{{ profiles|length }}}' class="text-end fs-10 me-4">0</div>
+                        
+                        </div>
                     </div>
                 </div>
             </div>
@@ -22,7 +26,7 @@
 
 
         <div class="col-12">
-            <div class="card">
+            <div class="card  bg-opacity-75">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-4">

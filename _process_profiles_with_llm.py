@@ -2,7 +2,7 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from profile_model import ProfileModel  
+from models import ProfileModel  
 from profile import Profile
 from openai import OpenAI
 from datetime import datetime
@@ -19,8 +19,8 @@ def _call_llm_for_name_and_persona(prompt):
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that generates a persona name and description.\n"},
-            {"role": "assistant", "content": "Always answer with persona name on the first line (no suffix, prefix or title, just the name) followed by a long-form, realistic persona description on the next line.\n"},
-            {"role": "assistant", "content": "Don't divide the answer into different sections and do not always provide happy stories\n "},
+            {"role": "assistant", "content": "Always answer with persona full name on the first line (no suffix, prefix or title, just the full name) followed by a long-form, realistic persona description on the next line.\n"},
+            {"role": "assistant", "content": "Don't divide the answer into different sections and be relistic, do not always provide happy stories\n "},
             {"role": "user", "content": "Generate a persona name and a description of this persona using all the provided traits and characteristics. Mention just the resulting traits, not the specific characteristics specified in the profile, like MBTI or OCEAN.\. Make sure you cover the most important aspects such as Psychographics, Behavioral patterns, Challenges/Pain points, Goals, Preferred communication channels, Influencers and sources of information, Technological proficiency and Buying triggers. Here is the profile: " + prompt}
         ]
     )
@@ -32,7 +32,7 @@ def _call_llm_for_typical_day(prompt):
         model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant that imagines a typical day for a given persona"},
-            {"role": "assistant", "content": "The response should provide a description of a typical day emphasizing the behaviours, usual Challenges/Pain points and habits. The description should not be divided into different sections and should not mention the specific characteristics specified in the profile."},
+            {"role": "assistant", "content": "The response should provide a description of a typical day, emphasizing the behaviours, usual Challenges/Pain points and habits. The description should not be divided into different sections and should not mention the specific characteristics specified in the profile."},
             {"role": "user", "content": "Generate the story of a typical day for this profile: " + prompt}
         ]
     )
@@ -77,7 +77,8 @@ def process_profiles(N):
         profile_record.profile_name = profile.profile_name
         session.add(profile_record)
     session.commit()
-N = 1
+    
+N = 1000
 process_profiles(N)
 
 print(f"LLM personas generated and saved for the first {N} profiles.")

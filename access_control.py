@@ -58,6 +58,10 @@ def confirm_reset_token(token, expiration=3600):
 @access_control_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        if not current_user.is_confirmed:
+            logout_user()
+            flash('Please confirm your account before logging in.', 'warning')
+            return redirect(url_for('access_control.login'))
         return redirect(url_for('dashboard_bp.dashboard'))
 
     form = LoginForm()
@@ -65,14 +69,16 @@ def login():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user and check_password_hash(user.password, form.password.data):
             if not user.is_confirmed:
-                flash('Please confirm your account before logging in. Check your email for the confirmation link.', 'warning')
-                return redirect(url_for('access_control.unconfirmed'))
+                flash('Check your email for the confirmation link or click Resend.', 'warning')
+                return redirect(url_for('access_control.unconfirmed', email=user.email))
+            
             login_user(user)
             flash('Logged in successfully.', 'success')
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('dashboard_bp.dashboard'))
         else:
             flash('Invalid email or password.', 'danger')
+    
     return render_template('login.html', form=form)
     
 @access_control_bp.route('/register', methods=['GET', 'POST'])
@@ -121,7 +127,7 @@ def confirm_email(token):
         email = confirm_token(token)
     except:
         flash('The confirmation link is invalid or has expired.', 'danger')
-        return redirect(url_for('access_control.unconfirmed'))
+        return redirect(url_for('access_control.login'))
 
     user = User.query.filter_by(email=email).first_or_404()
     if user.is_confirmed:
@@ -129,33 +135,34 @@ def confirm_email(token):
     else:
         user.is_confirmed = True
         db.session.commit()
-        flash('You have confirmed your account. Thanks!', 'success')
+        flash('Your account is confirmed. You may login now!', 'success')
     return redirect(url_for('access_control.login'))
 
 @access_control_bp.route('/unconfirmed')
-def unconfirmed():
+@access_control_bp.route('/unconfirmed/<email>')
+def unconfirmed(email=None):
     if current_user.is_authenticated and current_user.is_confirmed:
         return redirect(url_for('dashboard_bp.dashboard'))
-    return render_template('unconfirmed.html')
+    return render_template('unconfirmed.html', email=email)
     
 @access_control_bp.route('/resend_confirmation')
 def resend_confirmation():
-    if current_user.is_authenticated:
-        if current_user.is_confirmed:
-            flash('Your account is already confirmed.', 'info')
-            return redirect(url_for('dashboard_bp.dashboard'))
-        
-        token = generate_confirmation_token(current_user.email)
-        confirm_url = url_for('access_control.confirm_email', token=token, _external=True)
-        html = render_template('activate.html', confirm_url=confirm_url)
-        subject = "Please confirm your email"
-        send_email(current_user.email, subject, html)
-        flash('A new confirmation email has been sent.', 'success')
-    else:
-        flash('Please log in to resend the confirmation email.', 'warning')
+    email = request.args.get('email')
+    if not email:
+        flash('Email address is required.', 'danger')
         return redirect(url_for('access_control.login'))
     
-    return redirect(url_for('access_control.unconfirmed'))
+    user = User.query.filter_by(email=email).first()
+    if not user or user.is_confirmed:
+        return redirect(url_for('access_control.login'))
+    
+    token = generate_confirmation_token(user.email)
+    confirm_url = url_for('access_control.confirm_email', token=token, _external=True)
+    html = render_template('activate.html', confirm_url=confirm_url)
+    subject = "Please confirm your email"
+    send_email(user.email, subject, html)
+    flash('A new confirmation email has been sent.', 'success')
+    return redirect(url_for('access_control.login'))
     
 @access_control_bp.route('/reset', methods=['GET', 'POST'])
 def reset_request():

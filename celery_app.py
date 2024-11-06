@@ -22,9 +22,18 @@ celery.conf.update(
 )
 
 celery.conf.result_extended = True  # Ensures result tracking for chord tasks
-#celery.conf.task_annotations = {
-#    'celery.chord_unlock': {'rate_limit': '10/m'},  # Ensures chord unlock task isn't failing
-#}
+celery.conf.task_annotations = {
+    'profile.query_LLM': {
+        'rate_limit': '20/m',
+        'max_retries': 5,
+        'retry_backoff': True,
+        'retry_backoff_max': 3600,  # 1 hour max delay
+        'autoretry_for': (Exception,),  # Auto-retry for all exceptions
+    },
+    'celery.chord_unlock': {
+        'rate_limit': '10/m'
+    }
+}
 
 # Set up logging manually
 logger = logging.getLogger('celery')

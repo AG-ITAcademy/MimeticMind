@@ -13,7 +13,7 @@ from sqlalchemy import func
 from survey import Survey, get_survey_progress
 
 
-# Create a Blueprint for project-related routes
+# Blueprint for project-related routes
 projects_bp = Blueprint('projects_bp', __name__)
 csrf = CSRFProtect()
 
@@ -38,7 +38,7 @@ def project_dashboard(project_id):
 
     segments = FilterModel.query.filter_by(project_id=project.id).all()
     form = SegmentCreationForm()
-    #survey_templates = SurveyTemplate.query.all()
+
     survey_templates = SurveyTemplate.query.filter_by(user_id=current_user.id).all()
     
     FilterAlias = aliased(FilterModel)
@@ -51,7 +51,10 @@ def project_dashboard(project_id):
         
     for survey in project_surveys:
         segment = db.session.query(FilterModel).filter_by(id=survey.segment_id).first()
+        survey.template = db.session.query(SurveyTemplate.name).filter_by(id=survey.survey_template_id).scalar()
         survey.segment_alias = segment.alias if segment else None
+        survey.is_running = (survey.completion_percentage == 0)
+        
   
     completed_surveys = db.session.query(ProjectSurvey).filter(
         ProjectSurvey.project_id == project_id,
@@ -203,14 +206,12 @@ def remove_segment(project_id, segment_id):
 @projects_bp.route('/project/<int:project_id>/create_survey', methods=['POST'])
 @login_required
 def create_survey(project_id):
-    survey_alias = request.form.get('survey_alias')
+    
     template_id = request.form.get('template_id')
+    template_name = db.session.query(SurveyTemplate.name).filter_by(id=template_id).scalar()
     segment_id = request.form.get('segment_id')
-
-    # Ensure the segment_id is provided
-    if not segment_id:
-        flash('You must select a population segment.', 'warning')
-        return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+    segment_name = db.session.query(FilterModel.alias).filter_by(id=segment_id).scalar()
+    survey_alias = template_name +' --> '+segment_name
 
     # Check if a survey with the same template and segment already exists for this project
     existing_survey = ProjectSurvey.query.filter_by(
@@ -272,6 +273,7 @@ def run_survey(project_id, survey_id):
     
     # Step 4: Count respondents and calculate interactions
     query = db.session.query(func.count(ProfileModel.id))
+    query = query.filter(ProfileModel.tags.contains(project.population.tag))
     filtered_query = applied_filter.apply_filters(query)
     respondents_count = filtered_query.scalar()
     interactions_count = respondents_count * len(survey_template.query_templates)
@@ -322,19 +324,26 @@ def survey_progress(project_survey_id):
 @login_required
 def available_results(project_id):
     project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
-    completed_surveys = db.session.query(ProjectSurvey).filter(
-        ProjectSurvey.project_id == project_id,
-        ProjectSurvey.completion_percentage == 100
+    
+    # Get both completed and in-progress surveys
+    all_surveys = db.session.query(ProjectSurvey).filter(
+        ProjectSurvey.project_id == project_id
     ).all()
+    
+    completed_surveys = [s for s in all_surveys if s.completion_percentage == 100]
+    in_progress_surveys = [s for s in all_surveys if s.completion_percentage is not None 
+                          and s.completion_percentage > 0 
+                          and s.completion_percentage < 100]
     
     project_population = None
     if project.population_id:
         project_population = Population.query.filter_by(id=project.population_id).first()
-
+        
     return render_template('_available_results.html', 
-                           completed_surveys=completed_surveys, 
-                           project_id=project_id,
-                           project_population=project_population)
+                         completed_surveys=completed_surveys,
+                         in_progress_surveys=in_progress_surveys,
+                         project_id=project_id,
+                         project_population=project_population)
                            
 @projects_bp.route('/projects/<int:project_id>/rename', methods=['POST'])
 @login_required

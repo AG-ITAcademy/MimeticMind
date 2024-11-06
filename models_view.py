@@ -12,6 +12,7 @@ class CompletedSurvey(Base):
     project_id = Column(Integer)
     segment_id = Column(Integer)
     created_at = Column(DateTime)
+    credits = Column(Integer)
 
 class CompletedSurveyQuestion(Base):
     __tablename__ = 'vw_completed_survey_questions'
