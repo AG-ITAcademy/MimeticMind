@@ -1,4 +1,4 @@
-from models import ProfileModel
+from models import ProfileView
 from sqlalchemy import and_, or_, between
 from datetime import datetime
 
@@ -25,12 +25,12 @@ class Filter:
         if self.tags:
             if isinstance(self.tags, str):
                 self.tags = [self.tags]
-            query = query.filter(ProfileModel.tags.ilike(f"%{self.tags}%"))
+            query = query.filter(ProfileView.tags.ilike(f"%{self.tags}%"))
 
         if self.gender:
             if isinstance(self.gender, str):
                 self.gender = [self.gender]
-            query = query.filter(ProfileModel.gender.in_(self.gender))
+            query = query.filter(ProfileView.gender.in_(self.gender))
 
         if self.age_interval:
             # Set defaults if either age_min or age_max is None
@@ -41,52 +41,52 @@ class Filter:
             if not (self.age_interval[0] is None and self.age_interval[1] is None):
                 min_date = datetime.now().date().replace(year=datetime.now().year - age_max)
                 max_date = datetime.now().date().replace(year=datetime.now().year - age_min)
-                query = query.filter(ProfileModel.birth_date.between(min_date, max_date))
+                query = query.filter(ProfileView.birth_date.between(min_date, max_date))
 
         if self.location:
             if isinstance(self.location, str):
                 self.location = [self.location]
-            query = query.filter(or_(*[ProfileModel.location.ilike(f"%{loc}%") for loc in self.location]))
+            query = query.filter(or_(*[ProfileView.location.ilike(f"%{loc}%") for loc in self.location]))
 
         if self.education_level:
             if isinstance(self.education_level, str):
                 self.education_level = [self.education_level]
-            query = query.filter(ProfileModel.education_level.in_(self.education_level))
+            query = query.filter(ProfileView.education_level.in_(self.education_level))
 
         if self.occupation:
             if isinstance(self.occupation, str):
                 self.occupation = [self.occupation]
-            query = query.filter(ProfileModel.occupation.in_(self.occupation))
+            query = query.filter(ProfileView.occupation.in_(self.occupation))
 
         if self.income_range:
             if isinstance(self.income_range, str):
                 self.income_range = [self.income_range]
-            query = query.filter(ProfileModel.income_range.in_(self.income_range))
+            query = query.filter(ProfileView.income_range.in_(self.income_range))
 
         if self.ethnicity:
             if isinstance(self.ethnicity, str):
                 self.ethnicity = [self.ethnicity]
-            query = query.filter(ProfileModel.ethnicity.in_(self.ethnicity))
+            query = query.filter(ProfileView.ethnicity.in_(self.ethnicity))
 
         if self.religion:
             if isinstance(self.religion, str):
                 self.religion = [self.religion]
-            query = query.filter(ProfileModel.religion.in_(self.religion))
+            query = query.filter(ProfileView.religion.in_(self.religion))
 
         if self.health_status:
             if isinstance(self.health_status, str):
                 self.health_status = [self.health_status]
-            query = query.filter(ProfileModel.health_status.in_(self.health_status))
+            query = query.filter(ProfileView.health_status.in_(self.health_status))
 
         if self.legal_status:
             if isinstance(self.legal_status, str):
                 self.legal_status = [self.legal_status]
-            query = query.filter(ProfileModel.legal_status.in_(self.legal_status))
+            query = query.filter(ProfileView.legal_status.in_(self.legal_status))
 
         if self.marital_status:
             if isinstance(self.marital_status, str):
                 self.marital_status = [self.marital_status]
-            query = query.filter(ProfileModel.marital_status.in_(self.marital_status))
+            query = query.filter(ProfileView.marital_status.in_(self.marital_status))
 
         return query
 

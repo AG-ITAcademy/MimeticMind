@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, g, jsonify, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user, login_required
-from models import db, User, Project, ProfileModel, Population, SurveyTemplate, SubscriptionTier, Subscription
+from models import db, User, Project,  Population, SurveyTemplate, SubscriptionTier, Subscription
 import os
 from flask_migrate import Migrate
 from flask_mail import Mail
@@ -43,12 +43,15 @@ def load_user(user_id):
 @app.context_processor
 def inject_global_vars():
     subscription_info = None
+    show_tooltips=False
     if current_user.is_authenticated:
         subscription_info = current_user.subscription
+        show_tooltips = current_user.tooltips
     return dict(
         projects=g.projects if hasattr(g, 'projects') else [],
         populations=Population.query.all(),
-        subscription_info=subscription_info
+        subscription_info=subscription_info,
+        show_tooltips=show_tooltips
     )
 
 # register additional blueprints

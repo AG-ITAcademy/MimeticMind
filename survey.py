@@ -9,8 +9,9 @@ from datetime import datetime
 from celery import group, chord, shared_task
 from celery_app import celery
 from profile import Profile
-from models import ProjectSurvey, Population
+from models import ProjectSurvey, Population, FilterModel
 import redis
+from vector_utils import VectorSearch
 
 
 def collect_results(result_parameters):
@@ -87,33 +88,50 @@ def process_survey_results(results):
     return result_parameters
 
 class Survey:
-    def __init__(self, filter_obj: Filter, session: Session, survey_template: SurveyTemplate, custom_parameters_dict: dict = None):
+    def __init__(self, filter_obj: Filter, session: Session, survey_template: SurveyTemplate, 
+                 custom_parameters_dict: dict = None, max_respondents: int = None):
         self.filter = filter_obj
         self.session = session
         self.survey_template = survey_template
         self.custom_parameters_dict = custom_parameters_dict or {}
+        self.max_respondents = max_respondents
+        self.vector_search = VectorSearch()  # Initialize VectorSearch
 
     def get_filtered_profiles(self, project_survey_id=None):
+        # Get project survey and associated project/population
+        project_survey = self.session.query(ProjectSurvey).filter_by(id=project_survey_id).first()
+        project = self.session.query(Project).filter_by(id=project_survey.project_id).first()
+        population = project.population
+
+        # Start with base query
         query = self.session.query(ProfileModel)
-        query = query.join(
-            Interaction, 
-            ProfileModel.id == Interaction.profile_id, 
-            isouter=True
-        ).join(
-            ProjectSurvey, 
-            ProjectSurvey.id == project_survey_id
-        ).join(
-            Project, 
-            Project.id == ProjectSurvey.project_id
-        ).join(
-            Population, 
-            Project.population_id == Population.id
-        ).filter(
-            ProfileModel.tags.contains(Population.tag)  
-        )
         
-        # Apply the existing filters
+        # Filter by population tag
+        query = query.filter(ProfileModel.tags.contains(population.tag))
+        
+        # Apply standard filters
         query = self.filter.apply_filters(query)
+        
+        # Get the filter model to check for AI filter
+        filter_model = self.session.query(FilterModel).filter_by(id=project_survey.segment_id).first()
+        
+        # If there's an AI filter, apply vector search
+        if filter_model and filter_model.ai_filter:
+            profile_ids = self.vector_search.find_similar_profiles_from_query(
+                query=filter_model.ai_filter,
+                base_query=query,
+                similarity_threshold=0.32  
+            )
+            # Filter the query to only include matched profiles
+            if profile_ids:
+                query = query.filter(ProfileModel.id.in_(profile_ids))
+            else:
+                # If no profiles match the AI filter, return empty list
+                return []
+        
+        # Apply respondent limit
+        if self.max_respondents is not None:
+            query = query.limit(self.max_respondents)
         
         return query.all()
 
@@ -132,6 +150,7 @@ class Survey:
         # Set the total number of tasks in Redis and reset completed tasks
         r.set(f"survey_total_tasks_{project_survey_id}", total_tasks)
         r.set(f"survey_completed_tasks_{project_survey_id}", 0)
+        
         # Retrieve the user_id associated with the project
         project_survey = self.session.query(ProjectSurvey).filter_by(id=project_survey_id).first()
         project = self.session.query(Project).filter_by(id=project_survey.project_id).first()
@@ -139,7 +158,7 @@ class Survey:
         for profile_model in filtered_profiles:
             profile = Profile.from_model(self.session, profile_model)
             for query_template in query_templates:
-                # Enqueue the query with the retrieved user_id
+                # Enqueue the query
                 task = profile.enqueue_query(
                     user_id=user_id,
                     profile_id=profile_model.id,
@@ -158,7 +177,12 @@ class Survey:
         
 def get_survey_progress(project_survey_id):
     r = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
-    total_tasks = int(r.get(f"survey_total_tasks_{project_survey_id}") or 0)
+    total_tasks_raw = r.get(f"survey_total_tasks_{project_survey_id}")
+    
+    if total_tasks_raw is None:  # Survey hasn't started yet
+        return None
+        
+    total_tasks = int(total_tasks_raw)
     completed_tasks = int(r.get(f"survey_completed_tasks_{project_survey_id}") or 0)
     
     if total_tasks == 0:

@@ -1,15 +1,16 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from markupsafe import Markup
 from flask_login import login_required, current_user
-from models import db, Project,  ProfileModel, FilterModel, SurveyTemplate, ProjectSurvey, Population
+from models import db, Project,  FilterModel, SurveyTemplate, ProjectSurvey, Population, ProfileView, ProfileModel
 from filter_utils import populate_filter_form_choices, apply_filters_to_query, create_segment_from_form
 from filter import Filter
-from forms import ProjectForm, SegmentCreationForm
+from forms import ProjectForm,  FilterForm
 from flask_wtf.csrf import CSRFProtect
 from config import Config
 import redis
 from sqlalchemy.orm import aliased
 from sqlalchemy import func
+from vector_utils import VectorSearch
 from survey import Survey, get_survey_progress
 
 
@@ -34,10 +35,20 @@ def project_dashboard(project_id):
                 'population_tag': current_population.tag,
                 'population': current_population
             })()
-            total_profiles = ProfileModel.query.filter(ProfileModel.tags.contains(current_population.tag)).count()
+            total_profiles = ProfileView.query.filter(ProfileView.tags.contains(current_population.tag)).count()
 
     segments = FilterModel.query.filter_by(project_id=project.id).all()
-    form = SegmentCreationForm()
+
+    # calculate the number of profiles in each segment
+    for segment in segments:
+        filter_obj = Filter.from_model(segment)
+        base_query = ProfileView.query
+        if project_population:
+            base_query = base_query.filter(ProfileView.tags.contains(project_population.population_tag))
+        filtered_query = filter_obj.apply_filters(base_query)
+        segment.total_profiles = filtered_query.count()
+        
+    form = FilterForm()
 
     survey_templates = SurveyTemplate.query.filter_by(user_id=current_user.id).all()
     
@@ -46,7 +57,7 @@ def project_dashboard(project_id):
     project_surveys = db.session.query(ProjectSurvey)\
         .outerjoin(FilterAlias, ProjectSurvey.segment_id == FilterAlias.id)\
         .filter(ProjectSurvey.project_id == project_id)\
-        .order_by(ProjectSurvey.survey_alias.asc())\
+        .order_by(ProjectSurvey.id.asc())\
         .all()
         
     for survey in project_surveys:
@@ -54,7 +65,6 @@ def project_dashboard(project_id):
         survey.template = db.session.query(SurveyTemplate.name).filter_by(id=survey.survey_template_id).scalar()
         survey.segment_alias = segment.alias if segment else None
         survey.is_running = (survey.completion_percentage == 0)
-        
   
     completed_surveys = db.session.query(ProjectSurvey).filter(
         ProjectSurvey.project_id == project_id,
@@ -88,7 +98,7 @@ def create_project():
     if active_projects_count >= current_user.subscription.max_projects:
         upgrade_button = Markup('<a href="{}" class="btn btn-sm btn-primary">Upgrade Plan</a>'.format(url_for('pricing')))
         flash(Markup(f"You have reached the maximum number of projects ({current_user.subscription.max_projects}) allowed for your subscription tier. Please upgrade your plan to create more projects. {upgrade_button}"), "warning")
-        return redirect(url_for('dashboard_bp.dashboard'))  # Or redirect to an appropriate page
+        return redirect(url_for('dashboard_bp.dashboard'))  
 
     if form.validate_on_submit():
         new_project = Project(
@@ -128,7 +138,7 @@ def apply_population(project_id):
 @login_required
 def define_segments(project_id):
     project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
-    form = SegmentCreationForm()
+    form = FilterForm()
 
     project_population = None
     if project.population_id:
@@ -150,11 +160,9 @@ def define_segments(project_id):
     else:
         print("Form validation failed:", form.errors)
 
-    # If form validation fails, re-render the dashboard with errors
-    # We need to fetch all the data needed for the dashboard template
     projects = Project.query.filter_by(user_id=current_user.id, status='active').all()
     populations = Population.query.all()
-    total_profiles = ProfileModel.query.filter(ProfileModel.tags.contains(project_population.population_tag)).count() if project_population else 0
+    total_profiles = ProfileView.query.filter(ProfileView.tags.contains(project_population.population_tag)).count() if project_population else 0
     segments = FilterModel.query.filter_by(project_id=project.id).all()
     survey_templates = SurveyTemplate.query.all()
     project_surveys = ProjectSurvey.query.filter_by(project_id=project_id).order_by(ProjectSurvey.survey_alias.asc()).all()
@@ -206,29 +214,30 @@ def remove_segment(project_id, segment_id):
 @projects_bp.route('/project/<int:project_id>/create_survey', methods=['POST'])
 @login_required
 def create_survey(project_id):
-    
     template_id = request.form.get('template_id')
     template_name = db.session.query(SurveyTemplate.name).filter_by(id=template_id).scalar()
     segment_id = request.form.get('segment_id')
     segment_name = db.session.query(FilterModel.alias).filter_by(id=segment_id).scalar()
     survey_alias = template_name +' --> '+segment_name
-
+    respondents = request.form.get('max_respondents', type=int)
+   
     # Check if a survey with the same template and segment already exists for this project
     existing_survey = ProjectSurvey.query.filter_by(
         project_id=project_id,
         survey_template_id=template_id,
         segment_id=segment_id
     ).first()
-
+ 
     if existing_survey:
         flash('A survey with the same template and segment already exists for this project.', 'warning')
     else:
-        # Create the new survey and set completion_percentage to 0
+        # Create the new survey and set completion_percentage to null
         new_survey = ProjectSurvey(
             project_id=project_id,
             survey_template_id=template_id,
             survey_alias=survey_alias,
-            segment_id=segment_id
+            segment_id=segment_id,
+            respondents=respondents
         )
         db.session.add(new_survey)
         db.session.commit()
@@ -272,10 +281,26 @@ def run_survey(project_id, survey_id):
     survey_template = SurveyTemplate.query.filter_by(id=project_survey.survey_template_id).first_or_404()
     
     # Step 4: Count respondents and calculate interactions
-    query = db.session.query(func.count(ProfileModel.id))
-    query = query.filter(ProfileModel.tags.contains(project.population.tag))
+    query = db.session.query(ProfileView)
+    query = query.filter(ProfileView.tags.contains(project.population.tag))
     filtered_query = applied_filter.apply_filters(query)
-    respondents_count = filtered_query.scalar()
+    
+    if filter_model.ai_filter:
+        # If there's an AI filter, check vector search results
+        vector_search = VectorSearch()
+        profile_ids = vector_search.find_similar_profiles_from_query(
+            query=filter_model.ai_filter,
+            base_query=filtered_query,
+            similarity_threshold=0.32 # this will be customizable in the future
+        )
+        if not profile_ids:
+            flash(f'No profiles match the AI filter criteria for survey "{project_survey.survey_alias}".', 'warning')
+            return redirect(url_for('projects_bp.project_dashboard', project_id=project_id))
+        filtered_query = filtered_query.filter(ProfileView.id.in_(profile_ids))
+    
+    # Add limit to the query before counting
+    limited_query = filtered_query.limit(project_survey.respondents)
+    respondents_count = limited_query.count()
     interactions_count = respondents_count * len(survey_template.query_templates)
     
     # Step 5: Check subscription limits
@@ -300,8 +325,8 @@ def run_survey(project_id, survey_id):
     current_user.subscription.remaining_interactions -= interactions_count
     db.session.commit()
     
-    # Step 6: Run the survey using the Survey class
-    survey = Survey(applied_filter, db.session, survey_template, custom_parameters_dict={})
+    # Step 6: Run the survey using the Survey class and applying the max_respondents limit
+    survey = Survey(applied_filter, db.session, survey_template, custom_parameters_dict={}, max_respondents=project_survey.respondents)
     result = survey.run_survey(project_survey_id=survey_id)
     
     # Step 7: Provide feedback and redirect to the project dashboard
@@ -313,11 +338,11 @@ def run_survey(project_id, survey_id):
 @login_required
 def survey_progress(project_survey_id):
     progress = get_survey_progress(project_survey_id)
+    if progress is None:
+        return jsonify({'progress': None})
+        
     rounded_progress = round(progress / 5) * 5
-    
-    return jsonify({
-        'progress': int(rounded_progress)
-    })
+    return jsonify({'progress': int(rounded_progress)})
     
         
 @projects_bp.route('/project/<int:project_id>/available_results', methods=['GET'])

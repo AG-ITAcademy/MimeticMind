@@ -6,7 +6,10 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <h5 id="edit-survey" class="card-title">{% if survey and survey.id %}Edit Survey{% else %}Create New Survey{% endif %}</h5>
+            <h5 id="edit-survey" class="card-title">
+                {% if survey and survey.id %}Edit Survey{% else %}Create New Survey{% endif %}
+                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="Start by chosing a descriptive name for your survey. <hr>To keep track of your work it is also recommended to write a short description. <hr> Don't forget to add at least one question."><i class="fas fa-question-circle"></i></a>{% endif %}
+            </h5>
           <form id="surveyForm">
             {{ form.hidden_tag() }}
             <input type="hidden" id="survey_id" name="survey_id" value="{{ survey.id if survey else '' }}">
@@ -19,19 +22,22 @@
                 </div>
                 <div class="form-floating mb-0">
                   {{ form.context_prompt(class="form-control h-100", id="context_prompt", placeholder="Context Prompt", rows="4") }}
-                  <label for="context_prompt">Context Prompt</label>
+                  <label for="context_prompt">Context Prompt  (optional)</label>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-floating h-100">
                   {{ form.description(class="form-control h-100", id="description", placeholder="Survey Description") }}
-                  <label for="description">Survey Description</label>
+                  <label for="description">Survey Description  (optional)</label>
                 </div>
               </div>
             </div>
             
             
-            <h5 id="survey-questions" class="mt-4 mb-2">Survey Questions:</h5>
+            <h5 id="survey-questions" class="mt-4 mb-2">
+                Survey Questions:
+                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="When adding a question, try to keep it simple and be very specific about the type answer you expect. <hr>The second field allows you to select the answer schema. This will guide the model and ensure a correctly structured answer. <br>Possible values are: <ul><li><strong>ScaleSchema</strong> - used for Likert scale (1-5) type of answers</li><li><strong>OpenEndedSchema</strong> - used for open ended questions</li><li><strong>MultipleChoiceSchema</strong> - the answer will be one choice from a list of choices provided in the question</li><li><strong>YesNoSchema</strong> - used for closed questions</li><li><strong>RankingSchema</strong> - a list of items that were provided in the question will be ranked in order of importance</li></ul>"><i class="fas fa-question-circle"></i></a>{% endif %}
+            </h5>
             <div id="queryTemplates">
               {% if survey and survey.query_templates %}
                 {% for query in survey.query_templates %}

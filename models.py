@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, DateTime, String
+from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, DateTime, String, Float
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
@@ -7,6 +7,7 @@ from datetime import datetime
 import uuid
 from sqlalchemy.orm import Session , relationship
 from enum import Enum
+from sqlalchemy.dialects.postgresql import ARRAY
 
 db = SQLAlchemy()
 
@@ -75,7 +76,7 @@ class FilterModel(db.Model):
     marital_status = db.Column(db.String(255))
     income_range = db.Column(db.String(255))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
+    ai_filter= db.Column(db.Text, nullable=True)
     project = db.relationship('Project', backref=db.backref('filters', cascade="all, delete"))
 
 
@@ -150,8 +151,39 @@ class ProfileModel(db.Model):
     llm_persona = db.Column(db.Text, nullable=True)
     llm_typical_day = db.Column(db.Text, nullable=True)
 
+    llm_persona_embeddings = db.Column(ARRAY(Float), nullable=True)
+    llm_typical_day_embeddings = db.Column(ARRAY(Float), nullable=True)
+    llm_persona_chunks = db.Column(ARRAY(db.Text), nullable=True)
+    llm_typical_day_chunks = db.Column(ARRAY(db.Text), nullable=True)
+    
     # Relationship to interactions
     interactions = relationship('Interaction', back_populates='profile')
+
+class ProfileView(db.Model):
+    __tablename__ = 'vw_profiles'
+    __table_args__ = {'extend_existing': True}
+    
+    id = db.Column(db.Integer, primary_key=True)
+    profile_name = db.Column(db.String(255))
+    created_at = db.Column(db.Date)
+    version = db.Column(db.Float)
+    tags = db.Column(db.String)
+    birth_date = db.Column(db.Date)
+    gender = db.Column(db.String(10))
+    education_level = db.Column(db.String(255))
+    occupation = db.Column(db.String(255))
+    income_range = db.Column(db.String(50))
+    location = db.Column(db.String(255))
+    health_status = db.Column(db.String(255))
+    ethnicity = db.Column(db.String(255))
+    legal_status = db.Column(db.String(255))
+    religion = db.Column(db.String(255))
+    marital_status = db.Column(db.String(255))
+    big_five_ocean_profile = db.Column(db.String(5))
+    children = db.Column(db.Integer)
+    mbti_profile = db.Column(db.String(4))
+    personal_values = db.Column(db.String)
+    hobbies = db.Column(db.String)
 
 # Define Interaction model
 class Interaction(db.Model):
@@ -257,6 +289,7 @@ class ProjectSurvey(db.Model):
     survey_alias = Column(String, nullable=True)
     completion_percentage = Column(Integer, nullable=True)
     segment_id = db.Column(db.Integer, db.ForeignKey('filters.id'), nullable=False)
+    respondents = Column(Integer, nullable=True)
     
     project = db.relationship('Project', back_populates='project_surveys')
     survey_template = db.relationship('SurveyTemplate', back_populates='project_surveys')

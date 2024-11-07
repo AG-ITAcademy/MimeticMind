@@ -1,17 +1,16 @@
 Prioritate0:
 --------------
-- ***************** bug: acum ramane pe running cand dai attach survey!!!!
-- facut sa mearga structured output si mutata toata logica pe llamaindex sllm
-- pus slider pt. respondenti cu estimare de cost
+
 - facute niste template-uri de demo
-- sterse populatiile celelalte
-DACA e timp: 
-	- facute embeddings si stocate in db + filtru inteligent si retriever care trimite in survey doar portiunile relevante din llm_persona
-	- se pot filtra raspunsurile cu semantic deduplicator din nemo curator
-- comentat calumea codul
+
 **** !!!!!! BUG - mai trebuie lucrat la promptul pentru generatorul AI de survey-uri !!!!!!
-- urcat pe github + licenta nepermisva si actualizat pe productie
+DACA e timp: 
+	- se pot filtra raspunsurile cu semantic deduplicator din nemo curator si folosit AEGIS pentru filtrare continut ilegal
+- comentat calumea codul
+
+- urcat pe github si actualizat pe productie
 - facut filmuletul de demo si postat
+- submission
 
 -----------------------------------
 - facute paginile care lipsesc pe site + privacy policy
@@ -55,6 +54,7 @@ PHASE 2
 - redis nu cred ca e multi user, eventual facute instante cu id-ul userului in coada. Ba da merge dar se ruleaza pe rand. Ar trebui verificat de ce, si cum poate rula in paralel
 - implementat A/B testing
 - implementat Reports
+- retriever care trimite in survey doar portiunile relevante din llm_persona
 + sectiunea de settings
 	- optiuni pentru inference engine (ales LLM-ul)
 - de adaugat functie de editare la project description

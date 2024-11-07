@@ -4,8 +4,6 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from models import ProfileModel, QueryTemplate , Population, LLM, User
-from openai import OpenAI
-from groq import Groq
 import instructor
 from answer_schema import schema_mapping, MultipleChoiceSchema, OpenEndedSchema, YesNoSchema, ScaleSchema, RankingSchema, schema_mapping
 from pydantic import BaseModel
@@ -15,51 +13,35 @@ from celery import chord
 from celery_app import celery
 import redis
 import re
-from mistralai import Mistral
 from llama_index.llms.nvidia import NVIDIA
+from llama_index.llms.mistralai import MistralAI
+from llama_index.llms.openai import OpenAI
 from llama_index.core.llms import ChatMessage, MessageRole
 
 @celery.task
-def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int, model: str, llm_id: int, base_url: str, api_key: str, summary: str, query:str):
+def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int, model: str, llm_id: int, api_key: str, summary: str, query:str):
     messages_obj = json.loads(messages)
     schema_class = schema_mapping.get(schema)
     
+    system_prompt = next(item["content"] for item in messages_obj if item["role"] == "system").format(summary=summary)
+    assistant_prompt = next(item["content"] for item in messages_obj if item["role"] == "assistant")
+    user_prompt = next(item["content"] for item in messages_obj if item["role"] == "user").format(query=query)
+    messages = [ChatMessage(role=MessageRole.SYSTEM, content=(system_prompt)), ChatMessage(role=MessageRole.ASSISTANT, content=(assistant_prompt)), ChatMessage(role=MessageRole.USER, content=(user_prompt), )]
+       
     if llm_id==0:
-        client = OpenAI(base_url=base_url, api_key=api_key)  
-        response = client.beta.chat.completions.parse(
-            model=model,
-            temperature=1,
-            messages=messages_obj,
-            response_format=schema_class
-        )
-        content = response.choices[0].message.content.lower()
-        prompt_tokens = response.usage.prompt_tokens
-        completion_tokens = response.usage.completion_tokens
-        
+        LLM = NVIDIA(api_key=api_key, model=model, temperature=1)  
     elif llm_id==1:
-        client = client = Mistral(api_key=api_key)
-        response = client.chat.complete(
-            model= model, 
-            messages=messages_obj,
-            response_format = {"type": "json_object"}
-        )
-        prompt_tokens=0
-        completion_tokens=0
-
-        content=response.choices[0].message.content.lower()
-        
+        LLM = MistralAI(api_key=api_key, model=model, temperature=1)  
     elif llm_id==2:
-        LLM = NVIDIA(base_url=base_url, api_key=api_key, model=model, temperature=1)  
-        LLM = LLM.as_structured_llm (output_cls=schema_class)
-        messages = [
-            ChatMessage(role=MessageRole.SYSTEM, content=(f"You will assume the following identity: {summary}\n\n")),
-            ChatMessage(role=MessageRole.ASSISTANT, content=("Adapt your vocabulary, knowledge level and language style to the assumed identity. Try to mimick the assumed identity as accurate as possible, ignoring your own biased opinion about the topic. \n")),
-            ChatMessage(role=MessageRole.USER, content=(f"Answer in English to the following query without adding any other details: {query}.\n"), ),
-        ]
-        content = str(LLM.chat(messages))
-        content = re.sub(r'^assistant:\s*', '', content.lower())
-        prompt_tokens =0
-        completion_tokens =0
+        LLM = OpenAI(api_key=api_key, model=model, temperature=1) 
+
+    LLM = LLM.as_structured_llm (output_cls=schema_class)
+    prompt_str = LLM.messages_to_prompt(messages)
+    content = str(LLM.complete(prompt_str)).lower()    
+        
+    # token counters - will be implemented later    
+    prompt_tokens =0
+    completion_tokens =0
 
     # After task completion, update progress in Redis
     r = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
@@ -193,13 +175,9 @@ class Profile:
         llm = self.session.query(LLM).get(user.llm_id)
         model = llm.settings
         
-        # Summarize the profile's attributes
+        # summarize attributes
         summary = self.summarize_attributes()
-        
-        # Replace placeholders in the prompt template with summary and query values
-        for message in prompt_template:
-            message['content'] = message['content'].replace("{summary}", summary).replace("{query}", query)
-        
+               
         task_signature = query_LLM.s(
             json.dumps(prompt_template),  
             str(schema),
@@ -210,7 +188,6 @@ class Profile:
             project_survey_id,
             model,          
             user.llm_id,
-            llm.base_url,
             llm.api_key,
             summary,
             query

@@ -9,8 +9,10 @@
         <div class="col-12">
             <div class="card bg-gradient">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    
-                    <h2 class="h5 mb-0">Survey Summary: <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span></h2>
+                        <h2 class="h5 mb-0">
+                            Survey Summary: <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span>
+                            {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="This first card shows you the survey overview. You may collapse the card by clicking the collapse button on the right."><i class="fas fa-question-circle"></i></a>{% endif %}
+                        </h2>
                     <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSummary" aria-expanded="true" aria-controls="collapseSummary">
                         <i class="fas fa-expand text-light"></i>
                     </button>
@@ -21,12 +23,12 @@
                         <p>Welcome to the analysis dashboard for the <span class="text-warning-emphasis">{{ project_survey.survey_alias }}</span> survey, consisting of <span class="text-warning-emphasis">{{ questions|length }}</span> questions.</p>
                         <p>Survey description: <span class="text-warning-emphasis">{{ description }}</span></p>
                         <ul>
-                            <li><strong>Respondents:</strong> <span class="text-warning-emphasis">{{ respondents }}</span> participants from <span class="text-warning-emphasis">{{ population }}</span> of various age groups and geographic locations</li>
+                            <li><strong>Respondents:</strong> <span class="text-warning-emphasis">{{ respondents }}</span> participants from population <span class="text-warning-emphasis">{{ population }}</span> of various age groups and geographic locations</li>
                             <li>
                                 <strong>Key Insights:</strong> This dashboard presents visualizations using the following analysis methods:
                                 <ul>
                                     {% for method in all_analysis_methods %}
-                                        <li>{{ method }}</li>
+                                        <li><span class="text-warning-emphasis">{{ method }}</span></li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -41,7 +43,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Question Analysis</h5>
+                    <h5>
+                        Question Analysis
+                        {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="Select a question from the list and the use the filters to explore the survey results."><i class="fas fa-question-circle"></i></a>{% endif %}
+                    </h5>
                     <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAnalysis" aria-expanded="true" aria-controls="collapseAnalysis">
                         <i class="fas fa-expand text-light"></i>
                     </button>
@@ -79,7 +84,7 @@
                                 <div id="analysis-placeholder" class="text-center py-5 w-100">
                                     <div class="card overflow-hidden mx-auto ms-3" style="width: 40rem;" aria-hidden="true">
                                         <div class="card-body">
-                                            <h4>Select a question to view analysis methods</h4>
+                                            <h4><span class="text-warning-emphasis">Select a question to view analysis methods</span></h4>
                                             <h5 class="card-title placeholder-glow"><span class="placeholder col-6"></span></h5>
                                             <p class="card-text placeholder-glow"><span class="placeholder col-7"></span><span class="placeholder col-4"></span><span class="placeholder col-4"></span><span class="placeholder col-6"></span><span class="placeholder col-8"></span></p>
                                         </div>
@@ -111,7 +116,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="h5 mb-0">Raw Survey Data</h2>
+                    <h2 class="h5 mb-0">
+                        Raw Survey Data
+                        {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="You can expand this section by clicking on the collapse button on the right. If you prefer you can also download the raw data from your survey."><i class="fas fa-question-circle"></i></a>{% endif %}
+                    </h2>
                     <div>
                         <button id="downloadRawData" class="btn btn-outline-primary pt-0 pb-0 me-2 invisible">Download Raw Data</button>
                         <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRawData" aria-expanded="false" aria-controls="collapseRawData">
@@ -129,6 +137,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
 $(document).ready(function() {

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify, abort, redirect, url_for
-from models import ProfileModel, Population, db
+from models import Population, db, ProfileView
 from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_profiles
 from sqlalchemy import func
 from datetime import datetime, timedelta, date
@@ -28,7 +28,7 @@ def population_explorer():
     if request.method == 'POST' and form.validate():
         profiles = get_filtered_profiles(population_tag, form.data)
     else:
-        profiles = ProfileModel.query.filter(ProfileModel.tags.contains(population_tag)).all()
+        profiles = ProfileView.query.filter(ProfileView.tags.contains(population_tag)).all()
     age_groups = get_age_groups(profiles)
     gender_distribution = get_gender_distribution(profiles)
     education_income_data = get_education_income(profiles)
@@ -104,10 +104,8 @@ def get_gender_distribution(profiles):
 
 
 def get_education_income(profiles):
-    # Dynamically get unique education levels and income ranges from the profiles
     education_levels = sorted(set(profile.education_level for profile in profiles if profile.education_level))
     income_levels = sorted(set(profile.income_range for profile in profiles if profile.income_range))
-    # Initialize a 2D array with zeros
     data = [[0 for _ in range(len(education_levels))] for _ in range(len(income_levels))]
     
     total_counted = 0
@@ -144,7 +142,6 @@ def get_hobbies(profiles):
     hobby_counts = Counter(all_hobbies)
     
     if not hobby_counts:
-        # Return empty data if there are no hobbies
         return {
             "indicator": [],
             "data": [{
@@ -153,17 +150,14 @@ def get_hobbies(profiles):
             }]
         }
     
-    # Select top 6 hobbies by frequency
     top_hobbies = hobby_counts.most_common(15)
     
-    # Calculate the percentage of hobby mentions
     total_hobby_mentions = sum(count for _, count in top_hobbies)
     hobby_percentages = [
         (hobby, (count / total_hobby_mentions) * 100) 
         for hobby, count in top_hobbies
     ]
-    
-    # Amplify percentages to make them more visible
+
     max_percentage = max(percentage for _, percentage in hobby_percentages)
     amplification_factor = 100 / max_percentage if max_percentage > 0 else 1
     

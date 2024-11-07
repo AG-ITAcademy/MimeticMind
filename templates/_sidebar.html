@@ -133,9 +133,10 @@
        
       </ul>
       
+      <!-- Subscription info -->
       <div class="mt-auto">
       
-      <!-- Subscription info -->
+
         <div class="settings my-3">
           <div class="card shadow-none bg-transparent">
             <div class="card-body alert mb-0 " role="alert">
@@ -146,6 +147,7 @@
                     <img src="{{ url_for('static', filename='assets/img/illustrations/navbar-vertical.png') }}" class="mb-1" width="80" alt="Subscription">
                     <p class="fs-10 text-light">{{ subscription_info.tier.capitalize() }} Plan</p>
                     <p class="fs-10 text-warning">{{ subscription_info.remaining_interactions }} Credits remaining</p>
+                    <!--
                   {% else %}
                     <img src="{{ url_for('static', filename='assets/img/illustrations/creating.png') }}" class="mb-1" width="80" alt="Subscription">
                   {% endif %}
@@ -156,6 +158,7 @@
                   {% else %}
                     <p class="fs-9 text-primary">{{ subscription_info.tier.capitalize() }} Plan</p>
                   {% endif %}
+                  -->
                 {% endif %}
               </div>
             </div>
@@ -164,6 +167,7 @@
 
             
       </div>
+
     </div>
   </div>
 </nav>

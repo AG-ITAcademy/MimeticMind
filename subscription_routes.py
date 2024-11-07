@@ -11,7 +11,7 @@ def create_or_update_subscription(user_id, tier, billing_cycle='monthly'):
         return False, "User not found"
 
     limits = {
-        SubscriptionTier.STARTER.value: {"max_projects": 1, "max_respondents_per_survey": 100, "max_interactions_per_month": 500},
+        SubscriptionTier.STARTER.value: {"max_projects": 5, "max_respondents_per_survey": 100, "max_interactions_per_month": 5000},
         SubscriptionTier.ADVANCED.value: {"max_projects": 1000, "max_respondents_per_survey": 500, "max_interactions_per_month": 10000},
         SubscriptionTier.ENTERPRISE.value: {"max_projects": 10000, "max_respondents_per_survey": 1000000, "max_interactions_per_month": 10000000},
     }

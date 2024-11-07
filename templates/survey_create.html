@@ -5,7 +5,10 @@
     <div class="col-12">
       <div class="card bg-gradient">
         <div class="card-body">
-          <h5 class="card-title">Create a New Survey</h5>
+          <h5 class="card-title">
+            Create a New Survey
+            {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="There are three ways to create a survey:<br><br><ul><li>You may start from scratch if you need full control and already know what questions to include.</li><br><li>The button in the middle allows you to use an existing template to create a new survey.</li><br><li>The AI Assistant can be helpful if you're not yet familiar with how surveys work, or just need a quick starting point.</li></ul>"><i class="fas fa-question-circle"></i></a>{% endif %}
+          </h5>
           <p class="card-text">How would you like to proceed?</p>
           <div class="row mt-4">
           
@@ -49,7 +52,10 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Select the template you want to use</h5>
+          <h5 class="card-title">
+            Select the template you want to use
+            {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="This is a convenient way to start creating surveys. You may customize any of the templates in the list below instead of starting from an empty one."><i class="fas fa-question-circle"></i></a>{% endif %}
+        </h5>
           <div class="table-responsive">
             <table class="table table-hover">
               <thead>

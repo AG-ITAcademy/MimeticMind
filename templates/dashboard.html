@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-{% block head %}
-{% endblock %}
+
 {% block content %}
 
 <div class="container-fluid mt-0 ps-0 pe-0">
@@ -10,8 +9,11 @@
                 <div class="col-12">
                     <div class="card overflow-hidden bg-gradient">
                         <div class="bg-holder bg-card" style="background-image:url({{ url_for('static', filename='assets/img/illustrations/crm-line-chart.png') }});"></div>
-                        <div class="card-body">
-                            <h2 class="card-title mb-0">Welcome to your dashboard</h2>
+                        <div class="card-body position-relative">
+                            <h2 class="card-title mb-0">
+                                Welcome to your dashboard
+                                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="This is your dashboard. All your existing projects appear here."><i class="fas fa-question-circle"></i></a>{% endif %}
+                            </h2>
                             <p>Here you can manage your projects and see some general metrics.</p>
                         </div>
                     </div>
@@ -20,7 +22,10 @@
                 <div class="col-12">
                     <div class="card overflow-hidden">
                         <div class="card-body">
-                            <h2 class="card-title mb-3">Available Projects:</h2>
+                            <h2 class="card-title mb-3">
+                                Available Projects:
+                                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="You can Edit / Create / Delete projects in this card. "><i class="fas fa-question-circle"></i></a>{% endif %}
+                            </h2>
                             <div class="row g-3">
 
                                 {% for project in projects %}

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, jsonify
-from models import ProfileModel, ProjectSurvey, SurveyTemplate, QueryTemplate, db
+from models import ProfileView, ProjectSurvey, SurveyTemplate, QueryTemplate, db
 from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_profiles
 from answer_schema import get_data_from_schema
 from flask_login import login_required
@@ -29,7 +29,7 @@ def survey_analysis(project_survey_id):
     if request.method == 'POST' and form.validate():
         profiles = get_filtered_profiles(population_tag, form.data).all()
     else:
-        profiles = ProfileModel.query.filter(ProfileModel.tags.contains(population_tag)).all()
+        profiles = ProfileView.query.filter(ProfileView.tags.contains(population_tag)).all()
         
     profile_ids = [profile.id for profile in profiles]
     question = QueryTemplate.query.get(question_id)
@@ -86,7 +86,7 @@ def survey_analysis(project_survey_id):
                            population=population_tag,
                            project_survey=project_survey,
                            questions=questions,
-                           respondents= len(profiles),
+                           respondents= project_survey.respondents,
                            description=survey_template.description,
                            data=response_data,
                            question_data=question_data,

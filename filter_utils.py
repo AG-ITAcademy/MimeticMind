@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField
 from wtforms.validators import Optional, DataRequired
-from models import ProfileModel, db
+from models import ProfileView, db
 from sqlalchemy import and_, or_
 from datetime import datetime, timedelta
 
@@ -9,23 +9,22 @@ def populate_filter_form_choices(form, population_tag=None):
     """
     Populate the choices for select fields in the filter form.
     """
-    query_filter = ProfileModel.tags.contains(population_tag) if population_tag else True
+    query_filter = ProfileView.tags.contains(population_tag) if population_tag else True
     
     # Helper function to get distinct values
     def get_distinct_values(field):
         return [('Any', 'Any')] + [(v[0], v[0]) for v in db.session.query(field).filter(query_filter).distinct().order_by(field)]
 
-    form.gender.choices = get_distinct_values(ProfileModel.gender)
-    form.location.choices = get_distinct_values(ProfileModel.location)
-    form.ethnicity.choices = get_distinct_values(ProfileModel.ethnicity)
-    form.occupation.choices = get_distinct_values(ProfileModel.occupation)
-    form.education_level.choices = get_distinct_values(ProfileModel.education_level)
-    form.religion.choices = get_distinct_values(ProfileModel.religion)
-    form.health_status.choices = get_distinct_values(ProfileModel.health_status)
-    form.legal_status.choices = get_distinct_values(ProfileModel.legal_status)
-    form.marital_status.choices = get_distinct_values(ProfileModel.marital_status)
-    form.income_range.choices = [('Any', 'Any'), ('Low', 'Low'), ('Medium', 'Medium'), ('High', 'High')]
-
+    form.gender.choices = get_distinct_values(ProfileView.gender)
+    form.location.choices = get_distinct_values(ProfileView.location)
+    form.ethnicity.choices = get_distinct_values(ProfileView.ethnicity)
+    form.occupation.choices = get_distinct_values(ProfileView.occupation)
+    form.education_level.choices = get_distinct_values(ProfileView.education_level)
+    form.religion.choices = get_distinct_values(ProfileView.religion)
+    form.health_status.choices = get_distinct_values(ProfileView.health_status)
+    form.legal_status.choices = get_distinct_values(ProfileView.legal_status)
+    form.marital_status.choices = get_distinct_values(ProfileView.marital_status)
+    form.income_range.choices = [('Any', 'Any'), ('1 - Low', 'Low'), ('2 - Medium', 'Medium'), ('3 - High', 'High')]
 
 
 def apply_filters_to_query(query, form_data):
@@ -35,22 +34,22 @@ def apply_filters_to_query(query, form_data):
     filters = []
 
     if form_data.get('gender') and form_data['gender'] != 'Any':
-        filters.append(ProfileModel.gender == form_data['gender'])
+        filters.append(ProfileView.gender == form_data['gender'])
     
     if form_data.get('age_min'):
-        filters.append(ProfileModel.birth_date <= (datetime.now() - timedelta(days=365*int(form_data['age_min']))))
+        filters.append(ProfileView.birth_date <= (datetime.now() - timedelta(days=365*int(form_data['age_min']))))
     
     if form_data.get('age_max'):
-        filters.append(ProfileModel.birth_date >= (datetime.now() - timedelta(days=365*int(form_data['age_max']))))
+        filters.append(ProfileView.birth_date >= (datetime.now() - timedelta(days=365*int(form_data['age_max']))))
     
     for field in ['location', 'ethnicity', 'occupation', 'education_level', 'religion', 'health_status', 'legal_status', 'marital_status']:
         if form_data.get(field) and form_data[field] != 'Any':
-            filters.append(getattr(ProfileModel, field).ilike(f"%{form_data[field]}%"))
+            filters.append(getattr(ProfileView, field).ilike(f"%{form_data[field]}%"))
     
     if form_data.get('income_range') and form_data['income_range'] != 'Any':
         income_filter = or_(
-            ProfileModel.income_range.ilike(f"%{form_data['income_range']}%"),
-            ProfileModel.income_range == form_data['income_range']
+            ProfileView.income_range.ilike(f"%{form_data['income_range']}%"),
+            ProfileView.income_range == form_data['income_range']
         )
         filters.append(income_filter)
 
@@ -62,9 +61,9 @@ def get_filtered_profiles(population_tag, form_data):
     """
     Get filtered profiles based on population tag and form data.
     """
-    query = ProfileModel.query
+    query = ProfileView.query
     if population_tag:
-        query = query.filter(ProfileModel.tags.contains(population_tag))
+        query = query.filter(ProfileView.tags.contains(population_tag))
     return apply_filters_to_query(query, form_data)
 
 
@@ -110,7 +109,8 @@ def create_segment_from_form(project_id, form_data):
         health_status=form_data['health_status'] if form_data['health_status'] != 'Any' else None,
         legal_status=form_data['legal_status'] if form_data['legal_status'] != 'Any' else None,
         marital_status=form_data['marital_status'] if form_data['marital_status'] != 'Any' else None,
-        income_range=form_data['income_range'] if form_data['income_range'] != 'Any' else None
+        income_range=form_data['income_range'] if form_data['income_range'] != 'Any' else None,
+        ai_filter= form_data['ai_filter'] if form_data['ai_filter'] else None
     )
     db.session.add(new_filter)
     db.session.commit()

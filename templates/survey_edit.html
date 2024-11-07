@@ -6,7 +6,10 @@
     <div class="col-12">
       <div class="card bg-gradient">
         <div class="card-body">
-          <h2 class="card-title">Existing Surveys</h2>
+          <h2 class="card-title">
+            Current Surveys
+            {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="Edit or remove any existing surveys.<hr> <strong>WARNING!</strong><br> Removing a survey will also delete any associated survey results."><i class="fas fa-question-circle"></i></a>{% endif %}
+          </h2>
           <p class="card-text">Edit or Remove your existing surveys</p>
         </div>
       </div>

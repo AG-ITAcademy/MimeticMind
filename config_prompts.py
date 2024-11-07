@@ -1,6 +1,6 @@
 import json
 
-# these are the prompts used in various modules
+#  prompts used in various modules
 
 survey_generation_instructions = '''A survey consists of:
 - Title (short title, suggestive for the survey type)
