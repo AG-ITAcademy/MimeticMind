@@ -11,3 +11,5 @@ _test_reports.py
 _test_survey_new.py
 _poc_ai_survey.py
 stripe_service.py
+_prepare_embeddings.py
+_todo.txt
