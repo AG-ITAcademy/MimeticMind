@@ -3,7 +3,6 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from nltk.tag import pos_tag
 from collections import Counter
 
 nltk.download('vader_lexicon')

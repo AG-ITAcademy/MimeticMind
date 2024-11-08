@@ -1,11 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify, abort, redirect, url_for
-from models import Population, db, ProfileView
+from models import Population, ProfileView
 from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_profiles
-from sqlalchemy import func
-from datetime import datetime, timedelta, date
+from datetime import timedelta, date
 from flask_login import login_required
 import logging
-from collections import Counter, defaultdict
+from collections import Counter
 
 population_explorer_bp = Blueprint('population_explorer_bp', __name__)
 

@@ -12,9 +12,9 @@
                         <div class="card-body position-relative">
                             <h2 class="card-title mb-0">
                                 Welcome to your dashboard
-                                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="This is your dashboard. All your existing projects appear here."><i class="fas fa-question-circle"></i></a>{% endif %}
+                                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-html="true" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="This is your dashboard. <hr>All your existing projects appear here."><i class="fas fa-question-circle"></i></a>{% endif %}
                             </h2>
-                            <p>Here you can manage your projects and see some general metrics.</p>
+                            <p>Here's an overview of your current projects.</p>
                         </div>
                     </div>
                 </div>
@@ -44,15 +44,12 @@
                                                     </button>
                                                 </div>
                                                 
-                                                <!-- Project Description -->
-                                                <p class="fs-10 text-center mb-0">[ {{ project.description }} ]</p>
                                                 
-                                                <hr>
                                                 <!-- Header Row with Population Badge -->
                                                 <div class="d-flex justify-content-center align-items-start mb-3">
                                                     <div>
                                                         {% if project.population %}
-                                                        <span class="badge bg-primary">
+                                                        <span class="badge bg-secondary">
                                                             {% if project.population.flag %}
                                                             <i class="fi fi-{{ project.population.flag }} me-1"></i>
                                                             {% endif %}
@@ -61,7 +58,9 @@
                                                         {% endif %}
                                                     </div>
                                                 </div>
-                                                
+                                                 <!-- Project Description -->
+                                                <p class="fs-10 text-center mb-0">[ {{ project.description }} ]</p>
+                                                <hr>
                                                 <!-- Surveys Table -->
                                                 {% set completed_surveys = project.project_surveys|selectattr('completion_percentage', 'equalto', 100)|list %}
                                                 {% if completed_surveys %}
@@ -71,22 +70,20 @@
                                                         <thead>
                                                             <tr>
                                                                 <th></th>
-                                                                <th></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {% for survey in completed_surveys %}
                                                             <tr>
-                                                                <td class="text-muted fs-10 text-center">
-                                                                    {% if survey.survey_alias %}
-                                                                        {{ survey.survey_alias }}
-                                                                    {% else %}
-                                                                        <span class="text-muted">Unnamed Survey</span>
-                                                                    {% endif %}
-                                                                </td>
-                                                                <td class="text-end">
-                                                                    <a href="{{ url_for('survey_analysis_bp.survey_analysis', project_survey_id=survey.id, population_tag=project.population.tag if project.population else '') }}"  class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); return true;">
-                                                                        View
+                                                                <td class="text-center">
+                                                                    <a href="{{ url_for('survey_analysis_bp.survey_analysis', project_survey_id=survey.id, population_tag=project.population.tag if project.population else '') }}" 
+                                                                       class="btn btn-sm btn-outline-primary w-100"
+                                                                       onclick="event.stopPropagation(); return true;">
+                                                                        {% if survey.survey_alias %}
+                                                                            {{ survey.survey_alias }}
+                                                                        {% else %}
+                                                                            <span class="text-muted">Unnamed Survey</span>
+                                                                        {% endif %}
                                                                     </a>
                                                                 </td>
                                                             </tr>

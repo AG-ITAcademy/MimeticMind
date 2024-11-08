@@ -2,9 +2,7 @@
 from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, DateTime, String, Float
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 from datetime import datetime
-import uuid
 from sqlalchemy.orm import Session , relationship
 from enum import Enum
 from sqlalchemy.dialects.postgresql import ARRAY

@@ -4,10 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from forms import RegistrationForm, LoginForm, RequestResetForm, ResetPasswordForm
 from models import db, User, SubscriptionTier
 from flask_mail import Message
-from itsdangerous import URLSafeTimedSerializer
 from flask import current_app
 from config import Config 
-from subscription_routes import set_subscription 
 from subscription_routes import create_or_update_subscription
 
 

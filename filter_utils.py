@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SelectField
-from wtforms.validators import Optional, DataRequired
+from wtforms import IntegerField, SelectField
+from wtforms.validators import Optional
 from models import ProfileView, db
 from sqlalchemy import and_, or_
 from datetime import datetime, timedelta

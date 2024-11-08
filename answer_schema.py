@@ -1,7 +1,7 @@
 # answer_schema.py
 
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List
 
 class ScaleSchema(BaseModel):
     rating: int

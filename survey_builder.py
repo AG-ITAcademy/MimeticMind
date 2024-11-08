@@ -1,15 +1,19 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from models import Project, db, Population, SurveyTemplate, ProjectSurvey, QueryTemplate
+from models import Project, db, Population, SurveyTemplate, ProjectSurvey, QueryTemplate, User, LLM
 from sqlalchemy.orm import joinedload
 from flask_wtf.csrf import CSRFProtect
 from flask import jsonify
 from answer_schema import schema_mapping
 from forms import SurveyForm
-from openai import OpenAI
-from config import Config
 from config_prompts import survey_generation_messages
 import json
+from llama_index.llms.nvidia import NVIDIA
+from llama_index.llms.mistralai import MistralAI
+from llama_index.llms.openai import OpenAI
+from llama_index.core.llms import ChatMessage, MessageRole
+from pydantic import BaseModel
+from typing import List
 
 survey_builder_bp = Blueprint('survey_builder_bp', __name__)
 csrf = CSRFProtect()
@@ -88,7 +92,6 @@ def build_survey():
     return render_template('survey_builder.html', form=form, survey=survey, schema_options=schema_options)
     
     
-    
 @survey_builder_bp.route('/survey/save', methods=['POST'])
 @login_required
 def save_survey():
@@ -148,6 +151,16 @@ def save_survey():
         return jsonify({'error': str(e)}), 500
    
 
+class SurveyQuestion(BaseModel):
+    question_text: str
+    possible_answers: str
+    answer_schema: str
+
+class SurveyResponse(BaseModel):
+    survey_title: str
+    survey_description: str
+    survey_questions: List[SurveyQuestion]
+
 @survey_builder_bp.route('/survey/generate', methods=['POST'])
 @login_required
 def generate_survey():
@@ -155,40 +168,66 @@ def generate_survey():
     if not description:
         flash('Please provide a survey description.', 'error')
         return redirect(url_for('survey_builder_bp.create_survey'))
-        
-    messages = json.loads(survey_generation_messages)
-    messages[-1]["content"] = f"The user query is: {description}"
     
     try:
-        client = OpenAI(api_key=Config.OPENAI_API_KEY)  
-        response = client.chat.completions.create(model='gpt-4o', messages=messages, response_format={ "type": "json_object" })
+        user = User.query.get(current_user.id)
+        llm_settings = LLM.query.get(user.llm_id)
+
+        # Initialize appropriate LLM based on user settings
+        if llm_settings.id == 0:  
+            llm = NVIDIA(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
+        elif llm_settings.id == 1:  
+            llm = MistralAI(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
+        else: 
+            llm = OpenAI(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
+            
+        llm = llm.as_structured_llm(output_cls=SurveyResponse)
         
-        ai_response = json.loads(response.choices[0].message.content)
+        messages = json.loads(survey_generation_messages)
+        messages[-1]["content"] = f"The user query is: {description}"
+        
+        # Convert messages to ChatMessage format
+        chat_messages = [
+            ChatMessage(
+                role=MessageRole.SYSTEM if msg["role"] == "system" else 
+                     MessageRole.ASSISTANT if msg["role"] == "assistant" else 
+                     MessageRole.USER,
+                content=msg["content"]
+            ) for msg in messages
+        ]
+
+        prompt_str = llm.messages_to_prompt(chat_messages)
+        response = llm.complete(prompt_str)
+        
+        print('*****************************')
+        print(response)
+        print('*****************************')
         
         # Check if the description was inadequate
-        if isinstance(ai_response, str) and "Inadequate description" in ai_response:
-            flash('Your survey description was not specific enough. Please provide more details about what kind of survey you want to create.', 'error')
+        if isinstance(response, str) and "Inadequate description" in response:
+            flash('Inadequate description. Please retry!', 'error')
             return redirect(url_for('survey_builder_bp.create_survey'))
-            
+        
+        response_obj = response.raw
         # Create the form and survey with AI-generated content
         form = SurveyForm()
-        form.name.data = ai_response['title']
-        form.description.data = ai_response['description']
-        form.context_prompt.data = "AI Assistant generated survey - Feel free to modify this context prompt to better suit your needs."
+        form.name.data = response_obj.survey_title
+        form.description.data = response_obj.survey_description
+        form.context_prompt.data = "AI Assistant generated survey - Feel free to modify this context prompt according to your needs."
         
         survey = SurveyTemplate(
-            name=ai_response['title'],
-            description=ai_response['description'],
+            name=form.name.data,
+            description=form.description.data,
             context_prompt=form.context_prompt.data,
             user_id=current_user.id
         )
         
         # Add the AI-generated questions
-        for question in ai_response['questions']:
+        for question in response_obj.survey_questions:
             query = QueryTemplate(
-                name=question['question_text'],
-                query_text=question['question_text'],
-                schema=question['schema']
+                name=question.question_text,
+                query_text=f"{question.question_text}...{question.possible_answers}",
+                schema=question.answer_schema
             )
             survey.query_templates.append(query)
         

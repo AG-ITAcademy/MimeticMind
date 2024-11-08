@@ -1,9 +1,7 @@
-from flask import Blueprint, render_template, request, jsonify, abort, redirect, url_for
-from models import db, Project, ProjectSurvey, SurveyTemplate, Population
+from flask import Blueprint, render_template
+from models import db, Project, ProjectSurvey,  Population
 from models_view import CompletedSurvey
 from flask_login import login_required, current_user
-import logging
-from collections import defaultdict
 from datetime import datetime
 
 survey_reports_bp = Blueprint('survey_reports_bp', __name__)

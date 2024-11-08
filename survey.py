@@ -3,13 +3,12 @@
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine, text
 from filter import Filter
-from models import ProfileModel, SurveyTemplate, Interaction, Project, ProjectSurvey
+from models import ProfileModel, SurveyTemplate, Interaction, Project, ProjectSurvey, FilterModel
 from config import Config
 from datetime import datetime
-from celery import group, chord, shared_task
+from celery import chord, shared_task
 from celery_app import celery
 from profile import Profile
-from models import ProjectSurvey, Population, FilterModel
 import redis
 from vector_utils import VectorSearch
 

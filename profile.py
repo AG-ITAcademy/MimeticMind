@@ -3,16 +3,12 @@ from datetime import date, datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from models import ProfileModel, QueryTemplate , Population, LLM, User
-import instructor
-from answer_schema import schema_mapping, MultipleChoiceSchema, OpenEndedSchema, YesNoSchema, ScaleSchema, RankingSchema, schema_mapping
-from pydantic import BaseModel
+from models import ProfileModel, Population, LLM, User
+from answer_schema import schema_mapping
 import json
 from config import Config
-from celery import chord
 from celery_app import celery
 import redis
-import re
 from llama_index.llms.nvidia import NVIDIA
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.openai import OpenAI
@@ -39,7 +35,7 @@ def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_t
     prompt_str = LLM.messages_to_prompt(messages)
     content = str(LLM.complete(prompt_str)).lower()    
         
-    # token counters - will be implemented later    
+    # token counters - to be implemented later    
     prompt_tokens =0
     completion_tokens =0
 

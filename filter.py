@@ -1,5 +1,5 @@
 from models import ProfileView
-from sqlalchemy import and_, or_, between
+from sqlalchemy import or_
 from datetime import datetime
 
 class Filter:

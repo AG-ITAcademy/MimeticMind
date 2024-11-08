@@ -1,13 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from llama_index.embeddings.nvidia import NVIDIAEmbedding
-from typing import Dict, List
 import numpy as np
 from models import ProfileModel, ProfileView, LLM
 from collections import defaultdict
 from config import Config
-from sqlalchemy.orm.query import Query 
-from typing import Dict, List, Union 
+from typing import List 
 
 # I could not use Llamaindex's PGVectorStore features because pgvector is not supported on Postgress17 and I'm using Windows on my dev environment :(
 class VectorSearch:

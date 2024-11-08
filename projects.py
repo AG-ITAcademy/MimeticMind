@@ -1,15 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from markupsafe import Markup
 from flask_login import login_required, current_user
-from models import db, Project,  FilterModel, SurveyTemplate, ProjectSurvey, Population, ProfileView, ProfileModel
-from filter_utils import populate_filter_form_choices, apply_filters_to_query, create_segment_from_form
+from models import db, Project,  FilterModel, SurveyTemplate, ProjectSurvey, Population, ProfileView
+from filter_utils import populate_filter_form_choices, create_segment_from_form
 from filter import Filter
 from forms import ProjectForm,  FilterForm
 from flask_wtf.csrf import CSRFProtect
-from config import Config
-import redis
 from sqlalchemy.orm import aliased
-from sqlalchemy import func
 from vector_utils import VectorSearch
 from survey import Survey, get_survey_progress
 

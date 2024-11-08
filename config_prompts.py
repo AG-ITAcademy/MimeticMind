@@ -5,15 +5,15 @@ import json
 survey_generation_instructions = '''A survey consists of:
 - Title (short title, suggestive for the survey type)
 - Description (clear description of the survey objectives)
-- Survey questions (between 3 and 8) questions. Each question has this format: question_text, schema.  The schema defines the structure for the question answers and can have the following values:
-      ScaleSchema: this means Likert scale (1-5)
-      OpenEndedSchema: for open-ended questions
-      MultipleChoiceSchema: example: {Would you prefer a smartphone with fewer features at a lower price (A) or more features at a higher price (B) ? Answer with either A or B}
-      YesNoSchema: for Yes/No answers
-      RankingSchema: example: {Please rank the following features of a smartphone in terms of importance - from lowest to highest : Battery life, Display quality, Storage space, Durability}
-You are free to decide on the apropriate number of questions and schema for each question. The schema value can only be 'ScaleSchema', 'OpenEndedSchema', 'MultipleChoiceSchema','YesNoSchema' or 'RankingSchema'.
+- Survey questions (between 3 and 8) questions. Each question has this format: question_text, possible_answers, schema.  The schema can have the following values:
+      ScaleSchema - answer can be on a scale from 1 to 5 (make sure to explain the values in the question text)
+      OpenEndedSchema - answer is open-ended
+      MultipleChoiceSchema - answer is a single choice from several options
+      YesNoSchema - answer can be Yes or No
+      RankingSchema: example: -  the answer consists of an ordered list of options (make sure to explain the order meaning in the question text)
+You are free to decide on the apropriate number of questions and schema for each question. 
 If the user query is not compatible with your task you must always return the answer "Inadequate description!"
-Provide the response in valid JSON format with fields: title, description, and questions array.'''
+Provide the response in valid JSON format with fields: survey_title, survey_description, and survey_questions array.'''
 
 
 survey_generation_messages = json.dumps([

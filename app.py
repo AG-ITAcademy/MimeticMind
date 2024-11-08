@@ -1,11 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, g, jsonify, render_template_string
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, redirect, url_for,  request, g, jsonify
 from flask_login import LoginManager, current_user, login_required
-from models import db, User, Project,  Population, SurveyTemplate, SubscriptionTier, Subscription
-import os
+from models import db, User, Project,  Population, SurveyTemplate, SubscriptionTier
 from flask_migrate import Migrate
 from flask_mail import Mail
-from itsdangerous import URLSafeTimedSerializer
 from sqlalchemy import or_
 from projects import projects_bp
 from dashboard import dashboard_bp
@@ -17,7 +14,6 @@ from subscription_routes import subscription_bp
 from survey_reports import survey_reports_bp
 from config import Config
 from flask_wtf.csrf import CSRFProtect
-import celery_app
 import logging
 
 app = Flask(__name__)
