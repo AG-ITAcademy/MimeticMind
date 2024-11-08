@@ -1,4 +1,16 @@
 # models.py
+
+"""
+Database models for the survey application.
+This module defines the SQLAlchemy ORM models representing the core data structures:
+- User management (User, Subscription, Invitation)
+- Survey components (SurveyTemplate, QueryTemplate, ProjectSurvey)
+- Population segmentation (Population, FilterModel, ProfileModel)
+- Interaction tracking (Interaction)
+- Project organization (Project)
+Note: Some models (like ProfileView) are database views rather than base tables.
+"""
+
 from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, DateTime, String, Float
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin

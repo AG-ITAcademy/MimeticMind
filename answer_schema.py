@@ -1,4 +1,8 @@
 # answer_schema.py
+"""
+Survey response schema definitions and analysis method configurations.
+Maps response types to Pydantic models and defines SQL queries for analysis.
+"""
 
 from pydantic import BaseModel
 from typing import List

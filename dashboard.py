@@ -1,3 +1,9 @@
+#dashboard.py
+"""
+Dashboard blueprint handling main user interface routes.
+Manages project display, deletion, and user preferences.
+"""
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models import Project, db, Population, FilterModel, ProjectSurvey, LLM, User
@@ -9,6 +15,7 @@ csrf = CSRFProtect()
 @dashboard_bp.route('/dashboard')
 @login_required
 def dashboard():
+    """Display user's active projects and available populations."""
     projects = Project.query.filter_by(
         user_id=current_user.id, 
         status='active'
@@ -19,6 +26,8 @@ def dashboard():
 @dashboard_bp.route('/delete_project/<int:project_id>', methods=['POST'])
 @login_required
 def delete_project(project_id):
+    """ Delete project and associated segments/surveys. """
+    
     try:
         project = Project.query.filter_by(id=project_id, user_id=current_user.id).first_or_404()
         segments_count = FilterModel.query.filter_by(project_id=project_id).count()
@@ -50,6 +59,8 @@ def delete_project(project_id):
 @dashboard_bp.route('/settings')
 @login_required
 def settings():
+    """Show user settings page with available LLM options."""
+    
     llms = LLM.query.order_by(LLM.id.asc()).all()  # Order LLMs by ID
     return render_template('settings.html', 
                          llms=llms,
@@ -58,6 +69,8 @@ def settings():
 @dashboard_bp.route('/update_preferences', methods=['POST'])
 @login_required
 def update_preferences():
+    """Update user's LLM choice and interface preferences."""
+    
     try:
         llm_id = request.form.get('llm_id', type=int)
         # Fix boolean handling - checkbox values come as 'on' when checked

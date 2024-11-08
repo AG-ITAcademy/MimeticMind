@@ -1,3 +1,9 @@
+#survey_analysis.py
+"""
+Blueprint for survey analysis functionality.
+Handles data visualization, filtering, and export of survey responses with various analysis methods.
+"""
+
 from flask import Blueprint, render_template, request, jsonify
 from models import ProfileView, ProjectSurvey, SurveyTemplate, QueryTemplate, db, Population
 from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_profiles
@@ -14,6 +20,7 @@ survey_analysis_bp = Blueprint('survey_analysis_bp', __name__)
 @survey_analysis_bp.route('/survey_analysis/<int:project_survey_id>', methods=['GET', 'POST'])
 @login_required
 def survey_analysis(project_survey_id):
+    """  Display and filter survey analysis with charts and response data. Handles both initial page load and AJAX requests for filtered data. """
     print(f"survey_analysis function called for project_survey_id: {project_survey_id}")
 
     question_id = request.form.get('selected_question_id')
@@ -98,6 +105,8 @@ def survey_analysis(project_survey_id):
 @survey_analysis_bp.route('/download_raw_data/<int:project_survey_id>', methods=['GET'])
 @login_required
 def download_raw_data(project_survey_id):
+    """Export survey responses and demographic data as CSV."""
+    
     project_survey = ProjectSurvey.query.get_or_404(project_survey_id)
     survey_template = SurveyTemplate.query.get(project_survey.survey_template_id)
     questions = survey_template.query_templates
@@ -144,6 +153,8 @@ def download_raw_data(project_survey_id):
 
 
 def build_options(question_data):
+    """ Build visualization options for different analysis methods. """
+    
     for method in question_data['methods']:
         chart_data = method['chart_data']
         print(chart_data)

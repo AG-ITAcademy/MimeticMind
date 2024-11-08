@@ -1,3 +1,9 @@
+# App Configuration
+"""
+Main Flask application setup and configuration.
+Initializes core extensions, registers blueprints, and defines global routes.
+"""
+
 from flask import Flask, render_template, redirect, url_for,  request, g, jsonify
 from flask_login import LoginManager, current_user, login_required
 from models import db, User, Project,  Population, SurveyTemplate, SubscriptionTier
@@ -92,9 +98,20 @@ def landing():
 def pricing():
     return render_template('pricing.html', SubscriptionTier=SubscriptionTier)
 
+
 @app.route('/api/search', methods=['GET'])
 @login_required
 def search():
+    """
+    Global search endpoint.
+    Searches across populations, user projects, and survey templates.
+    
+    Query Parameters:
+        q: Search query string
+        
+    Returns:
+        JSON response containing matched items from each category
+    """
     query = request.args.get('q', '')
     
     if not query:

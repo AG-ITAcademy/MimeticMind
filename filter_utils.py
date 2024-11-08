@@ -1,3 +1,9 @@
+#filter_utils.py
+"""
+Utility functions and form definitions for filtering profile data.
+Handles form population, query filtering, and segment creation.
+"""
+
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField
 from wtforms.validators import Optional

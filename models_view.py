@@ -1,3 +1,9 @@
+#models_view.py
+"""
+SQLAlchemy models mapping database views for survey responses.
+Each model represents a different response type view with demographic data.
+"""
+
 from sqlalchemy import Column, Integer, String, Date, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 

@@ -1,4 +1,8 @@
 #survey.py
+"""
+Core survey execution module.
+Handles survey filtering, execution, progress tracking, and result processing using Celery tasks.
+"""
 
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine, text
@@ -14,6 +18,8 @@ from vector_utils import VectorSearch
 
 
 def collect_results(result_parameters):
+    """Save survey interactions to database and update completion status."""
+    
     # Step 1: Create a database session using config details
     engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
     Session = sessionmaker(bind=engine)
@@ -59,6 +65,7 @@ def collect_results(result_parameters):
 
 @shared_task(name='survey.process_survey_results')
 def process_survey_results(results):
+    """ Celery task to process survey responses and save interactions. """
     # Initialize a list to store the parameters for each result
     result_parameters = []
 
@@ -87,6 +94,7 @@ def process_survey_results(results):
     return result_parameters
 
 class Survey:
+    """ Survey execution manager handling profile filtering and distributed surveying. """
     def __init__(self, filter_obj: Filter, session: Session, survey_template: SurveyTemplate, 
                  custom_parameters_dict: dict = None, max_respondents: int = None):
         self.filter = filter_obj
@@ -135,6 +143,8 @@ class Survey:
         return query.all()
 
     def run_survey(self, project_survey_id=None):
+        """Execute survey on filtered profiles after cleaning previous data."""
+        
         cleanup_survey_data(project_survey_id)
         filtered_profiles = self.get_filtered_profiles(project_survey_id)
         return self._survey_profiles(filtered_profiles, project_survey_id=project_survey_id)
@@ -175,6 +185,8 @@ class Survey:
         
         
 def get_survey_progress(project_survey_id):
+    """Calculate survey completion percentage from Redis task counters."""
+    
     r = redis.Redis(host=Config.REDIS_HOST, port=Config.REDIS_PORT, db=Config.REDIS_DB)
     total_tasks_raw = r.get(f"survey_total_tasks_{project_survey_id}")
     
@@ -191,6 +203,7 @@ def get_survey_progress(project_survey_id):
     return round(progress, 2)
      
 def cleanup_survey_data(project_survey_id):
+    """Remove previous survey data using stored procedure."""
     engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
     session = sessionmaker(bind=engine)()
     session.execute(text(f"CALL sp_cleanup_survey_data({project_survey_id});"))

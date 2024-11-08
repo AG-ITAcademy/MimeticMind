@@ -1,6 +1,7 @@
-import json
+#config_prompts.py
+'''  prompts used in various modules '''
 
-#  prompts used in various modules
+import json
 
 survey_generation_instructions = '''A survey consists of:
 - Title (short title, suggestive for the survey type)

@@ -1,3 +1,10 @@
+#vector_utils.py
+
+"""
+Vector search implementation using NVIDIA embeddings for semantic profile matching.
+Provides similarity search across profile data using embedding comparisons.
+"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from llama_index.embeddings.nvidia import NVIDIAEmbedding
@@ -7,8 +14,9 @@ from collections import defaultdict
 from config import Config
 from typing import List 
 
-# I could not use Llamaindex's PGVectorStore features because pgvector is not supported on Postgress17 and I'm using Windows on my dev environment :(
+# Could not use Llamaindex's PGVectorStore features because pgvector is not supported on Postgress17 and I'm using Windows on my dev environment :(
 class VectorSearch:
+    """Handles semantic search over profile data using NVIDIA embeddings."""
     def __init__(
         self,
         embedding_model: str = "nvidia/llama-3.2-nv-embedqa-1b-v1",
@@ -97,51 +105,3 @@ class VectorSearch:
             np.linalg.norm(embedding1) * np.linalg.norm(embedding2)
         )
 
-# Sample usage
-if __name__ == "__main__":
-    from sqlalchemy.orm import Session
-    
-    vector_search = VectorSearch()
-    session = Session(vector_search.engine)
-    
-    # Test query
-    query = "Someone who enjoys nature and hiking."
-    
-    # Create a base query from ProfileView
-    base_query = session.query(ProfileView)
-    
-    try:
-        # Test 1: All Profiles
-        print("\nTest 1: All Profiles")
-        results = vector_search.find_similar_profiles_from_query(
-            query=query,
-            base_query=base_query,
-            similarity_threshold=0.32
-        )
-        print(f"Found {len(results)} matching profiles")
-        print("Profile IDs:", results)
-        
-        # Test 2: Filter profiles by tag and gender
-        print("\nTest 2: Filtered by tag and gender")
-        filtered_query = base_query.filter(
-            ProfileView.tags.contains('US_beta2'),
-            ProfileView.gender == 'Female'
-        )
-        # Print the SQL query to debug
-        print("SQL Query:", filtered_query)
-        # Print count before vector search
-        initial_count = filtered_query.count()
-        print(f"Profiles matching filters before vector search: {initial_count}")
-        
-        results = vector_search.find_similar_profiles_from_query(
-            query=query,
-            base_query=filtered_query,
-            similarity_threshold=0.32
-        )
-        print(f"Found {len(results)} matching profiles with 'US_beta2' tag and Female gender")
-        print("Profile IDs:", results)
-        
-    except Exception as e:
-        print(f"Error during testing: {str(e)}")
-    finally:
-        session.close()

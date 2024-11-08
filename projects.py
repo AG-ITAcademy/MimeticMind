@@ -1,3 +1,14 @@
+#projects.py
+
+"""
+Project management routes and functionality for the survey application.
+This module handles all project-related operations including:
+- Project creation, viewing, and management
+- Population assignment and segment definition
+- Survey creation and execution within projects 
+- Progress tracking and result management
+"""
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from markupsafe import Markup
 from flask_login import login_required, current_user

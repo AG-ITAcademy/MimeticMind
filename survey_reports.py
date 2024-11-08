@@ -1,3 +1,9 @@
+#survey_reports.py
+"""
+Survey reports blueprint handling the display of completed survey data.
+Provides views for users to see survey results across their active projects.
+"""
+
 from flask import Blueprint, render_template
 from models import db, Project, ProjectSurvey,  Population
 from models_view import CompletedSurvey
@@ -9,6 +15,7 @@ survey_reports_bp = Blueprint('survey_reports_bp', __name__)
 @survey_reports_bp.route('/survey_reports')
 @login_required
 def survey_reports():
+    """ Display completed surveys for user's active projects. """
     # Get all active projects for the current user
     projects = Project.query.filter_by(
         user_id=current_user.id,

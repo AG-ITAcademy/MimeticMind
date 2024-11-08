@@ -3,6 +3,10 @@ from sqlalchemy import or_
 from datetime import datetime
 
 class Filter:
+    """
+    Utility class for filtering ProfileView queries based on demographic and personal characteristics.
+    Handles multiple filter criteria and supports both single values and lists for each filter type.
+    """
     def __init__(self, tags=None, gender=None, age_interval=None, location=None, education_level=None, occupation=None,
                  income_range=None, ethnicity=None, religion=None, health_status=None, legal_status=None, 
                  marital_status=None, hobbies=None, mbti_profile=None):
@@ -21,6 +25,16 @@ class Filter:
 
 
     def apply_filters(self, query):
+        """
+        Apply all configured filters to a SQLAlchemy query object.
+        Handles conversion of single values to lists and applies appropriate SQL filtering logic.
+
+        Args:
+            query: SQLAlchemy query object to filter
+
+        Returns:
+            SQLAlchemy query object with all applicable filters applied
+        """
         # Ensure all fields that could be single values are converted to lists if necessary
         if self.tags:
             if isinstance(self.tags, str):

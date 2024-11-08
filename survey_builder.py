@@ -1,3 +1,10 @@
+#survey_builder.py
+
+"""
+Blueprint for survey creation and management functionality.
+Handles survey CRUD operations, AI-based survey generation, and template management.
+"""
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models import Project, db, Population, SurveyTemplate, ProjectSurvey, QueryTemplate, User, LLM
@@ -21,6 +28,8 @@ csrf = CSRFProtect()
 @survey_builder_bp.route('/survey/create')
 @login_required
 def create_survey():
+    """Display survey creation page with available projects, populations and templates."""
+    
     projects = Project.query.filter_by(user_id=current_user.id, status='active').all()
     populations = Population.query.all()
     templates = SurveyTemplate.query.all()  # This will include both default and user-defined templates
@@ -29,6 +38,8 @@ def create_survey():
 @survey_builder_bp.route('/surveys')
 @login_required
 def list_surveys():
+    """Show list of user's survey templates with their associated projects."""
+    
     survey_templates = SurveyTemplate.query.filter_by(user_id=current_user.id).options(
         joinedload(SurveyTemplate.project_surveys).joinedload(ProjectSurvey.project)
     ).all()
@@ -37,6 +48,8 @@ def list_surveys():
 @survey_builder_bp.route('/survey/edit/<int:template_id>')
 @login_required
 def edit_survey(template_id):
+    """Load survey template editor."""
+    
     survey_template = SurveyTemplate.query.get_or_404(template_id)
     if survey_template.user_id and survey_template.user_id != current_user.id:
         flash('You do not have permission to edit this survey template.', 'danger')
@@ -49,6 +62,8 @@ def edit_survey(template_id):
 @survey_builder_bp.route('/survey/delete/<int:template_id>', methods=['POST'])
 @login_required
 def delete_survey(template_id):
+    """Delete survey template."""
+    
     survey_template = SurveyTemplate.query.get_or_404(template_id)
     if not survey_template.user_id or survey_template.user_id != current_user.id:
         flash('You do not have permission to delete this survey template.', 'danger')
@@ -63,6 +78,8 @@ def delete_survey(template_id):
 @survey_builder_bp.route('/survey/build', methods=['GET', 'POST'])
 @login_required
 def build_survey():
+    """Create new survey, optionally copying from existing template."""
+    
     form = SurveyForm()
     template_id = request.args.get('template_id')
     
@@ -95,6 +112,7 @@ def build_survey():
 @survey_builder_bp.route('/survey/save', methods=['POST'])
 @login_required
 def save_survey():
+    """Save new or update existing survey template and its queries."""
     data = request.json
     
     if not data:
@@ -152,11 +170,15 @@ def save_survey():
    
 
 class SurveyQuestion(BaseModel):
+    """Pydantic model for structured survey question data."""
+    
     question_text: str
     possible_answers: str
     answer_schema: str
 
 class SurveyResponse(BaseModel):
+    """Pydantic model for complete AI-generated survey structure."""
+    
     survey_title: str
     survey_description: str
     survey_questions: List[SurveyQuestion]
@@ -164,6 +186,8 @@ class SurveyResponse(BaseModel):
 @survey_builder_bp.route('/survey/generate', methods=['POST'])
 @login_required
 def generate_survey():
+    """Generate survey using AI based on user description."""
+    
     description = request.form.get('survey-description', '')  
     if not description:
         flash('Please provide a survey description.', 'error')

@@ -1,3 +1,10 @@
+#profile.py
+
+"""
+Profile management and LLM interaction module.
+The module uses Celery for asynchronous task processing and Redis for progress tracking.
+"""
+
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Optional

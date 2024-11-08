@@ -1,3 +1,9 @@
+#population_explorer.py
+"""
+Flask blueprint for population exploration dashboard.
+Handles demographic data visualization and filtering of population segments.
+"""
+
 from flask import Blueprint, render_template, request, jsonify, abort, redirect, url_for
 from models import Population, ProfileView
 from filter_utils import FilterForm, populate_filter_form_choices, get_filtered_profiles
@@ -11,6 +17,7 @@ population_explorer_bp = Blueprint('population_explorer_bp', __name__)
 @population_explorer_bp.route('/population_explorer', methods=['GET', 'POST'])
 @login_required
 def population_explorer():
+    """  Main route for population explorer dashboard. Handles both initial page load and AJAX filter updates. Returns HTML or JSON based on request type. """
     population_tag = request.args.get('population')
     
     if not population_tag:

@@ -1,3 +1,9 @@
+#analysis_utils.py
+"""
+Text analysis utilities for survey responses.
+Provides sentiment analysis and word frequency calculations.
+"""
+
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
