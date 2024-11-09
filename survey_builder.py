@@ -19,8 +19,11 @@ from llama_index.llms.nvidia import NVIDIA
 from llama_index.llms.mistralai import MistralAI
 from llama_index.llms.openai import OpenAI
 from llama_index.core.llms import ChatMessage, MessageRole
+from llama_index.core.prompts import ChatPromptTemplate
+from llama_index.core.program import FunctionCallingProgram
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Any, Dict, ClassVar
+
 
 survey_builder_bp = Blueprint('survey_builder_bp', __name__)
 csrf = CSRFProtect()
@@ -168,7 +171,7 @@ def save_survey():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
    
-
+   
 class SurveyQuestion(BaseModel):
     """Pydantic model for structured survey question data."""
     
@@ -187,56 +190,48 @@ class SurveyResponse(BaseModel):
 @login_required
 def generate_survey():
     """Generate survey using AI based on user description."""
-    
-    description = request.form.get('survey-description', '')  
-    if not description:
-        flash('Please provide a survey description.', 'error')
-        return redirect(url_for('survey_builder_bp.create_survey'))
-    
     try:
+        description = request.form.get('survey-description', '')  
         user = User.query.get(current_user.id)
         llm_settings = LLM.query.get(user.llm_id)
-
-        # Initialize appropriate LLM based on user settings
-        if llm_settings.id == 0:  
-            llm = NVIDIA(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
-        elif llm_settings.id == 1:  
-            llm = MistralAI(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
-        else: 
-            llm = OpenAI(api_key=llm_settings.api_key, model=llm_settings.settings, temperature=1)
-            
-        llm = llm.as_structured_llm(output_cls=SurveyResponse)
-        
-        messages = json.loads(survey_generation_messages)
-        messages[-1]["content"] = f"The user query is: {description}"
-        
-        # Convert messages to ChatMessage format
-        chat_messages = [
+        messages = [
             ChatMessage(
                 role=MessageRole.SYSTEM if msg["role"] == "system" else 
                      MessageRole.ASSISTANT if msg["role"] == "assistant" else 
                      MessageRole.USER,
-                content=msg["content"]
-            ) for msg in messages
+                content=msg["content"].format(query=description) if "query" in msg["content"] else msg["content"]
+            ) for msg in survey_generation_messages
         ]
 
-        prompt_str = llm.messages_to_prompt(chat_messages)
-        response = llm.complete(prompt_str)
-        
-        print('*****************************')
-        print(response)
-        print('*****************************')
-        
-        # Check if the description was inadequate
-        if isinstance(response, str) and "Inadequate description" in response:
-            flash('Inadequate description. Please retry!', 'error')
-            return redirect(url_for('survey_builder_bp.create_survey'))
-        
-        response_obj = response.raw
-        # Create the form and survey with AI-generated content
+        try:
+            llm = (NVIDIA if llm_settings.id == 0 else 
+                   MistralAI if llm_settings.id == 1 else 
+                   OpenAI)(
+                api_key=llm_settings.api_key,
+                model=llm_settings.settings,
+                temperature=1,
+                max_retries=1,
+                timeout=20 if llm_settings.id < 2  else 30
+            )
+            
+            structured_llm = llm.as_structured_llm(output_cls=SurveyResponse)
+            response = SurveyResponse(**json.loads(str(structured_llm.complete(structured_llm.messages_to_prompt(messages)))))
+            
+        except Exception as e:
+            if llm_settings.id in [0, 1]:
+                print(f"Primary LLM failed with error: {e}, falling back to OpenAI")
+                openai_settings = LLM.query.get(2)
+                llm = OpenAI(api_key=openai_settings.api_key, model=openai_settings.settings, temperature=1, timeout=45)
+                structured_llm = llm.as_structured_llm(output_cls=SurveyResponse)
+                response = SurveyResponse(**json.loads(str(structured_llm.complete(structured_llm.messages_to_prompt(messages)))))
+            else:
+                print(f"OpenAI LLM failed with error: {e}")
+                flash('Unable to generate the survey. Please try again later.', 'error')
+                return redirect(url_for('survey_builder_bp.create_survey'))
+
         form = SurveyForm()
-        form.name.data = response_obj.survey_title
-        form.description.data = response_obj.survey_description
+        form.name.data = response.survey_title
+        form.description.data = response.survey_description
         form.context_prompt.data = "AI Assistant generated survey - Feel free to modify this context prompt according to your needs."
         
         survey = SurveyTemplate(
@@ -246,24 +241,17 @@ def generate_survey():
             user_id=current_user.id
         )
         
-        # Add the AI-generated questions
-        for question in response_obj.survey_questions:
-            query = QueryTemplate(
+        for question in response.survey_questions:
+            survey.query_templates.append(QueryTemplate(
                 name=question.question_text,
                 query_text=f"{question.question_text}...{question.possible_answers}",
                 schema=question.answer_schema
-            )
-            survey.query_templates.append(query)
+            ))
         
         schema_options = list(schema_mapping.keys()) if schema_mapping else []
         return render_template('survey_builder.html', form=form, survey=survey, schema_options=schema_options, source='ai')
-        
-    except json.JSONDecodeError as e:
-        flash('An error occurred while processing your request. The response was not in the expected format.', 'error')
-        print(f"JSON Decode Error: {e}")
-        return redirect(url_for('survey_builder_bp.create_survey'))
-        
+
     except Exception as e:
-        flash('An unexpected error occurred while generating your survey. Please try again.', 'error')
-        print(f"Error: {e}")
+        print(f"Unexpected error in survey generation: {e}")
+        flash('An unexpected error occurred. Please try again later.', 'error')
         return redirect(url_for('survey_builder_bp.create_survey'))

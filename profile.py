@@ -22,12 +22,12 @@ from llama_index.llms.openai import OpenAI
 from llama_index.core.llms import ChatMessage, MessageRole
 
 @celery.task
-def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int, model: str, llm_id: int, api_key: str, summary: str, query:str):
+def query_LLM(messages: str, schema: str, user_id: int, profile_id: int, query_template_id: int, query_text: str, project_survey_id: int, model: str, llm_id: int, api_key: str, summary: str, query:str, survey_description:str, survey_context:str):
     messages_obj = json.loads(messages)
     schema_class = schema_mapping.get(schema)
     
     system_prompt = next(item["content"] for item in messages_obj if item["role"] == "system").format(summary=summary)
-    assistant_prompt = next(item["content"] for item in messages_obj if item["role"] == "assistant")
+    assistant_prompt = next(item["content"] for item in messages_obj if item["role"] == "assistant"). format(description=survey_description, context=survey_context)
     user_prompt = next(item["content"] for item in messages_obj if item["role"] == "user").format(query=query)
     messages = [ChatMessage(role=MessageRole.SYSTEM, content=(system_prompt)), ChatMessage(role=MessageRole.ASSISTANT, content=(assistant_prompt)), ChatMessage(role=MessageRole.USER, content=(user_prompt), )]
        
@@ -166,7 +166,7 @@ class Profile:
             print(f"No prompt_template found for population tag: {population_tag}")
             return None
 
-    def enqueue_query(self, user_id: int, profile_id: int, query: str, schema: str, query_template_id: int, project_survey_id: int) -> str:
+    def enqueue_query(self, user_id: int, profile_id: int, query: str, schema: str, query_template_id: int, project_survey_id: int, survey_description:str, survey_context:str) -> str:
         # Fetch the profile's population tag
         population_tag = self.session.query(ProfileModel.tags).filter_by(id=profile_id).scalar()
         
@@ -193,7 +193,9 @@ class Profile:
             user.llm_id,
             llm.api_key,
             summary,
-            query
+            query,
+            survey_description, 
+            survey_context
         )
         print(f"Task signature created for query template id: {query_template_id}")
 

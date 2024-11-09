@@ -174,7 +174,9 @@ class Survey:
                     query=query_template.query_text,
                     schema=query_template.schema,
                     query_template_id=query_template.id,
-                    project_survey_id=project_survey_id  
+                    project_survey_id=project_survey_id,
+                    survey_description=self.survey_template.description, 
+                    survey_context=self.survey_template.context_prompt
                 )
                 task_group.append(task)
                 print(f"Profile ID: {profile_model.id}, Name: {profile_model.profile_name}")
