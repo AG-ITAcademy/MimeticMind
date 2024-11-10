@@ -1,6 +1,6 @@
 # AI-Driven Survey Platform
 
-We provide businesses, marketers, and decision-makers with AI-generated virtual populations modeled to reflect real-world demographics and behaviors. Our platform enables users to define and execute surveys, tapping into detailed, personality-rich profiles for meaningful insights. Whether you're a marketing professional, startup founder, product manager, or policy maker, our platform is designed to help you understand customer needs, analyze market trends, and predict public responses. With built-in survey templates and flexible data export options, we make market research and predictive analysis accessible and actionable.
+Provides businesses, marketers, and decision-makers with AI-generated virtual populations modeled to reflect real-world demographics and behaviors. The platform enables users to define and execute surveys, tapping into detailed, personality-rich profiles for meaningful insights. Whether you're a marketing professional, startup founder, product manager, or policy maker, this platform is designed to help you understand customer needs, analyze market trends, and predict public responses. With built-in survey templates and flexible data export options, it makes market research and predictive analysis accessible and actionable.
 
 ## Key Features
 
@@ -44,4 +44,4 @@ This project is licensed under the GPLv3 License. See the [LICENSE](./LICENSE) f
 
 ---
 
-With this app, we aim to make advanced, AI-driven market research available to everyone, helping you make data-backed, informed decisions effortlessly.
+This app aims to make advanced, AI-driven market research available to everyone, helping you make data-backed, informed decisions effortlessly.
