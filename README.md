@@ -7,14 +7,14 @@ We provide businesses, marketers, and decision-makers with AI-generated virtual 
 - **AI-Generated Virtual Populations**: Create surveys with a statistically representative population, tailored to specific demographics and psychographics.
 - **Customizable Surveys**: Define custom surveys or use pre-built templates for different fields, including marketing, product development, and public policy.
 - **Rich Persona Profiles**: Each virtual profile includes demographics, personality traits, and detailed daily habits to mirror real-world behaviors.
-- **Flexible Data Export**: Export survey results in various formats, enabling further analysis and integration with other tools.
+- **Flexible Data Export**: Export survey results in flat CSV format for further analysis and integration with other tools.
 
 ## Technology Stack
 
 - **Backend**: Python and Flask
 - **Storage**: PostgreSQL for permanent data storage
 - **Queue Management**: Redis and Celery for managing survey processing
-- **RAG Framework**: LlamaIndex, connecting with NVIDIA NIM as the default endpoint for AI-assisted survey creation and execution ('survey_builder.py', 'profile.py'). Optionally, users can configure MistralAI or OpenAI inference endpoints.
+- **RAG Framework**: LlamaIndex, connecting with NVIDIA NIM as the default endpoint for AI-assisted survey creation and execution (`survey_builder.py`, `profile.py`). Optionally, users can configure MistralAI or OpenAI inference endpoints.
 
 ## Code Structure
 
