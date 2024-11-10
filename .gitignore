@@ -1,0 +1,17 @@
+__pycache__/
+BACKUP/
+temp/
+migrations/
+static/
+legal/
+config.py
+zz_start_celery.bat
+_generate_n_profiles.py
+_process_profiles_with_llm.py
+_test_reports.py
+_test_survey_new.py
+_poc_ai_survey.py
+stripe_service.py
+_prepare_embeddings.py
+_todo.txt
+profile_generation_tools.py

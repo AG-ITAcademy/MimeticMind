@@ -21,6 +21,14 @@ from survey_reports import survey_reports_bp
 from config import Config
 from flask_wtf.csrf import CSRFProtect
 import logging
+from flask import send_from_directory
+import markdown
+
+LEGAL_DOCUMENTS = {
+    'privacy': 'legal/privacy.md',
+    'terms': 'legal/terms.md',
+    'cookie': 'legal/cookies.md'
+}
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -36,6 +44,22 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'access_control.login'
 
 mail = Mail(app)
+
+@app.route('/api/legal/<doc_type>')
+def get_legal_document(doc_type):
+    """Serve legal documents as HTML converted from markdown"""
+    if doc_type not in LEGAL_DOCUMENTS:
+        return jsonify({'error': 'Document not found'}), 404
+        
+    try:
+        with open(LEGAL_DOCUMENTS[doc_type], 'r', encoding='utf-8') as file:
+            content = file.read()
+            # Convert Markdown to HTML with support for tables
+            html_content = markdown.markdown(content, extensions=['tables'])
+            return jsonify({'content': html_content})
+    except FileNotFoundError:
+        return jsonify({'error': 'Document not found'}), 404
+
 
 # User Loader
 @login_manager.user_loader

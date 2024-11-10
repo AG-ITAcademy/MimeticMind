@@ -99,7 +99,7 @@ def create_segment_from_form(project_id, form_data):
     """
     Create a new segment (FilterModel) from form data.
     """
-    from models import FilterModel  # Import here to avoid circular imports
+    from models import FilterModel  # to avoid circular imports
     
     new_filter = FilterModel(
         project_id=project_id,

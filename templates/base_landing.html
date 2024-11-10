@@ -129,8 +129,8 @@
                     <!--<li class="mb-1"><a class="link-600" href="#!">Contact</a></li>
                     <li class="mb-1"><a class="link-600" href="#!">Careers</a></li>
                     <li class="mb-1"><a class="link-600" href="#!">Blog</a></li>-->
-                    <li class="mb-1"><a class="link-600" href="#!">Terms</a></li>
-                    <li class="mb-1"><a class="link-600" href="#!">Privacy</a></li>
+                    <li class="mb-1"><a class="link-600 legal-link" href="#" data-doc-type="terms">Terms</a></li>
+                    <li class="mb-1"><a class="link-600 legal-link" href="#" data-doc-type="privacy">Privacy</a></li>
                   </ul>
                 </div>
                 <div class="col-6 col-md-3">
@@ -218,6 +218,24 @@
     <!--    End of Main Content-->
     <!-- ===============================================-->
 
+        <!-- Legal Documents Modal -->
+        <div class="modal fade" id="legalModal" tabindex="-1" aria-labelledby="legalModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="legalModalLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="legalModalContent">
+                        <!-- Content will be loaded here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="cookie-consent-banner position-fixed bottom-0 start-0 w-100 bg-dark text-white py-3" 
              style="z-index: 1050; display: none; transition: opacity 0.5s ease-in-out; opacity: 0;">
           <div class="container">
@@ -225,7 +243,7 @@
               <div class="col-12 col-md-8 mb-2 mb-md-0">
                 <p class="mb-0">
                   We use cookies to improve your browsing experience. By using this site, you agree to our use of cookies. 
-                  <a href="#" class="text-info text-decoration-underline">Learn more</a>
+                  <a class="legal-link text-info text-decoration-underline" href="#" data-doc-type="cookies">Learn More</a>
                 </p>
               </div>
               <div class="col-12 col-md-4 text-md-end">
@@ -272,6 +290,73 @@
             }, 5000); // 5 second delay
           }
         });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = new bootstrap.Modal(document.getElementById('legalModal'));
+            const modalTitle = document.getElementById('legalModalLabel');
+            const modalContent = document.getElementById('legalModalContent');
+
+            // Map document types to their titles
+            const docTitles = {
+                'privacy': 'Privacy Policy',
+                'terms': 'Terms and Conditions',
+                'cookies': 'Cookie Policy'
+            };
+
+            // Add click event listeners to all legal links
+            document.querySelectorAll('.legal-link').forEach(link => {
+               link.addEventListener('click', function(e) {
+                   e.preventDefault();
+                   const docType = this.dataset.docType;
+                   
+                   // Show loading state
+                   modalContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+                   modalTitle.textContent = docTitles[docType] || 'Legal Document';
+                   modal.show();
+
+                   // Fetch and display content
+                   fetch(`/api/legal/${docType}`)
+                       .then(response => response.json())
+                       .then(data => {
+                           if (data.error) {
+                               modalContent.innerHTML = '<div class="alert alert-danger">Error loading document</div>';
+                           } else {
+                               // Convert markdown headings to Bootstrap classes
+                               let content = data.content
+                                   .replace(/<h1/g, '<div class="h4 mb-3"')
+                                   .replace(/<\/h1>/g, '</div>')
+                                   .replace(/<h2/g, '<div class="h5 mb-3"')
+                                   .replace(/<\/h2>/g, '</div>')
+                                   .replace(/<h3/g, '<div class="h6 mb-3"')
+                                   .replace(/<\/h3>/g, '</div>')
+                                   .replace(/<h4/g, '<div class="h7 mb-3"')
+                                   .replace(/<\/h4>/g, '</div>');
+                               
+                               // Add Bootstrap spacing and text classes
+                               content = `<div class="px-2">
+                                   <div class="text-body mb-4">${content}</div>
+                               </div>`;
+                               
+                               modalContent.innerHTML = content;
+                           }
+                       })
+                       .catch(error => {
+                           modalContent.innerHTML = '<div class="alert alert-danger">Error loading document</div>';
+                           console.error('Error:', error);
+                       });
+               });
+            });
+
+            // Modify your existing cookie consent logic to use the modal for the cookie policy
+            const cookiePolicyLink = document.querySelector('.cookie-consent-banner a');
+            if (cookiePolicyLink) {
+                cookiePolicyLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector('.legal-link[data-doc-type="cookies"]').click();
+                });
+            }
+        });
+        
         </script>
 
     <!-- ===============================================-->
