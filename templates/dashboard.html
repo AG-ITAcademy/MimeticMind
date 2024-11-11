@@ -23,6 +23,18 @@
                     <div class="card overflow-hidden">
                         <div class="card-body">
                             <h2 class="card-title mb-3">
+                                Getting Started:
+                                {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="You can permanently disable this recommendation from Settings"><i class="fas fa-question-circle"></i></a>{% endif %}
+                            </h2>
+                            <p>First, create a <span class="text-warning-emphasis">Project</span> here, then create a <span class="text-warning-emphasis">Survey</span> using the <span class="text-warning-emphasis">Survey Builder</span>, and follow the instructions in the project dashboard</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card overflow-hidden">
+                        <div class="card-body">
+                            <h2 class="card-title mb-3">
                                 Available Projects:
                                 {% if show_tooltips %}<a class="btn btn-sm btn-outline-muted" tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Guidance:" data-bs-content="You can Edit / Create / Delete projects in this card. "><i class="fas fa-question-circle"></i></a>{% endif %}
                             </h2>
@@ -146,9 +158,33 @@
     </div>
 </div>
 
+<!-- Disclaimer Modal -->
+<div class="modal fade" id="disclaimerModal" tabindex="-1" aria-labelledby="disclaimerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="disclaimerModalLabel">Important Disclaimer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                By logging into this application, you acknowledge that MimeticMind is currently in an experimental and development phase. The data and insights provided by this application are for testing and evaluation purposes only and should not be relied upon for business or critical decision-making. <hr> MimeticMind is not responsible for any errors, inaccuracies, or consequences that may arise from the use or interpretation of the survey data. Users are advised to exercise caution and consult additional sources before making decisions based on this information.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const deleteModal = document.getElementById('deleteProjectModal');
+    
+    {% if show_disclaimer %}
+        const disclaimerModal = new bootstrap.Modal(document.getElementById('disclaimerModal'));
+        disclaimerModal.show();
+    {% endif %}
+    
     if (deleteModal) {
         deleteModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
