@@ -373,45 +373,54 @@
             });
         }
 
-        // Handle slider
-        if (respondentsSlider) {
-            // Simply remove the try-catch since we know exactly what's happening
-            // Remove existing slider (which we know exists from the HTML data attribute)
-            if (respondentsSlider.noUiSlider) {
-                respondentsSlider.noUiSlider.destroy();
+// Handle slider
+if (respondentsSlider) {
+    // Get initial total profiles from the selected segment
+    let initialMaxProfiles = 100;  // fallback default
+    if (segmentSelect && segmentSelect.selectedOptions.length > 0) {
+        const selectedOption = segmentSelect.selectedOptions[0];
+        const totalProfiles = parseInt(selectedOption.getAttribute('data-profiles'));
+        if (totalProfiles) {
+            initialMaxProfiles = totalProfiles;
+        }
+    }
+    
+    // Remove existing slider if it exists
+    if (respondentsSlider.noUiSlider) {
+        respondentsSlider.noUiSlider.destroy();
+    }
+    
+    // Initialize with correct initial max value
+    noUiSlider.create(respondentsSlider, {
+        start: [initialMaxProfiles],  // Start at max available
+        connect: [true, false],
+        step: 1,
+        range: {
+            'min': [1],
+            'max': [initialMaxProfiles]
+        },
+        tooltips: true,
+        format: {
+            to: function (value) {
+                return Math.round(value);
+            },
+            from: function (value) {
+                return Math.round(value);
             }
-            
-            // Reinitialize it (this is necessary for proper event binding)
-            noUiSlider.create(respondentsSlider, {
-                start: [100],
-                connect: [true, false],
-                step: 1,
-                range: {
-                    'min': [1],
-                    'max': [100]
-                },
-                tooltips: true,
-                format: {
-                    to: function (value) {
-                        return Math.round(value);
-                    },
-                    from: function (value) {
-                        return Math.round(value);
-                    }
-                },
-                pips: {
-                    mode: 'values',
-                    values: [1, 20, 40, 60, 80, 100],
-                    density: 4,
-                    stepped: true,
-                    format: {
-                        to: function(value) {
-                            return Math.round(value);
-                        }
-                    }
+        },
+        pips: {
+            mode: 'values',
+            values: [1, Math.round(initialMaxProfiles * 0.25), Math.round(initialMaxProfiles * 0.5), 
+                     Math.round(initialMaxProfiles * 0.75), initialMaxProfiles],
+            density: 4,
+            stepped: true,
+            format: {
+                to: function(value) {
+                    return Math.round(value);
                 }
-            });
-            
+            }
+        }
+    });
             // Apply Bootstrap's bg-primary class to the connect element
             respondentsSlider.querySelector('.noUi-connect').classList.add('bg-primary');
             
